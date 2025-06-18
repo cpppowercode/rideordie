@@ -22,24 +22,52 @@ export default function BusinessCardPage() {
   useEffect(() => {
     const clamp = (min: number, max: number, x: number) =>
       Math.min(max, Math.max(min, x));
-
-    const handleWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      if (!cardRef.current) return;
-
+  
+    let startY = 0;
+  
+    const getCurrentRotation = () => {
+      if (!cardRef.current) return 0;
       const currentTransform = cardRef.current.style.transform;
       const currentRotation = currentTransform.match(/rotateX\((-?\d+(?:\.\d+)?)deg\)/);
-      const currentDeg = currentRotation ? parseFloat(currentRotation[1]) : 0;
-
-      const rotationStep = e.deltaY > 0 ? 5 : -5;
-      const newRotation = clamp(0, 180, currentDeg + rotationStep);
-
-      cardRef.current.style.transform = `rotateX(${newRotation}deg)`;
+      return currentRotation ? parseFloat(currentRotation[1]) : 0;
     };
-
+  
+    const setRotation = (deg: number) => {
+      if (!cardRef.current) return;
+      cardRef.current.style.transform = `rotateX(${deg}deg)`;
+    };
+  
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const currentDeg = getCurrentRotation();
+      const rotationStep = e.deltaY > 0 ? 5 : -5;
+      setRotation(clamp(0, 180, currentDeg + rotationStep));
+    };
+  
+    const handleTouchStart = (e: TouchEvent) => {
+      startY = e.touches[0].clientY;
+    };
+  
+    const handleTouchMove = (e: TouchEvent) => {
+      e.preventDefault(); // 기본 스크롤 막음
+      const deltaY = e.touches[0].clientY - startY;
+      const currentDeg = getCurrentRotation();
+      const rotationStep = deltaY > 0 ? -15 : 15; // 위로 쓸면 회전, 아래로 쓸면 반대로
+      setRotation(clamp(0, 180, currentDeg + rotationStep));
+      startY = e.touches[0].clientY; // 다음 비교를 위해 갱신
+    };
+  
+    // wheel 이벤트 (PC)
     document.addEventListener('wheel', handleWheel, { passive: false });
+  
+    // touch 이벤트 (모바일)
+    document.addEventListener('touchstart', handleTouchStart, { passive: false });
+    document.addEventListener('touchmove', handleTouchMove, { passive: false });
+  
     return () => {
       document.removeEventListener('wheel', handleWheel);
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('touchmove', handleTouchMove);
     };
   }, []);
 
