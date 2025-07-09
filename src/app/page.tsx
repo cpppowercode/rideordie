@@ -1,164 +1,57 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
+import { Parallax, ParallaxLayer } from '@react-spring/parallax';
 
-export default function BusinessCardPage() {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [cardSize, setCardSize] = useState({ width: 0, height: 0, depth: 10 });
-
-  useEffect(() => {
-    const updateSize = () => {
-      const width = Math.min(window.innerWidth * 0.8, 640); // 최대 640px
-      const height = width * 0.625; // 640:400 비율
-      setCardSize({ width, height, depth: 10 });
-    };
-
-    updateSize();
-    window.addEventListener('resize', updateSize);
-    return () => window.removeEventListener('resize', updateSize);
-  }, []);
-
-  useEffect(() => {
-    const clamp = (min: number, max: number, x: number) =>
-      Math.min(max, Math.max(min, x));
-  
-    let startY = 0;
-  
-    const getCurrentRotation = () => {
-      if (!cardRef.current) return 0;
-      const currentTransform = cardRef.current.style.transform;
-      const currentRotation = currentTransform.match(/rotateX\((-?\d+(?:\.\d+)?)deg\)/);
-      return currentRotation ? parseFloat(currentRotation[1]) : 0;
-    };
-  
-    const setRotation = (deg: number) => {
-      if (!cardRef.current) return;
-      cardRef.current.style.transform = `rotateX(${deg}deg)`;
-    };
-  
-    const handleWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      const currentDeg = getCurrentRotation();
-      const rotationStep = e.deltaY > 0 ? 5 : -5;
-      setRotation(clamp(0, 180, currentDeg + rotationStep));
-    };
-  
-    const handleTouchStart = (e: TouchEvent) => {
-      startY = e.touches[0].clientY;
-    };
-  
-    const handleTouchMove = (e: TouchEvent) => {
-      e.preventDefault(); // 기본 스크롤 막음
-      const deltaY = e.touches[0].clientY - startY;
-      const currentDeg = getCurrentRotation();
-      const rotationStep = deltaY > 0 ? -15 : 15; // 위로 쓸면 회전, 아래로 쓸면 반대로
-      setRotation(clamp(0, 180, currentDeg + rotationStep));
-      startY = e.touches[0].clientY; // 다음 비교를 위해 갱신
-    };
-  
-    // wheel 이벤트 (PC)
-    document.addEventListener('wheel', handleWheel, { passive: false });
-  
-    // touch 이벤트 (모바일)
-    document.addEventListener('touchstart', handleTouchStart, { passive: false });
-    document.addEventListener('touchmove', handleTouchMove, { passive: false });
-  
-    return () => {
-      document.removeEventListener('wheel', handleWheel);
-      document.removeEventListener('touchstart', handleTouchStart);
-      document.removeEventListener('touchmove', handleTouchMove);
-    };
-  }, []);
-
-  const { width, height, depth } = cardSize;
-
+export default function HomePage() {
   return (
-    <div className="h-screen bg-gray-950 overflow-hidden">
-      <div className="flex items-center justify-center h-full px-4">
-        <div
-          className="scene"
-          style={{ perspective: '4000px', width, height }}
+    <main className="relative min-h-screen w-full overflow-hidden bg-[#1A1A1A]">
+      <Parallax pages={2.5} style={{ top: '0', left: '0' }}>
+        {/* rideordie 이미지 레이어 */}
+        <ParallaxLayer
+          offset={0}
+          speed={0.3}
+          // flex를 이용해 자식 요소를 완벽한 중앙으로 정렬합니다.
+          className="flex items-center justify-center"
+          style={{ zIndex: 1 }} // 산 이미지 위에 겹치도록 z-index 설정
         >
-          <div
-            ref={cardRef}
-            className="relative w-full h-full transition-transform duration-300 ease-out"
-            style={{
-              transformStyle: 'preserve-3d',
-              transformOrigin: `center center ${depth / 2}px`,
-            }}
-          >
-            {/* Front */}
-            <div
-              className="absolute w-full h-full bg-white rounded-lg shadow-2xl overflow-hidden"
-              style={{ transform: `translateZ(${depth / 2}px)` }}
-            >
-              <Image src="/front.png" alt="Front" fill style={{ objectFit: 'cover' }} />
-            </div>
+          {/* 이미지 크기를 키우고 반응형으로 조절합니다. */}
+          <Image
+            src="/RIDEORDIE.svg"
+            alt="rideordie"
+            width={800} // 이미지 기본 너비 증가
+            height={800} // 이미지 기본 높이 증가
+            className="w-2/3 md:w-1/2 lg:w-1/3 select-none" // 화면 크기에 따라 너비 조절
+            priority
+          />
+        </ParallaxLayer>
 
-            {/* Back */}
-            <div
-              className="absolute w-full h-full bg-white rounded-lg shadow-2xl overflow-hidden"
-              style={{
-                transform: `rotateY(180deg) rotateZ(180deg) translateZ(${depth / 2}px)`,
-              }}
-            >
-              <Image src="/back.svg" alt="Back" fill style={{ objectFit: 'cover' }} />
-            </div>
-
-            {/* Right */}
-            <div
-              className="absolute bg-gray-800"
-              style={{
-                width: `${depth}px`,
-                height: `${height}px`,
-                left: `calc(50% - ${depth / 2}px)`,
-                transform: `rotateY(90deg) translateZ(${width / 2}px)`,
-              }}
-            />
-
-            {/* Left */}
-            <div
-              className="absolute bg-gray-800"
-              style={{
-                width: `${depth}px`,
-                height: `${height}px`,
-                left: `calc(50% - ${depth / 2}px)`,
-                transform: `rotateY(-90deg) translateZ(${width / 2}px)`,
-              }}
-            />
-
-            {/* Top */}
-            <div
-              className="absolute bg-gray-700"
-              style={{
-                width: `${width}px`,
-                height: `${depth}px`,
-                top: `calc(50% - ${depth / 2}px)`,
-                transform: `rotateX(90deg) translateZ(${height / 2}px)`,
-              }}
-            />
-
-            {/* Bottom */}
-            <div
-              className="absolute bg-gray-700"
-              style={{
-                width: `${width}px`,
-                height: `${depth}px`,
-                top: `calc(50% - ${depth / 2}px)`,
-                transform: `rotateX(-90deg) translateZ(${height / 2}px)`,
-              }}
+        {/* 산 이미지 레이어 */}
+        <ParallaxLayer
+          offset={0.55} // offset 값을 줄여 산이 더 일찍(더 위에서) 나타나도록 수정
+          speed={2}
+          style={{ zIndex: 2 }} // rideordie 이미지 아래에 오도록 z-index 설정
+        >
+          {/* bottom 위치를 조정해 산의 높이를 올립니다. */}
+          <div className="absolute left-1/2 sm:bottom-[20vh] xl:scale-70 lg:bottom-[0vh] xl:bottom-[-200px] md:bottom-[20vh] -translate-x-1/2 w-[150vw] h-auto scale-150 md:scale-120 pointer-events-none select-none">
+            <Image
+              src="/mountain.png"
+              alt="Mountain"
+              width={4000}
+              height={3000}
+              className="w-full h-auto"
+              priority
             />
           </div>
-        </div>
-      </div>
+        </ParallaxLayer>
 
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white text-center">
-        <div className=''>
-          <p className="text-lg font-medium mb-2">🖱️ scroll</p>
-          <p className="text-sm opacity-75">Rotate the business card to see both sides</p>
-        </div>
-      </div>
-    </div>
+        {/* 스크롤 가능한 공간을 위한 더미 레이어 */}
+        <ParallaxLayer offset={1.5} speed={0.5}>
+          <div className="flex items-center justify-center h-screen bg-transparent text-white text-2xl">
+            <p>Scroll down for more content!</p>
+          </div>
+        </ParallaxLayer>
+      </Parallax>
+    </main>
   );
 }
