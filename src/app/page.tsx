@@ -45,11 +45,10 @@ export default function HomePage() {
           </div>
         </ParallaxLayer>
 
-        {/* 스크롤 가능한 공간을 위한 더미 레이어 */}
-        <ParallaxLayer offset={1.5} speed={0.5}>
-          <div className="flex items-center justify-center h-screen bg-transparent text-white text-2xl">
-            <p>Scroll down for more content!</p>
-          </div>
+        {/* 스크롤 가능한 공간을 위한 더미 레이어 → 실제 콘텐츠로 대체 */}
+        <ParallaxLayer offset={1.2} speed={0.7}>
+          <div className='flex font-3xl'>개발중</div>
+
         </ParallaxLayer>
       </Parallax>
     </main>

@@ -18,7 +18,7 @@ export function Header() {
               height={48}
             />
           </Link>
-          <div className="flex items-center space-x-4">
+          <div className="flex hidden items-center space-x-4">
             <Link
               href="/dashboard"
               className="inline-flex items-center px-4 py-2 rounded-lg font-medium transition-colors duration-200 bg-teal-500 text-white hover:bg-teal-600"
