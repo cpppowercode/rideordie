@@ -18,7 +18,6 @@ export function Footer() {
               </p>
             </div>
 
-
           {/* 연락처 */}
           <div className="space-y-4">
             <h3 className="text-gray-300 font-medium">문의하기</h3>
@@ -36,16 +35,6 @@ export function Footer() {
           </p>
         </div>
 
-        {/* 데스크톱에서만 표시되는 사인 */}
-        <div className="hidden md:block absolute bottom-0 right-0 -mb-2">
-          <Image
-            src="/sign.svg"
-            alt="Signature"
-            width={80}
-            height={80}
-            className="opacity-20 hover:opacity-100 transition-opacity duration-300"
-          />
-        </div>
         </div>
       </div>
     </footer>
