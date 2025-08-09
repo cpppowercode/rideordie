@@ -26,6 +26,17 @@ export function Footer() {
               <Link href="/card" className='underline'>대표 연락처</Link>
             </ul>
           </div>
+
+          {/* 사업자 정보 */}
+          <div className="space-y-4">
+            <h3 className="text-gray-300 font-medium">사업자 정보</h3>
+            <ul className="space-y-2 text-gray-400 text-sm">
+              <li>상호명: 라이드올다이(Ride or Die)</li>
+              <li>대표자: 김대일</li>
+              <li>사업자등록번호: 825-27-01614</li>
+              <li>사업장 소재지: 강원특별자치도 태백시 대학길 80,<br />105동 1102호(황지동, 중앙하이츠)</li>
+            </ul>
+          </div>
         </div>
 
         {/* 저작권 */}
