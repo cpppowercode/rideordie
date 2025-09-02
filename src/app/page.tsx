@@ -2,55 +2,48 @@
 
 import Image from 'next/image';
 import { Parallax, ParallaxLayer } from '@react-spring/parallax';
+import { useState, useEffect } from 'react';
 
 export default function HomePage() {
+  const [showComingSoon, setShowComingSoon] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      const windowHeight = window.innerHeight;
+      
+      // 스크롤이 화면 높이의 50% 이상일 때 텍스트 표시
+      if (scrollY > windowHeight * 0.5) {
+        setShowComingSoon(true);
+      } else {
+        setShowComingSoon(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
     <main className="relative min-h-screen w-full overflow-hidden bg-[#1A1A1A]">
-      <Parallax pages={2.5} style={{ top: '0', left: '0' }}>
-        {/* rideordie 이미지 레이어 */}
-        <ParallaxLayer
-          offset={0}
-          speed={0.3}
-          // flex를 이용해 자식 요소를 완벽한 중앙으로 정렬합니다.
-          className="flex items-center justify-center"
-          style={{ zIndex: 1 }} // 산 이미지 위에 겹치도록 z-index 설정
-        >
-          {/* 이미지 크기를 키우고 반응형으로 조절합니다. */}
-          <Image
-            src="/RIDEORDIE.svg"
-            alt="rideordie"
-            width={800} // 이미지 기본 너비 증가
-            height={800} // 이미지 기본 높이 증가
-            className="w-2/3 md:w-1/2 lg:w-1/3 select-none" // 화면 크기에 따라 너비 조절
-            priority
-          />
-        </ParallaxLayer>
-
-        {/* 산 이미지 레이어 */}
-        <ParallaxLayer
-          offset={0.55} // offset 값을 줄여 산이 더 일찍(더 위에서) 나타나도록 수정
-          speed={2}
-          style={{ zIndex: 2 }} // rideordie 이미지 아래에 오도록 z-index 설정
-        >
-          {/* bottom 위치를 조정해 산의 높이를 올립니다. */}
-          <div className="absolute left-1/2 sm:bottom-[20vh] xl:scale-70 lg:bottom-[0vh] xl:bottom-[-200px] md:bottom-[20vh] -translate-x-1/2 w-[150vw] h-auto scale-150 md:scale-120 pointer-events-none select-none">
-            <Image
-              src="/mountain.png"
-              alt="Mountain"
-              width={4000}
-              height={3000}
-              className="w-full h-auto"
-              priority
-            />
+      <div 
+        className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 `}
+      >
+        <div className="text-center text-white">
+          <div className="text-4xl md:text-6xl font-bold mb-4 tracking-wider">
+            개발중
           </div>
-        </ParallaxLayer>
-
-        {/* 스크롤 가능한 공간을 위한 더미 레이어 → 실제 콘텐츠로 대체 */}
-        <ParallaxLayer offset={1.2} speed={0.7}>
-          <div className='flex font-3xl'>개발중</div>
-
-        </ParallaxLayer>
-      </Parallax>
+          <div className="text-2xl md:text-4xl font-light mb-2 tracking-widest">
+            —
+          </div>
+          <div className="text-xl md:text-3xl font-medium mb-2 tracking-wide">
+            coming soon
+          </div>
+          <div className="text-lg md:text-2xl font-light tracking-wider">
+            2025.11.
+          </div>
+        </div>
+      </div>
     </main>
   );
 }
