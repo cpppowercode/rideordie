@@ -1,29 +1,6 @@
 'use client';
 
-import Image from 'next/image';
-import { Parallax, ParallaxLayer } from '@react-spring/parallax';
-import { useState, useEffect } from 'react';
-
 export default function HomePage() {
-  const [showComingSoon, setShowComingSoon] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const windowHeight = window.innerHeight;
-      
-      // 스크롤이 화면 높이의 50% 이상일 때 텍스트 표시
-      if (scrollY > windowHeight * 0.5) {
-        setShowComingSoon(true);
-      } else {
-        setShowComingSoon(false);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
   return (
     <main className="relative min-h-screen w-full overflow-hidden bg-[#1A1A1A]">
       <div 
