@@ -29,7 +29,7 @@ export function OptionSelector() {
 
     const handleBuyNow = () => {
         if (!allSelected) {
-            alert("Please select all options before purchasing.");
+            alert("구매 전 모든 옵션을 선택해주세요.");
             return;
         }
         // In a real app, we'd pass the selection state to checkout via Context or URL params.
@@ -86,7 +86,7 @@ export function OptionSelector() {
                             <button className="w-6 h-6 border flex items-center justify-center bg-white hover:bg-gray-50">+</button>
                         </div>
                         <div className="text-lg font-bold">
-                            {PRODUCT_DATA.price.toLocaleString()} KRW
+                            {PRODUCT_DATA.price.toLocaleString()} 원
                         </div>
                     </div>
                 </div>
@@ -95,21 +95,21 @@ export function OptionSelector() {
             {/* Total Price & Action Buttons */}
             <div className="pt-4 border-t">
                 <div className="flex justify-between items-center mb-4">
-                    <span className="text-sm font-medium text-muted-foreground">Total (1 item)</span>
+                    <span className="text-sm font-medium text-muted-foreground">총 상품금액 (1개)</span>
                     <span className="text-2xl font-bold text-accent">
-                        {allSelected ? PRODUCT_DATA.price.toLocaleString() : 0} KRW
+                        {allSelected ? PRODUCT_DATA.price.toLocaleString() : 0} 원
                     </span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
                     <button className="py-4 border border-black font-bold uppercase tracking-wide hover:bg-gray-50 transition-colors">
-                        Add to Cart
+                        장바구니 담기
                     </button>
                     <button
                         onClick={handleBuyNow}
                         className="py-4 bg-accent text-white font-bold uppercase tracking-wide hover:bg-accent/90 transition-colors shadow-lg shadow-accent/20"
                     >
-                        Buy Now
+                        바로 구매
                     </button>
                 </div>
             </div>

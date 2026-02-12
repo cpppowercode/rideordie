@@ -210,7 +210,7 @@ export default function ServicePolicy() {
           <div className="bg-gray-50 p-6 rounded-lg">
             <div className="text-gray-600 space-y-2">
               <p><strong>이메일:</strong> contact@rideordie.kr</p>
-              <p><strong>운영시간:</strong> 평일 09:00 - 18:00 (주말 및 공휴일 휴무)</p>
+              <p><strong>운영시간:</strong> 연중 무휴</p>
             </div>
           </div>
         </section>

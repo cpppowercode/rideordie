@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { Search, ShoppingBag, User, Menu } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Search, ShoppingBag, Menu } from "lucide-react";
 
 export function Header() {
     return (
@@ -20,10 +19,9 @@ export function Header() {
 
                 {/* Desktop Navigation */}
                 <nav className="hidden lg:flex items-center gap-6 text-sm font-medium">
-                    <Link href="/" className="hover:text-primary transition-colors">Best</Link>
-                    <Link href="/" className="hover:text-primary transition-colors">New</Link>
-                    <Link href="/" className="text-accent hover:text-accent/80 transition-colors">Sale</Link>
-                    <Link href="/my" className="hover:text-primary transition-colors">My Order</Link>
+                    <Link href="/" className="hover:text-primary transition-colors">베스트</Link>
+                    <Link href="/" className="hover:text-primary transition-colors">신상</Link>
+                    <Link href="/" className="text-accent hover:text-accent/80 transition-colors">세일</Link>
                 </nav>
 
                 {/* Actions */}
@@ -32,7 +30,7 @@ export function Header() {
                     <div className="hidden md:flex items-center relative mr-2">
                         <input
                             type="text"
-                            placeholder="Search..."
+                            placeholder="검색"
                             className="h-9 w-64 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                         />
                         <Search className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -42,10 +40,6 @@ export function Header() {
                         <ShoppingBag className="h-5 w-5" />
                         <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-accent" />
                     </button>
-
-                    <Link href="/login" className="p-2 hover:bg-secondary rounded-full">
-                        <User className="h-5 w-5" />
-                    </Link>
                 </div>
             </div>
         </header>

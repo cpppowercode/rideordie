@@ -126,9 +126,9 @@ export default function BusinessCardPage() {
       </div>
 
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white text-center">
-        <div className=''>
-          <p className="text-lg font-medium mb-2">🖱️ scroll</p>
-          <p className="text-sm opacity-75">Rotate the business card to see both sides</p>
+        <div>
+          <p className="text-lg font-medium mb-2">🖱️ 스크롤</p>
+          <p className="text-sm opacity-75">스크롤하여 명함 앞뒤를 확인하세요</p>
         </div>
       </div>
     </div>

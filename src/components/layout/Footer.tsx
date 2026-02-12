@@ -10,28 +10,31 @@ export function Footer() {
                             RideOrDie
                         </span>
                         <p className="mt-4 text-sm text-muted-foreground max-w-sm">
-                            Authentic Ski & Snowboard Lessons based in High1 Resort. <br />
-                            We don't teach you how to ski, we teach you how to ride.
+                            하이원 리조트 기반 프리미엄 스키·스노보드 강습. <br />
+                            스키를 가르치는 게 아니라, 라이딩을 가르칩니다.
                         </p>
                     </div>
 
                     <div>
-                        <h3 className="font-semibold mb-4">Customer Service</h3>
+                        <h3 className="font-semibold mb-4">고객센터</h3>
                         <ul className="space-y-2 text-sm text-muted-foreground">
-                            <li>010-1234-5678</li>
-                            <li>Mon-Fri 09:00 - 18:00</li>
-                            <li>Sat-Sun Closed</li>
-                            <li>support@rideordie.com</li>
+                            <li>1833-8226</li>
+                            <li>연중 무휴</li>
+                            <li>
+                                <a href="mailto:contact@rideordie.kr" className="hover:underline">contact@rideordie.kr</a>
+                            </li>
                         </ul>
                     </div>
 
                     <div>
-                        <h3 className="font-semibold mb-4">Company Info</h3>
+                        <h3 className="font-semibold mb-4">회사 정보</h3>
                         <ul className="space-y-2 text-sm text-muted-foreground">
-                            <li>CEO: Kim Example</li>
-                            <li>Reg No: 123-45-67890</li>
-                            <li>Address: High1 Resort, Gangwon-do</li>
-                            <li>Privacy Policy | Terms of Use</li>
+                            <li>대표: 김대일 (Daeil Kim)</li>
+                            <li>사업자등록번호: 8218603636</li>
+                            <li>주소: 강원특별자치도 태백시 (하이원 리조트)</li>
+                            <li>
+                                <Link href="/service-policy" className="hover:underline">서비스 이용약관</Link>
+                            </li>
                         </ul>
                     </div>
                 </div>

@@ -25,27 +25,25 @@ export default function Home() {
                         Ride Or Die
                     </h1>
                     <p className="text-xl md:text-2xl text-white/90 font-light tracking-wide mb-8 max-w-2xl drop-shadow-md">
-                        Premium Ski & Snowboard Coaching
+                        프리미엄 스키·스노보드 강습
                     </p>
                     <Link
                         href={`/product/${PRODUCT_DATA.id}`}
                         className="px-8 py-4 bg-accent text-white font-bold text-lg uppercase tracking-wider hover:bg-accent/90 transition-all transform hover:scale-105"
                     >
-                        Start Your Journey
+                        바로 예약하기
                     </Link>
                 </div>
             </section>
 
-            {/* Featured Products (Since we only have one, we make it prominent) */}
+            {/* Featured Products */}
             <section className="py-20 bg-background">
                 <div className="container mx-auto px-4">
-                    <div className="flex items-center justify-between mb-10 border-b pb-4 border-black/10">
-                        <h2 className="text-3xl font-bold tracking-tight">Featured Lessons</h2>
-                        <Link href="/" className="text-sm font-medium underline underline-offset-4">View All</Link>
+                    <div className="mb-10 border-b pb-4 border-black/10">
+                        <h2 className="text-3xl font-bold tracking-tight">인기 강습</h2>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {/* Product Card */}
                         <Link href={`/product/${PRODUCT_DATA.id}`} className="group block">
                             <div className="relative aspect-[4/3] overflow-hidden bg-gray-100 rounded-sm mb-4">
                                 <Image
@@ -55,7 +53,7 @@ export default function Home() {
                                     className="object-cover transition-transform duration-500 group-hover:scale-110"
                                 />
                                 <div className="absolute top-2 left-2 bg-black text-white text-xs font-bold px-2 py-1 uppercase">
-                                    Best Seller
+                                    베스트셀러
                                 </div>
                             </div>
                             <div className="space-y-1">
@@ -71,29 +69,12 @@ export default function Home() {
                                     <span className="text-muted-foreground ml-1 text-xs">({PRODUCT_DATA.reviewCount})</span>
                                 </div>
                                 <div className="flex items-center gap-2 mt-2">
-                                    <span className="text-xl font-bold">{PRODUCT_DATA.price.toLocaleString()} KRW</span>
-                                    <span className="text-sm text-muted-foreground line-through">{PRODUCT_DATA.originalPrice.toLocaleString()} KRW</span>
+                                    <span className="text-xl font-bold">{PRODUCT_DATA.price.toLocaleString()} 원</span>
+                                    <span className="text-sm text-muted-foreground line-through">{PRODUCT_DATA.originalPrice.toLocaleString()} 원</span>
                                     <span className="text-sm text-accent font-bold">{PRODUCT_DATA.discountRate}%</span>
                                 </div>
                             </div>
                         </Link>
-
-                        {/* Mocking other cards to fill the aesthetic, typically a smart store has more than one item */}
-                        {[1, 2].map((i) => (
-                            <div key={i} className="group block opacity-70 pointer-events-none grayscale">
-                                <div className="relative aspect-[4/3] overflow-hidden bg-gray-100 rounded-sm mb-4 flex items-center justify-center">
-                                    <span className="text-muted-foreground">Coming Soon</span>
-                                </div>
-                                <div className="space-y-1">
-                                    <h3 className="text-lg font-medium leading-tight text-muted-foreground">
-                                        Advanced Techniques Vol.{i}
-                                    </h3>
-                                    <div className="flex items-center gap-2 mt-2">
-                                        <span className="text-xl font-bold text-muted-foreground">Sold Out</span>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
                     </div>
                 </div>
             </section>
@@ -102,16 +83,16 @@ export default function Home() {
             <section className="py-16 bg-secondary">
                 <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 text-center text-4xl">
                     <div className="space-y-2">
-                        <h3 className="text-lg font-bold uppercase tracking-wider">Certified Pros</h3>
-                        <p className="text-sm text-muted-foreground">Elite instructors with Level 2+ certifications.</p>
+                        <h3 className="text-lg font-bold uppercase tracking-wider">공인 강사</h3>
+                        <p className="text-sm text-muted-foreground">레벨 2 이상 자격을 보유한 엘리트 강사진.</p>
                     </div>
                     <div className="space-y-2">
-                        <h3 className="text-lg font-bold uppercase tracking-wider">Custom Curriculum</h3>
-                        <p className="text-sm text-muted-foreground">Tailored lessons matching your exact skill level.</p>
+                        <h3 className="text-lg font-bold uppercase tracking-wider">맞춤 커리큘럼</h3>
+                        <p className="text-sm text-muted-foreground">실력에 맞는 맞춤형 강습.</p>
                     </div>
                     <div className="space-y-2">
-                        <h3 className="text-lg font-bold uppercase tracking-wider">Safety First</h3>
-                        <p className="text-sm text-muted-foreground">Comprehensive insurance and safety protocols.</p>
+                        <h3 className="text-lg font-bold uppercase tracking-wider">안전 제일</h3>
+                        <p className="text-sm text-muted-foreground">종합 보험 및 안전 프로토콜.</p>
                     </div>
                 </div>
             </section>
