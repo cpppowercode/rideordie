@@ -5,10 +5,15 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 
+interface PaymentInfo {
+    orderId: string;
+    totalAmount: number;
+}
+
 function SuccessContent() {
     const searchParams = useSearchParams();
     const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
-    const [orderInfo, setOrderInfo] = useState<any>(null);
+    const [orderInfo, setOrderInfo] = useState<PaymentInfo | null>(null);
     const [errorMessage, setErrorMessage] = useState<string>('');
 
     useEffect(() => {
@@ -27,10 +32,10 @@ function SuccessContent() {
                 const res = await fetch('/api/payments/confirm', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        paymentKey, 
-                        orderId, 
-                        amount: Number(amount) 
+                    body: JSON.stringify({
+                        paymentKey,
+                        orderId,
+                        amount: Number(amount)
                     })
                 });
 
@@ -42,10 +47,11 @@ function SuccessContent() {
                 } else {
                     throw new Error(data.error || '결제 승인에 실패했습니다.');
                 }
-            } catch (error: any) {
+            } catch (error: unknown) {
                 console.error('Payment confirmation failed:', error);
                 setStatus('error');
-                setErrorMessage(error.message || '결제 승인 중 오류가 발생했습니다.');
+                const errorMessage = error instanceof Error ? error.message : '결제 승인 중 오류가 발생했습니다.';
+                setErrorMessage(errorMessage);
             }
         };
 

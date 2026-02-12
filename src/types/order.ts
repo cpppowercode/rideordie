@@ -40,6 +40,6 @@ export interface PaymentLog {
   method?: string;
   approved_at?: string;
   receipt_url?: string;
-  raw_response: any;
+  raw_response: Record<string, unknown>;
   created_at: string;
 }

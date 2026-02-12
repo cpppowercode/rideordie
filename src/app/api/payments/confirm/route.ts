@@ -39,14 +39,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Supabase 없이, 토스 응답만 그대로 반환
-    return NextResponse.json({ 
-      success: true, 
-      payment: paymentData 
+    return NextResponse.json({
+      success: true,
+      payment: paymentData
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Payment confirmation error:', error);
+    const errorMessage = error instanceof Error ? error.message : '결제 승인에 실패했습니다.';
     return NextResponse.json(
-      { error: error.message || '결제 승인에 실패했습니다.' },
+      { error: errorMessage },
       { status: 500 }
     );
   }

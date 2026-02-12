@@ -4,14 +4,14 @@ import { v4 as uuidv4 } from 'uuid';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { 
-      customerName, 
-      customerPhone, 
-      lessonDate, 
-      productId, 
-      productName, 
-      selectedOptions, 
-      amount 
+    const {
+      customerName,
+      customerPhone,
+      lessonDate,
+      productId,
+      productName,
+      selectedOptions,
+      amount
     } = body;
 
     // 입력 검증 (이메일은 선택)
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     const orderId = `ORDER-${Date.now()}-${uuidv4().slice(0, 8)}`;
 
     // Supabase 없이, 토스페이먼츠용 orderId만 반환
-    return NextResponse.json({ 
+    return NextResponse.json({
       orderId,
       order: {
         order_id: orderId,
@@ -40,12 +40,13 @@ export async function POST(request: NextRequest) {
         amount,
         status: 'pending'
       },
-      success: true 
+      success: true
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Order creation error:', error);
+    const errorMessage = error instanceof Error ? error.message : '주문 생성에 실패했습니다.';
     return NextResponse.json(
-      { error: error.message || '주문 생성에 실패했습니다.' },
+      { error: errorMessage },
       { status: 500 }
     );
   }

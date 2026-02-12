@@ -6,7 +6,7 @@ import { ChevronDown, Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PRODUCT_DATA } from '@/lib/mockData';
 
-type Option = typeof PRODUCT_DATA.options[number];
+
 
 export function OptionSelector() {
     const [selections, setSelections] = useState<Record<string, string>>({});
@@ -17,11 +17,7 @@ export function OptionSelector() {
         setIsDropdownOpen(null);
     };
 
-    const removeSelection = (optionName: string) => {
-        const newSelections = { ...selections };
-        delete newSelections[optionName];
-        setSelections(newSelections);
-    };
+
 
     const allSelected = PRODUCT_DATA.options.every(opt => selections[opt.name]);
 

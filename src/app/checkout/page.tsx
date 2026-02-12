@@ -21,7 +21,7 @@ export default function CheckoutPage() {
 
     const handlePayment = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (!hasConsulted) {
             alert('결제 전 채널톡으로 상담을 완료해 주세요.');
             return;
@@ -51,7 +51,7 @@ export default function CheckoutPage() {
             });
 
             const orderData = await orderRes.json();
-            
+
             if (!orderData.success) {
                 throw new Error(orderData.error || '주문 생성에 실패했습니다.');
             }
@@ -75,9 +75,10 @@ export default function CheckoutPage() {
                 successUrl: `${window.location.origin}/checkout/success`,
                 failUrl: `${window.location.origin}/checkout/fail`,
             });
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Payment error:', error);
-            alert(error.message || '결제 요청 중 오류가 발생했습니다.');
+            const errorMessage = error instanceof Error ? error.message : '결제 요청 중 오류가 발생했습니다.';
+            alert(errorMessage);
             setIsProcessing(false);
         }
     };
@@ -94,26 +95,26 @@ export default function CheckoutPage() {
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium mb-1">이름</label>
-                                <input 
-                                    type="text" 
+                                <input
+                                    type="text"
                                     name="name"
                                     value={formData.name}
                                     onChange={handleInputChange}
-                                    required 
-                                    className="w-full border p-2 rounded-sm" 
-                                    placeholder="홍길동" 
+                                    required
+                                    className="w-full border p-2 rounded-sm"
+                                    placeholder="홍길동"
                                 />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium mb-1">연락처</label>
-                                <input 
-                                    type="tel" 
+                                <input
+                                    type="tel"
                                     name="phone"
                                     value={formData.phone}
                                     onChange={handleInputChange}
-                                    required 
-                                    className="w-full border p-2 rounded-sm" 
-                                    placeholder="010-1234-5678" 
+                                    required
+                                    className="w-full border p-2 rounded-sm"
+                                    placeholder="010-1234-5678"
                                 />
                             </div>
                         </div>
@@ -193,11 +194,10 @@ export default function CheckoutPage() {
                             <button
                                 type="button"
                                 onClick={() => setHasConsulted(prev => !prev)}
-                                className={`w-full py-3 border font-medium text-sm flex items-center justify-center gap-2 transition-colors ${
-                                    hasConsulted
+                                className={`w-full py-3 border font-medium text-sm flex items-center justify-center gap-2 transition-colors ${hasConsulted
                                         ? 'bg-black text-white border-black'
                                         : 'bg-white text-black border-black hover:bg-gray-50'
-                                }`}
+                                    }`}
                             >
                                 {hasConsulted ? '네, 채널톡으로 상담을 완료했어요' : '결제 전 채널톡으로 상담을 완료했어요'}
                             </button>
