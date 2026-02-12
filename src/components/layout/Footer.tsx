@@ -31,7 +31,7 @@ export function Footer() {
                         <ul className="space-y-2 text-sm text-muted-foreground">
                             <li>대표: 김대일 (Daeil Kim)</li>
                             <li>사업자등록번호: 8218603636</li>
-                            <li>주소: 강원특별자치도 태백시 (하이원 리조트)</li>
+                            <li>주소: 강원특별자치도 태백시 대학길 80 105동 110</li>
                             <li>
                                 <Link href="/service-policy" className="hover:underline">서비스 이용약관</Link>
                             </li>
