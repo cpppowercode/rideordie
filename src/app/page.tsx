@@ -84,15 +84,11 @@ export default function Home() {
                 <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 text-center text-4xl">
                     <div className="space-y-2">
                         <h3 className="text-lg font-bold uppercase tracking-wider">공인 강사</h3>
-                        <p className="text-sm text-muted-foreground">레벨 2 이상 자격을 보유한 엘리트 강사진.</p>
+                        <p className="text-sm text-muted-foreground">레벨 1 이상 자격을 보유한 강사진.</p>
                     </div>
                     <div className="space-y-2">
                         <h3 className="text-lg font-bold uppercase tracking-wider">맞춤 커리큘럼</h3>
                         <p className="text-sm text-muted-foreground">실력에 맞는 맞춤형 강습.</p>
-                    </div>
-                    <div className="space-y-2">
-                        <h3 className="text-lg font-bold uppercase tracking-wider">안전 제일</h3>
-                        <p className="text-sm text-muted-foreground">종합 보험 및 안전 프로토콜.</p>
                     </div>
                 </div>
             </section>
