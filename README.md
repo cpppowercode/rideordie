@@ -76,9 +76,11 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 
-# Toss Payments
-NEXT_PUBLIC_TOSS_CLIENT_KEY=
-TOSS_SECRET_KEY=
+# NHN KCP
+NEXT_PUBLIC_KCP_SITE_CD=
+NEXT_PUBLIC_KCP_SITE_NAME=라이드올다이
+NEXT_PUBLIC_KCP_ENV=test
+KCP_CERT_INFO=
 
 # Channel Talk (선택사항)
 NEXT_PUBLIC_CHANNEL_TALK_PLUGIN_KEY=
@@ -119,4 +121,4 @@ Vercel을 사용한 배포:
 
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Supabase Documentation](https://supabase.com/docs)
-- [토스페이먼츠 개발자 센터](https://developers.tosspayments.com)
+- [NHN KCP 개발자센터](https://developer.kcp.co.kr)

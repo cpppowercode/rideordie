@@ -17,45 +17,27 @@ function SuccessContent() {
     const [errorMessage, setErrorMessage] = useState<string>('');
 
     useEffect(() => {
-        const confirmPayment = async () => {
-            const paymentKey = searchParams.get('paymentKey');
-            const orderId = searchParams.get('orderId');
-            const amount = searchParams.get('amount');
+        const orderId = searchParams.get('orderId') || searchParams.get('ordr_idxx');
+        const amount = searchParams.get('amount');
+        const tno = searchParams.get('tno');
 
-            if (!paymentKey || !orderId || !amount) {
-                setStatus('error');
-                setErrorMessage('결제 정보가 올바르지 않습니다.');
-                return;
-            }
+        if (!orderId || !amount) {
+            setStatus('error');
+            setErrorMessage('결제 정보가 올바르지 않습니다.');
+            return;
+        }
 
-            try {
-                const res = await fetch('/api/payments/confirm', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        paymentKey,
-                        orderId,
-                        amount: Number(amount)
-                    })
-                });
+        if (!tno) {
+            setStatus('error');
+            setErrorMessage('결제 승인 정보가 없습니다. 다시 시도해 주세요.');
+            return;
+        }
 
-                const data = await res.json();
-
-                if (data.success) {
-                    setOrderInfo(data.payment);
-                    setStatus('success');
-                } else {
-                    throw new Error(data.error || '결제 승인에 실패했습니다.');
-                }
-            } catch (error: unknown) {
-                console.error('Payment confirmation failed:', error);
-                setStatus('error');
-                const errorMessage = error instanceof Error ? error.message : '결제 승인 중 오류가 발생했습니다.';
-                setErrorMessage(errorMessage);
-            }
-        };
-
-        confirmPayment();
+        setOrderInfo({
+            orderId,
+            totalAmount: Number(amount),
+        });
+        setStatus('success');
     }, [searchParams]);
 
     if (status === 'loading') {

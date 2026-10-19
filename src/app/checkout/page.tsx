@@ -1,16 +1,32 @@
 'use client';
 
-import { useState } from 'react';
-import { loadTossPayments } from '@tosspayments/payment-sdk';
+import { useEffect, useState } from 'react';
 import { PRODUCT_DATA } from '@/lib/mockData';
+import { executeKcpPay, KcpPayForm } from '@/components/checkout/KcpPayForm';
+import {
+    expectedPayAmount,
+    isMobileUserAgent,
+    type KcpPayMethod,
+} from '@/lib/kcp-public';
+
+type KcpLaunch = {
+    orderId: string;
+    approvalKey?: string;
+    payUrl?: string;
+    retUrl?: string;
+};
 
 export default function CheckoutPage() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [hasConsulted, setHasConsulted] = useState(false);
+    const [payMethod, setPayMethod] = useState<KcpPayMethod>('card');
+    const [kcpLaunch, setKcpLaunch] = useState<KcpLaunch | null>(null);
     const [formData, setFormData] = useState({
         name: '',
         phone: ''
     });
+
+    const amount = expectedPayAmount();
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData(prev => ({
@@ -18,6 +34,35 @@ export default function CheckoutPage() {
             [e.target.name]: e.target.value
         }));
     };
+
+    useEffect(() => {
+        if (!kcpLaunch) return;
+
+        let cancelled = false;
+        (async () => {
+            if (!kcpLaunch.payUrl) {
+                for (let i = 0; i < 50 && !window.KCP_Pay_Execute_Web; i += 1) {
+                    await new Promise((resolve) => setTimeout(resolve, 100));
+                }
+                if (!window.KCP_Pay_Execute_Web) {
+                    throw new Error('KCP 결제창을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.');
+                }
+            }
+            if (cancelled) return;
+            const form = document.forms.namedItem('order_info') as HTMLFormElement | null;
+            if (!form) throw new Error('결제 폼을 찾지 못했습니다.');
+            executeKcpPay(form, kcpLaunch.payUrl);
+        })().catch((error: unknown) => {
+            const message = error instanceof Error ? error.message : '결제 요청 중 오류가 발생했습니다.';
+            alert(message);
+            setIsProcessing(false);
+            setKcpLaunch(null);
+        });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [kcpLaunch]);
 
     const handlePayment = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -27,7 +72,6 @@ export default function CheckoutPage() {
             return;
         }
 
-        // 입력 검증
         if (!formData.name || !formData.phone) {
             alert('필수 정보를 모두 입력해주세요.');
             return;
@@ -36,7 +80,6 @@ export default function CheckoutPage() {
         setIsProcessing(true);
 
         try {
-            // 1. 주문 생성
             const orderRes = await fetch('/api/orders/create', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -46,7 +89,7 @@ export default function CheckoutPage() {
                     productId: PRODUCT_DATA.id,
                     productName: PRODUCT_DATA.title,
                     selectedOptions: {},
-                    amount: PRODUCT_DATA.price
+                    amount
                 })
             });
 
@@ -56,25 +99,35 @@ export default function CheckoutPage() {
                 throw new Error(orderData.error || '주문 생성에 실패했습니다.');
             }
 
-            const { orderId } = orderData;
+            const { orderId } = orderData as { orderId: string };
+            const mobile = isMobileUserAgent(navigator.userAgent);
 
-            // 2. 토스페이먼츠 위젯 로드
-            const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY;
-            if (!clientKey) {
-                throw new Error('토스페이먼츠 클라이언트 키가 설정되지 않았습니다.');
+            if (mobile) {
+                const retUrl = `${window.location.origin}/api/payments/kcp/return`;
+                const registerRes = await fetch('/api/payments/kcp/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        orderId,
+                        goodName: PRODUCT_DATA.title,
+                        payMethod,
+                        retUrl,
+                    }),
+                });
+                const registerData = await registerRes.json();
+                if (!registerData.success) {
+                    throw new Error(registerData.error || 'KCP 거래등록에 실패했습니다.');
+                }
+                setKcpLaunch({
+                    orderId,
+                    approvalKey: registerData.approvalKey,
+                    payUrl: registerData.PayUrl,
+                    retUrl,
+                });
+                return;
             }
 
-            const tossPayments = await loadTossPayments(clientKey);
-
-            // 3. 결제 요청
-            await tossPayments.requestPayment('카드', {
-                amount: PRODUCT_DATA.price,
-                orderId,
-                orderName: PRODUCT_DATA.title,
-                customerName: formData.name,
-                successUrl: `${window.location.origin}/checkout/success`,
-                failUrl: `${window.location.origin}/checkout/fail`,
-            });
+            setKcpLaunch({ orderId });
         } catch (error: unknown) {
             console.error('Payment error:', error);
             const errorMessage = error instanceof Error ? error.message : '결제 요청 중 오류가 발생했습니다.';
@@ -87,9 +140,21 @@ export default function CheckoutPage() {
         <div className="container mx-auto px-4 py-8 max-w-4xl">
             <h1 className="text-2xl font-bold mb-8">결제하기</h1>
 
+            <KcpPayForm
+                key={kcpLaunch?.orderId || 'idle'}
+                orderId={kcpLaunch?.orderId || ''}
+                goodName={PRODUCT_DATA.title}
+                amount={amount}
+                buyerName={formData.name}
+                buyerPhone={formData.phone}
+                payMethod={payMethod}
+                approvalKey={kcpLaunch?.approvalKey}
+                payUrl={kcpLaunch?.payUrl}
+                retUrl={kcpLaunch?.retUrl}
+            />
+
             <form onSubmit={handlePayment} className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="md:col-span-2 space-y-8">
-                    {/* Section: Shipping Info */}
                     <section className="bg-white p-6 rounded-sm border shadow-sm">
                         <h2 className="text-lg font-bold mb-4">주문자 정보</h2>
                         <div className="grid grid-cols-2 gap-4">
@@ -120,7 +185,6 @@ export default function CheckoutPage() {
                         </div>
                     </section>
 
-                    {/* 채널톡 안내 */}
                     <section className="bg-blue-50 p-6 rounded-sm border border-blue-200">
                         <div className="flex items-start gap-3">
                             <div className="flex-shrink-0 w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
@@ -143,27 +207,33 @@ export default function CheckoutPage() {
                         </div>
                     </section>
 
-                    {/* Section: Payment Method */}
                     <section className="bg-white p-6 rounded-sm border shadow-sm">
                         <h2 className="text-lg font-bold mb-4">결제 수단</h2>
                         <div className="space-y-3">
                             <label className="flex items-center space-x-3 p-3 border rounded-sm cursor-pointer hover:bg-gray-50">
-                                <input type="radio" name="payment" defaultChecked className="h-4 w-4 accent-black" />
+                                <input
+                                    type="radio"
+                                    name="payment"
+                                    checked={payMethod === 'card'}
+                                    onChange={() => setPayMethod('card')}
+                                    className="h-4 w-4 accent-black"
+                                />
                                 <span>신용카드</span>
                             </label>
                             <label className="flex items-center space-x-3 p-3 border rounded-sm cursor-pointer hover:bg-gray-50">
-                                <input type="radio" name="payment" className="h-4 w-4 accent-black" />
-                                <span>계좌이체 (가상계좌)</span>
-                            </label>
-                            <label className="flex items-center space-x-3 p-3 border rounded-sm cursor-pointer hover:bg-gray-50">
-                                <input type="radio" name="payment" className="h-4 w-4 accent-black" />
-                                <span>네이버 페이</span>
+                                <input
+                                    type="radio"
+                                    name="payment"
+                                    checked={payMethod === 'bank'}
+                                    onChange={() => setPayMethod('bank')}
+                                    className="h-4 w-4 accent-black"
+                                />
+                                <span>계좌이체</span>
                             </label>
                         </div>
                     </section>
                 </div>
 
-                {/* Order Summary */}
                 <div className="md:col-span-1">
                     <div className="sticky top-24 bg-gray-50 p-6 rounded-sm border">
                         <h3 className="font-bold mb-4 text-lg">주문 요약</h3>
@@ -172,13 +242,13 @@ export default function CheckoutPage() {
                                 <p className="font-medium text-sm">{PRODUCT_DATA.title}</p>
                                 <p className="text-xs text-muted-foreground mt-1">1:1 프리미엄 강습</p>
                             </div>
-                            <span className="font-bold">{PRODUCT_DATA.price.toLocaleString()}</span>
+                            <span className="font-bold">{amount.toLocaleString()}</span>
                         </div>
 
                         <div className="space-y-2 mb-6">
                             <div className="flex justify-between text-sm">
                                 <span className="text-muted-foreground">상품금액</span>
-                                <span>{PRODUCT_DATA.price.toLocaleString()} 원</span>
+                                <span>{amount.toLocaleString()} 원</span>
                             </div>
                             <div className="flex justify-between text-sm">
                                 <span className="text-muted-foreground">할인</span>
@@ -186,7 +256,7 @@ export default function CheckoutPage() {
                             </div>
                             <div className="flex justify-between text-lg font-bold pt-4 border-t">
                                 <span>총 결제금액</span>
-                                <span className="text-accent">{PRODUCT_DATA.price.toLocaleString()} 원</span>
+                                <span className="text-accent">{amount.toLocaleString()} 원</span>
                             </div>
                         </div>
 

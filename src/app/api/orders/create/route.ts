@@ -22,10 +22,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 주문 ID 생성 (DB 없이 사용)
-    const orderId = `ORDER-${Date.now()}-${uuidv4().slice(0, 8)}`;
-
-    // Supabase 없이, 토스페이먼츠용 orderId만 반환
+    const orderId = `ROD${Date.now()}${uuidv4().replace(/-/g, "").slice(0, 8)}`.slice(0, 50);
     return NextResponse.json({
       orderId,
       order: {
