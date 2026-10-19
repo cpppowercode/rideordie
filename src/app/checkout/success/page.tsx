@@ -92,7 +92,7 @@ function SuccessContent() {
                     <div className="flex-1">
                         <h3 className="font-bold text-blue-900 mb-2">다음 단계</h3>
                         <p className="text-sm text-blue-800">
-                            곧 채널톡으로 연락드려 강습 일정, 레벨, 시간대를 상담해드리겠습니다.
+                            상담에서 확정한 일정으로 강습을 진행합니다. 변경이 필요하면 채널톡으로 연락해 주세요.
                         </p>
                     </div>
                 </div>
@@ -107,7 +107,7 @@ function SuccessContent() {
             </div>
 
             <Link href="/" className="px-6 py-3 bg-black text-white font-medium hover:bg-gray-800 transition-colors rounded-sm">
-                쇼핑 계속하기
+                홈으로
             </Link>
         </div>
     );

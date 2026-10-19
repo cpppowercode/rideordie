@@ -174,8 +174,10 @@ export default function ServicePolicy() {
             <h2 className="text-2xl font-semibold mb-4 text-gray-800">제12조 (개인정보 보호)</h2>
             <div className="text-gray-600 leading-relaxed space-y-2">
               <p>1. 회사는 &quot;개인정보보호법&quot;에 따라 개인정보 처리방침을 수립·공개하며, 개인정보를 안전하게 관리합니다.</p>
-              <p>2. 개인정보 수집 항목: 필수(이메일, 비밀번호, 이름), 선택(휴대폰 번호, 생년월일, 성별), 자동수집(IP주소, 쿠키, 이용기록 등)</p>
-              <p>3. 보유 기간: 이용 목적 달성 시까지, 단 법령에 따라 보존할 필요가 있는 경우 해당 기간까지 보관</p>
+              <p>2. 개인정보 수집 항목: 필수(이름, 휴대폰 번호), 상담 과정에서 일정·레벨 등 강습 진행에 필요한 정보, 자동수집(IP주소, 쿠키, 이용기록 등). 회원가입은 받지 않습니다.</p>
+              <p>3. 이용 목적: 강습 예약·상담·결제·고객 응대 및 관련 법령에 따른 보존</p>
+              <p>4. 보유 기간: 이용 목적 달성 시까지, 단 전자상거래법 등 법령에 따라 보존할 필요가 있는 경우 해당 기간까지 보관</p>
+              <p>5. 개인정보 보호책임자: 정동진 (contact@rideordie.kr, 010-2028-2744)</p>
             </div>
           </div>
           
@@ -209,6 +211,7 @@ export default function ServicePolicy() {
           <h2 className="text-2xl font-semibold mb-4 text-gray-800">문의처</h2>
           <div className="bg-gray-50 p-6 rounded-lg">
             <div className="text-gray-600 space-y-2">
+              <p><strong>전화:</strong> 010-2028-2744</p>
               <p><strong>이메일:</strong> contact@rideordie.kr</p>
               <p><strong>운영시간:</strong> 연중 무휴</p>
             </div>

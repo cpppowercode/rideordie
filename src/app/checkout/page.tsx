@@ -193,7 +193,7 @@ export default function CheckoutPage() {
                             <div className="flex-1">
                                 <h3 className="font-bold text-blue-900 mb-2">강습 일정 및 옵션 상담</h3>
                                 <p className="text-sm text-blue-800 mb-3">
-                                    결제 완료 후 채널톡으로 연락드려 강습 일정, 레벨, 시간대 등을 상담해드립니다.
+                                    상담 없이 결제하면 일정 조율·환불이 어려울 수 있습니다. 채널톡으로 일정·레벨·시간을 확인한 뒤에만 결제가 가능합니다.
                                 </p>
                                 <a
                                     href="https://rideordie.channel.io/"
@@ -240,7 +240,7 @@ export default function CheckoutPage() {
                         <div className="flex justify-between items-start mb-4 pb-4 border-b">
                             <div className="flex-1">
                                 <p className="font-medium text-sm">{PRODUCT_DATA.title}</p>
-                                <p className="text-xs text-muted-foreground mt-1">1:1 프리미엄 강습</p>
+                                <p className="text-xs text-muted-foreground mt-1">하이원 현장 강습</p>
                             </div>
                             <span className="font-bold">{amount.toLocaleString()}</span>
                         </div>

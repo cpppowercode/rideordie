@@ -51,7 +51,7 @@ export default function HomePage() {
                     </span>
                   </div>
                   <h2 className="inline whitespace-pre-wrap break-all text-center text-sm font-medium">
-                    상위 1% 프리미엄 퀄리티 스키 · 보드강습
+                    하이원 스키 · 보드 강습
                   </h2>
                 </div>
               </div>
