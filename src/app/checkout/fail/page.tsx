@@ -38,7 +38,7 @@ function FailContent() {
             <div className="mt-12 p-4 bg-gray-50 rounded-sm max-w-md">
                 <h3 className="font-semibold mb-2">도움이 필요하신가요?</h3>
                 <p className="text-sm text-muted-foreground">
-                    고객센터: 1833-8226<br />
+                    고객센터: <a href="tel:010-2028-2744" className="hover:underline">010-2028-2744</a><br />
                     이메일: contact@rideordie.kr<br />
                     운영시간: 연중 무휴
                 </p>

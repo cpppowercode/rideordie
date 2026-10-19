@@ -18,7 +18,9 @@ export function Footer() {
                     <div>
                         <h3 className="font-semibold mb-4">고객센터</h3>
                         <ul className="space-y-2 text-sm text-muted-foreground">
-                            <li>1833-8226</li>
+                            <li>
+                                <a href="tel:010-2028-2744" className="hover:underline">010-2028-2744</a>
+                            </li>
                             <li>연중 무휴</li>
                             <li>
                                 <a href="mailto:contact@rideordie.kr" className="hover:underline">contact@rideordie.kr</a>
@@ -29,9 +31,9 @@ export function Footer() {
                     <div>
                         <h3 className="font-semibold mb-4">회사 정보</h3>
                         <ul className="space-y-2 text-sm text-muted-foreground">
-                            <li>대표: 김대일 (Daeil Kim)</li>
-                            <li>사업자등록번호: 825-27-01614</li>
-                            <li>주소: 강원특별자치도 태백시 대학길 80 105-1102</li>
+                            <li>대표: 정동진</li>
+                            <li>사업자등록번호: 331-14-02684</li>
+                            <li>주소: 서울 서대문구 모래내로 411</li>
                             <li>
                                 <Link href="/service-policy" className="hover:underline">서비스 이용약관</Link>
                             </li>
