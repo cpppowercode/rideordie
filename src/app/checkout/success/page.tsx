@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { MessageCircle, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 
 interface PaymentInfo {
     orderId: string;
@@ -43,9 +43,9 @@ function SuccessContent() {
     if (status === 'loading') {
         return (
             <div className="min-h-[60vh] flex flex-col items-center justify-center p-4 text-center">
-                <Loader2 className="h-16 w-16 text-blue-600 animate-spin mb-6" />
+                <Loader2 className="h-16 w-16 text-brand animate-spin mb-6" />
                 <h1 className="text-2xl font-bold mb-2">결제 승인 중입니다</h1>
-                <p className="text-muted-foreground">잠시만 기다려주세요...</p>
+                <p className="text-muted">잠시만 기다려주세요...</p>
             </div>
         );
     }
@@ -57,14 +57,14 @@ function SuccessContent() {
                     <XCircle className="h-16 w-16 text-red-600" />
                 </div>
                 <h1 className="text-3xl font-bold mb-4">결제 승인에 실패했습니다</h1>
-                <p className="text-muted-foreground text-lg mb-8 max-w-md">
+                <p className="text-muted text-lg mb-8 max-w-md">
                     {errorMessage}
                 </p>
                 <div className="flex gap-4">
-                    <Link href="/checkout" className="px-6 py-3 border border-black font-medium hover:bg-gray-50 transition-colors">
+                    <Link href="/checkout" className="btn-ghost">
                         다시 시도
                     </Link>
-                    <Link href="/" className="px-6 py-3 bg-black text-white font-medium hover:bg-gray-800 transition-colors">
+                    <Link href="/" className="btn-dark">
                         홈으로
                     </Link>
                 </div>
@@ -74,24 +74,24 @@ function SuccessContent() {
 
     return (
         <div className="min-h-[60vh] flex flex-col items-center justify-center p-4 text-center">
-            <div className="bg-green-100 p-6 rounded-full mb-6">
-                <CheckCircle className="h-16 w-16 text-green-600" />
+            <div className="bg-ice p-6 rounded-full mb-6">
+                <CheckCircle className="h-16 w-16 text-brand" />
             </div>
             <h1 className="text-3xl font-bold mb-4">결제가 완료되었습니다</h1>
-            <div className="text-muted-foreground text-lg mb-8 max-w-md space-y-2">
+            <div className="text-muted text-lg mb-8 max-w-md space-y-2">
                 <p>주문번호: <span className="font-semibold text-black">{orderInfo?.orderId}</span></p>
                 <p>결제금액: <span className="font-semibold text-black">{orderInfo?.totalAmount?.toLocaleString()}원</span></p>
             </div>
 
             {/* 채널톡 안내 */}
-            <div className="bg-blue-50 p-6 rounded-lg border border-blue-200 mb-8 max-w-md">
+            <div className="bg-ice p-6 rounded-xl text-left mb-8 max-w-md">
                 <div className="flex items-start gap-3 mb-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
-                        💬
+                    <div className="flex-shrink-0 w-12 h-12 bg-brand rounded-full flex items-center justify-center text-white font-bold text-xl">
+                        <MessageCircle className="h-6 w-6" />
                     </div>
                     <div className="flex-1">
-                        <h3 className="font-bold text-blue-900 mb-2">다음 단계</h3>
-                        <p className="text-sm text-blue-800">
+                        <h3 className="font-bold text-ink mb-2">다음 단계</h3>
+                        <p className="text-sm text-ink/75">
                             상담에서 확정한 일정으로 강습을 진행합니다. 변경이 필요하면 채널톡으로 연락해 주세요.
                         </p>
                     </div>
@@ -100,13 +100,13 @@ function SuccessContent() {
                     href="https://rideordie.channel.io/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block w-full py-3 bg-blue-600 text-white font-medium rounded-sm hover:bg-blue-700 transition-colors text-center"
+                    className="btn-primary w-full"
                 >
                     지금 바로 상담하기
                 </a>
             </div>
 
-            <Link href="/" className="px-6 py-3 bg-black text-white font-medium hover:bg-gray-800 transition-colors rounded-sm">
+            <Link href="/" className="btn-dark">
                 홈으로
             </Link>
         </div>
@@ -117,7 +117,7 @@ export default function OrderSuccessPage() {
     return (
         <Suspense fallback={
             <div className="min-h-[60vh] flex items-center justify-center">
-                <Loader2 className="h-16 w-16 text-blue-600 animate-spin" />
+                <Loader2 className="h-16 w-16 text-brand animate-spin" />
             </div>
         }>
             <SuccessContent />

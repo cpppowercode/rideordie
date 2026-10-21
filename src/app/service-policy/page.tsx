@@ -4,7 +4,7 @@ export default function ServicePolicy() {
   return (
     <main className="bg-white text-black min-h-screen">
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-center mt-20 mb-8">Ride or Die 서비스 이용약관</h1>
+        <h1 className="text-3xl md:text-4xl font-bold text-center mt-10 mb-4">Ride or Die 서비스 이용약관</h1>
         <p className="text-center text-gray-600 mb-8">(전자상거래 표준약관 준용·스포츠 강습 특화)</p>
         
         {/* 서비스 이용약관 */}

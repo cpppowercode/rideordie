@@ -34,3 +34,5 @@ export const PRODUCT_DATA = {
         },
     ],
 };
+
+export const CHANNEL_URL = "https://rideordie.channel.io/";
