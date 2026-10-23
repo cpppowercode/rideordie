@@ -31,18 +31,18 @@ export const LESSON_TYPES = [
   { value: "both", label: "둘 다" },
 ] as const;
 
-/** Real lesson photos owned by RideOrDie. Stock photos were removed. */
+/**
+ * Real lesson photos owned by RideOrDie.
+ * Only shots without identifiable children's faces are shipped
+ * (backs, helmets+goggles covering the face, or distant riding).
+ */
 export const LESSON_PHOTOS = {
   hero: "/images/lessons/hero.webp",
   heroMobile: "/images/lessons/hero-mobile.webp",
   lesson: "/images/lessons/lesson.webp",
-  kids: "/images/lessons/gallery-kids.webp",
-  night: "/images/lessons/gallery-night.webp",
-  skiKids: "/images/lessons/gallery-ski-kids.webp",
   carve: "/images/lessons/gallery-carve.webp",
-  liftKid: "/images/lessons/gallery-lift-kid.webp",
   lift: "/images/lessons/gallery-lift.webp",
   jump: "/images/lessons/gallery-jump.webp",
-  coach: "/images/lessons/gallery-coach.webp",
-  nightLift: "/images/lessons/gallery-night-lift.webp",
+  air: "/images/lessons/gallery-air.webp",
+  slope: "/images/lessons/gallery-slope.webp",
 } as const;
