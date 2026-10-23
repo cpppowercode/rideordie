@@ -38,8 +38,9 @@ export type ResortLanding = {
 
 export const TERMS_REFUND_HREF = "/service-policy#article-9";
 
+export const EARLY_BIRD_LABEL = "시즌 전 얼리버드";
 export const EARLY_BIRD_COPY =
-  "1:1 2시간 정가 15만원, 개장 후 첫 2주 안에 예약 또는 2월 중순 이후 예약 시 14만원";
+  "시즌 전 얼리버드: 개장 후 첫 2주 안에 예약 또는 2월 중순 이후 예약 시 14만원";
 
 const SHARED_FACTS_FAQ: ResortFaq[] = [
   {
@@ -47,8 +48,8 @@ const SHARED_FACTS_FAQ: ResortFaq[] = [
     a: "1:1 2시간 정가는 15만원입니다. 1:1·2:1·3:1 구성이 있고, 숙소·리프트권·장비는 별도입니다.",
   },
   {
-    q: "얼리버드 할인이 있나요?",
-    a: `${EARLY_BIRD_COPY}입니다.`,
+    q: "시즌 전 얼리버드가 있나요?",
+    a: EARLY_BIRD_COPY,
   },
   {
     q: "숙소나 리프트권도 포함인가요?",
@@ -78,8 +79,8 @@ export const SITE_FAQ: ResortFaq[] = [
     a: "1:1 2시간 정가는 15만원입니다. 1:1·2:1·3:1 구성이 있으며, 숙소·리프트권·장비는 별도입니다.",
   },
   {
-    q: "얼리버드 할인이 있나요?",
-    a: `${EARLY_BIRD_COPY}입니다.`,
+    q: "시즌 전 얼리버드가 있나요?",
+    a: EARLY_BIRD_COPY,
   },
   {
     q: "강사는 공인 자격인가요?",

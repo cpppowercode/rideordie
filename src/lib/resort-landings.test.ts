@@ -4,6 +4,7 @@ import {
   bookingValueFromResortQuery,
   bookHref,
   EARLY_BIRD_COPY,
+  EARLY_BIRD_LABEL,
   REGULAR_PRICE_TABLE,
   RESORT_LANDINGS,
   resortCanonical,
@@ -21,15 +22,22 @@ assert.equal(bookHref("high1"), "/book?resort=high1");
 assert.equal(resortCanonical("high1"), "https://rideordie.kr/resorts/high1");
 assert.equal(resortLandingBySlug("missing"), undefined);
 assert.equal(REGULAR_PRICE_TABLE.amounts["1:1"][2], 150_000);
+assert.equal(EARLY_BIRD_LABEL, "시즌 전 얼리버드");
 assert.equal(
   EARLY_BIRD_COPY,
-  "1:1 2시간 정가 15만원, 개장 후 첫 2주 안에 예약 또는 2월 중순 이후 예약 시 14만원"
+  "시즌 전 얼리버드: 개장 후 첫 2주 안에 예약 또는 2월 중순 이후 예약 시 14만원"
 );
 assert.equal(EARLY_BIRD_COPY.includes("특가"), false);
+assert.equal(EARLY_BIRD_COPY.includes("오픈 기념"), false);
+assert.equal(EARLY_BIRD_COPY.includes("오픈기념"), false);
 assert.equal(EARLY_BIRD_COPY.includes("강습은"), false);
 assert.equal(EARLY_BIRD_COPY.includes("2월 한 달"), false);
-assert.equal(JSON.stringify(RESORT_LANDINGS).includes("2월 한 달"), false);
-assert.equal(JSON.stringify(RESORT_LANDINGS).includes("특가"), false);
+const landingBlob = JSON.stringify(RESORT_LANDINGS);
+assert.equal(landingBlob.includes("2월 한 달"), false);
+assert.equal(landingBlob.includes("특가"), false);
+assert.equal(landingBlob.includes("오픈 기념"), false);
+assert.equal(landingBlob.includes("오픈기념"), false);
+assert.ok(landingBlob.includes("시즌 전 얼리버드"));
 assert.equal(JSON.stringify(RESORT_LANDINGS).includes("넓은 초급 지형"), false);
 assert.equal(JSON.stringify(RESORT_LANDINGS).includes("숙박·식음이 한 단지에"), false);
 assert.equal(JSON.stringify(RESORT_LANDINGS).includes("오전에 출발해 오후에 강습"), false);
