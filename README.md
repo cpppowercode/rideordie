@@ -92,11 +92,11 @@ KCP_CERT_INFO=
 
 ## 사진 출처
 
-히어로·갤러리의 고해상 사진은 `public/images/lessons/` 에 두었습니다. 출처 목록은 `src/lib/site.ts` 의 `PHOTO_SOURCES` 입니다.
+히어로·갤러리는 사장님이 촬영한 실제 강습 사진입니다. 경로는 `src/lib/site.ts` 의 `LESSON_PHOTOS` 입니다. 스톡 사진은 쓰지 않습니다.
 
-- 히어로: Unsplash `photo-1551698618-1dfe5d97d256`
-- 갤러리 스톡: Pexels 848612, 376697, 2433353, 257961, 352093
-- 실제 강습 컷: 레포 원본 `/assets/mainThumb.png`, `/assets/subImage/{1,2,3}.png` (고해상 원본이 없는 600–900px 파일은 작은 타일용으로만 사용)
+- 히어로: `photo_32` 민트 재킷 보더 카빙 (데스크톱·모바일 각각 크롭)
+- 강습 안내: `photo_36` 강사와 아이들
+- 갤러리: `photo_12`, `photo_10`, `photo_14`, `photo_37` 등
 
 ## 프로젝트 구조
 

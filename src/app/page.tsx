@@ -26,17 +26,26 @@ const FAQ = [
 export default function Home() {
   return (
     <div className="flex flex-col" data-testid="home-page">
-      <section className="relative isolate min-h-[calc(100svh-4rem)] overflow-hidden bg-ink text-white">
+      <section className="relative isolate min-h-[calc(100svh-4rem)] overflow-hidden bg-ink text-white" data-testid="home-hero">
         <Image
           src={PRODUCT_DATA.images.hero}
-          alt="슬로프에서 스키를 타는 강습 장면"
+          alt="민트 재킷 보더가 슬로프를 카빙하는 강습 장면"
           fill
           priority
-          quality={90}
+          quality={80}
           sizes="100vw"
-          className="-z-10 object-cover object-[center_40%]"
+          className="-z-10 hidden object-cover object-center md:block"
         />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/85 via-black/50 to-black/30" />
+        <Image
+          src={PRODUCT_DATA.images.heroMobile}
+          alt="민트 재킷 보더가 슬로프를 카빙하는 강습 장면"
+          fill
+          priority
+          quality={80}
+          sizes="100vw"
+          className="-z-10 object-cover object-[center_42%] md:hidden"
+        />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/80 via-black/45 to-black/20" />
 
         <div className="mx-auto flex min-h-[calc(100svh-4rem)] max-w-6xl flex-col justify-end px-5 pb-10 pt-16 md:pb-24">
           <p className="animate-fade-up text-[13px] font-semibold tracking-[0.18em] text-white/80">
@@ -83,7 +92,7 @@ export default function Home() {
             alt={PRODUCT_DATA.title}
             fill
             sizes="(min-width: 768px) 50vw, 100vw"
-            className="object-cover"
+            className="object-cover object-[62%_center]"
           />
         </div>
         <div>

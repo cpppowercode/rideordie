@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { PRODUCT_DATA } from '@/lib/mockData';
 
 export function ProductImageGallery() {
-    const [selectedImage, setSelectedImage] = useState(PRODUCT_DATA.images.main);
+    const [selectedImage, setSelectedImage] = useState<string>(PRODUCT_DATA.images.main);
 
     return (
         <div className="flex flex-col gap-4">
@@ -18,7 +18,7 @@ export function ProductImageGallery() {
                     fill
                     sizes="(min-width: 1024px) 50vw, 100vw"
                     quality={85}
-                    className="object-cover"
+                    className="object-cover object-[62%_center]"
                     priority
                 />
             </div>

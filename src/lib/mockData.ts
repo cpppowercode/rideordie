@@ -1,4 +1,4 @@
-import { INSTAGRAM_URL } from "@/lib/site";
+import { INSTAGRAM_URL, LESSON_PHOTOS } from "@/lib/site";
 
 export const PRODUCT_DATA = {
     id: "ski-lesson-premium",
@@ -6,25 +6,26 @@ export const PRODUCT_DATA = {
     price: 150000,
     description: "공인 강사와 함께하는 스키·스노보드 강습. 입문부터 상급까지 레벨에 맞춰 진행합니다.",
     images: {
-        hero: "/images/lessons/hero.png",
-        main: "/assets/mainThumb.png",
+        hero: LESSON_PHOTOS.hero,
+        heroMobile: LESSON_PHOTOS.heroMobile,
+        main: LESSON_PHOTOS.lesson,
         sub: [
-            "/images/lessons/gallery-1.jpg",
-            "/assets/subImage/1.png",
-            "/images/lessons/gallery-6.jpg",
-            "/assets/subImage/2.png",
-            "/images/lessons/gallery-3.jpg",
-            "/assets/subImage/3.png",
-            "/images/lessons/gallery-2.jpg",
-            "/images/lessons/gallery-4.jpg",
+            LESSON_PHOTOS.kids,
+            LESSON_PHOTOS.night,
+            LESSON_PHOTOS.skiKids,
+            LESSON_PHOTOS.carve,
+            LESSON_PHOTOS.liftKid,
+            LESSON_PHOTOS.lift,
+            LESSON_PHOTOS.jump,
+            LESSON_PHOTOS.coach,
         ],
         detail: [
-            "/images/lessons/hero.png",
-            "/assets/subImage/1.png",
-            "/images/lessons/gallery-1.jpg",
-            "/assets/subImage/3.png",
-            "/images/lessons/gallery-6.jpg",
-            "/assets/mainThumb.png",
+            LESSON_PHOTOS.lesson,
+            LESSON_PHOTOS.kids,
+            LESSON_PHOTOS.night,
+            LESSON_PHOTOS.nightLift,
+            LESSON_PHOTOS.carve,
+            LESSON_PHOTOS.jump,
         ],
     },
     options: [
