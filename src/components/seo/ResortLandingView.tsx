@@ -138,7 +138,10 @@ export function ResortLandingView({ landing }: { landing: ResortLanding }) {
             <div className="mt-5">
               <PriceTable />
             </div>
-            <p className="mt-4 text-[16px] leading-7 text-muted">
+          </section>
+          <section className="mt-12">
+            <h2 className="text-[24px] font-bold tracking-tight">얼리버드 규칙</h2>
+            <p className="mt-3 text-[16px] leading-7 text-muted">
               {EARLY_BIRD_COPY}입니다.
             </p>
           </section>

@@ -30,6 +30,17 @@ assert.equal(
   false
 );
 
+assert.deepEqual(
+  RESORT_LANDINGS.map((row) => [row.slug, row.title, row.h1]),
+  [
+    ["high1", "하이원 어린이 스키강습·보드강습 1:1 | 라이드올다이", "하이원 어린이 스키·보드강습"],
+    ["welli-hilli", "웰리힐리 어린이 스키강습·보드강습 1:1 | 라이드올다이", "웰리힐리 어린이 스키·보드강습"],
+    ["vivaldi", "비발디 어린이 스키강습·보드강습 1:1 | 라이드올다이", "비발디파크 어린이 스키·보드강습"],
+    ["jisan", "지산 어린이 스키강습·보드강습 1:1 | 라이드올다이", "지산 어린이 스키·보드강습"],
+    ["yongpyong", "용평 어린이 스키강습·보드강습 1:1 | 라이드올다이", "용평 어린이 스키·보드강습"],
+  ]
+);
+
 const titles = new Set(RESORT_LANDINGS.map((row) => row.title));
 const descriptions = new Set(RESORT_LANDINGS.map((row) => row.description));
 const intros = new Set(RESORT_LANDINGS.map((row) => row.intro.join("\n")));
