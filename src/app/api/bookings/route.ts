@@ -85,6 +85,8 @@ export async function POST(request: NextRequest) {
       reservationId: created.id,
       amount: quote.payableAmount,
       regularAmount: quote.regularAmount,
+      lessonAmount: quote.lessonAmount,
+      badgeFee: quote.badgeFee,
       earlyBird: quote.earlyBird,
       ratio: quote.ratio,
       clientKey: tossClientKey(),

@@ -206,6 +206,9 @@ export function buildNotes(input: BookingInput, quoteAmount?: number): string {
     range,
   ].filter(Boolean);
   if (quoteAmount != null) parts.push(`${quoteAmount.toLocaleString("ko-KR")}원`);
+  if (quote && quote.badgeFee > 0) {
+    parts.push(`패찰비 ${quote.badgeFee.toLocaleString("ko-KR")}원`);
+  }
   if (quote?.earlyBird) parts.push("얼리버드");
   const extra = (input.notes || "").trim();
   if (extra) parts.push(extra);

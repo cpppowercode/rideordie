@@ -10,6 +10,8 @@ type OrderPayload = {
   orderNo: string;
   amount: number;
   amountLabel: string;
+  lessonAmount?: number;
+  badgeFee?: number;
   orderName: string;
   customerName: string;
   lessonDate?: string | null;
@@ -101,6 +103,22 @@ function PayContent() {
               <dt className="text-muted">시간</dt>
               <dd className="font-semibold">{order.lessonTime}</dd>
             </div>
+          )}
+          {order.badgeFee != null && order.badgeFee > 0 && order.lessonAmount != null && (
+            <>
+              <div className="flex justify-between border-b border-line px-5 py-4">
+                <dt className="text-muted">강습비</dt>
+                <dd className="font-semibold" data-testid="pay-lesson-amount">
+                  {order.lessonAmount.toLocaleString('ko-KR')}원
+                </dd>
+              </div>
+              <div className="flex justify-between border-b border-line px-5 py-4">
+                <dt className="text-muted">패찰비</dt>
+                <dd className="font-semibold" data-testid="pay-badge-fee">
+                  {order.badgeFee.toLocaleString('ko-KR')}원
+                </dd>
+              </div>
+            </>
           )}
           <div className="flex justify-between px-5 py-4">
             <dt className="text-muted">결제 금액</dt>

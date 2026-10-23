@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { findReservationByOrderNo } from "@/lib/admin-reservations";
 import { isPaidStatus } from "@/lib/booking";
-import { formatWon, ratioFromParticipants } from "@/lib/pricing";
+import { formatWon, quoteLessonPrice, ratioFromParticipants } from "@/lib/pricing";
 import { tossClientKey, tossCustomerKey, tossIsTestMode } from "@/lib/toss";
 
 export async function GET(request: NextRequest) {
@@ -24,11 +24,20 @@ export async function GET(request: NextRequest) {
     const ratio = ratioFromParticipants(Number(row.participants) || 1);
     const duration = Number(row.lesson_duration_hours) || 2;
     const orderName = `라이드올다이 강습 ${duration}시간${ratio ? ` ${ratio}` : ""}`;
+    const quote = quoteLessonPrice({
+      durationHours: duration,
+      participants: Number(row.participants) || 1,
+      lessonDate: String(row.lesson_date || ""),
+      skiResort: String(row.ski_resort || ""),
+    });
+    const showBadge = Boolean(quote && quote.badgeFee > 0 && quote.payableAmount === amount);
 
     return NextResponse.json({
       orderNo,
       amount,
       amountLabel: formatWon(amount),
+      lessonAmount: showBadge ? quote?.lessonAmount : undefined,
+      badgeFee: showBadge ? quote?.badgeFee : undefined,
       orderName,
       customerName: row.customer_name || "고객",
       lessonDate: row.lesson_date,

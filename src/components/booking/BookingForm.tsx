@@ -112,7 +112,7 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
   const selectedStart = generatedStarts.find((slot) => slot.startHour === startHour) || null;
   const resortLabel = SKI_RESORTS.find((r) => r.value === skiResort)?.label;
   const typeLabel = LESSON_TYPES.find((t) => t.value === lessonType)?.label;
-  const price = quoteLessonPrice({ durationHours, participants, lessonDate });
+  const price = quoteLessonPrice({ durationHours, participants, lessonDate, skiResort });
 
   const slots = useMemo(() => {
     return generatedStarts.map((slot) => {
@@ -529,26 +529,46 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
                 ['인원', `${participants}명 · ${price?.ratio || ''} · 아이 ${childCount}명`],
                 ['요청', notes.trim() || '없음'],
               ].map(([k, v]) => (
-                <div key={k} className="flex items-start justify-between gap-6 border-b border-line px-5 py-4 last:border-0">
+                <div key={k} className="flex items-start justify-between gap-6 border-b border-line px-5 py-4">
                   <dt className="shrink-0 text-[15px] text-muted">{k}</dt>
                   <dd className="text-right text-[16px] font-semibold">{v}</dd>
                 </div>
               ))}
               {price && (
-                <div className="flex items-start justify-between gap-6 px-5 py-4">
-                  <dt className="shrink-0 text-[15px] text-muted">강습비</dt>
-                  <dd className="text-right" data-testid="booking-price">
-                    {price.earlyBird && (
-                      <span className="mr-2 text-[14px] text-muted line-through" data-testid="price-regular">
-                        {formatWon(price.regularAmount)}
+                <>
+                  <div className="flex items-start justify-between gap-6 border-b border-line px-5 py-4">
+                    <dt className="shrink-0 text-[15px] text-muted">강습비</dt>
+                    <dd className="text-right" data-testid="booking-price">
+                      {price.earlyBird && (
+                        <span className="mr-2 text-[14px] text-muted line-through" data-testid="price-regular">
+                          {formatWon(price.regularAmount)}
+                        </span>
+                      )}
+                      <span className="text-[18px] font-bold" data-testid="price-lesson">
+                        {formatWon(price.lessonAmount)}
                       </span>
-                    )}
-                    <span className="text-[18px] font-bold" data-testid="price-payable">{formatWon(price.payableAmount)}</span>
-                    {price.earlyBird && (
-                      <span className="ml-2 text-[13px] font-semibold text-brand" data-testid="price-early-bird">얼리버드</span>
-                    )}
-                  </dd>
-                </div>
+                      {price.earlyBird && (
+                        <span className="ml-2 text-[13px] font-semibold text-brand" data-testid="price-early-bird">
+                          얼리버드
+                        </span>
+                      )}
+                    </dd>
+                  </div>
+                  {price.badgeFee > 0 && (
+                    <div className="flex items-start justify-between gap-6 border-b border-line px-5 py-4">
+                      <dt className="shrink-0 text-[15px] text-muted">패찰비</dt>
+                      <dd className="text-right text-[16px] font-semibold" data-testid="price-badge-fee">
+                        {formatWon(price.badgeFee)}
+                      </dd>
+                    </div>
+                  )}
+                  <div className="flex items-start justify-between gap-6 px-5 py-4">
+                    <dt className="shrink-0 text-[15px] text-muted">결제 금액</dt>
+                    <dd className="text-right text-[18px] font-bold" data-testid="price-payable">
+                      {formatWon(price.payableAmount)}
+                    </dd>
+                  </div>
+                </>
               )}
             </dl>
           </motion.div>
@@ -556,17 +576,26 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
       </AnimatePresence>
 
       {price && (
-        <div className="mt-6 flex items-baseline justify-between rounded-[20px] bg-white px-5 py-4" data-testid="live-price">
-          <p className="text-[14px] font-semibold text-muted">
-            {durationHours}시간 · {price.ratio}
-            {price.earlyBird ? ' · 얼리버드' : ''}
-          </p>
-          <p className="text-right">
-            {price.earlyBird && (
-              <span className="mr-2 text-[13px] text-muted line-through">{formatWon(price.regularAmount)}</span>
-            )}
-            <span className="text-[20px] font-bold">{formatWon(price.payableAmount)}</span>
-          </p>
+        <div className="mt-6 rounded-[20px] bg-white px-5 py-4" data-testid="live-price">
+          <div className="flex items-baseline justify-between">
+            <p className="text-[14px] font-semibold text-muted">
+              {durationHours}시간 · {price.ratio}
+              {price.earlyBird ? ' · 얼리버드' : ''}
+            </p>
+            <p className="text-right">
+              {price.earlyBird && (
+                <span className="mr-2 text-[13px] text-muted line-through">
+                  {formatWon(price.regularAmount + price.badgeFee)}
+                </span>
+              )}
+              <span className="text-[20px] font-bold">{formatWon(price.payableAmount)}</span>
+            </p>
+          </div>
+          {price.badgeFee > 0 && (
+            <p className="mt-1 text-right text-[13px] text-muted" data-testid="live-price-badge">
+              강습비 {formatWon(price.lessonAmount)} + 패찰비 {formatWon(price.badgeFee)}
+            </p>
+          )}
         </div>
       )}
 
