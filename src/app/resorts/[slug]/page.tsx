@@ -7,7 +7,7 @@ import {
   resortServiceJsonLd,
 } from "@/lib/jsonld";
 import { RESORT_LANDINGS, resortCanonical, resortLandingBySlug } from "@/lib/resort-landings";
-import { languageAlternates } from "@/lib/seo";
+import { pageAlternates } from "@/lib/seo";
 import { LESSON_PHOTOS, SITE_URL } from "@/lib/site";
 
 export const dynamicParams = false;
@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: { absolute: landing.title },
     description: landing.description,
     keywords: landing.keywords,
-    alternates: languageAlternates(url),
+    alternates: pageAlternates(url),
     openGraph: {
       title: landing.ogTitle,
       description: landing.description,

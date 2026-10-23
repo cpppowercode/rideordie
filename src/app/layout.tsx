@@ -4,7 +4,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { organizationJsonLd } from "@/lib/jsonld";
-import { DEFAULT_OG_ALT, DEFAULT_OG_IMAGE, languageAlternates } from "@/lib/seo";
+import { DEFAULT_OG_ALT, DEFAULT_OG_IMAGE, pageAlternates } from "@/lib/seo";
 import {
   SITE_URL,
   TEACHING_RESORTS_COPY,
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     "비발디 스키강습 비용",
     "웰리힐리 스키강습 가격",
   ],
-  alternates: languageAlternates(SITE_URL),
+  alternates: pageAlternates(SITE_URL),
   openGraph: {
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,

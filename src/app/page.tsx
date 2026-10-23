@@ -3,7 +3,7 @@ import Image from "next/image";
 import type { Metadata } from "next";
 import { PRODUCT_DATA } from "@/lib/mockData";
 import { INSTAGRAM_URL, SITE_URL, TEACHING_RESORTS_COPY, TEACHING_RESORTS_INLINE } from "@/lib/site";
-import { languageAlternates } from "@/lib/seo";
+import { pageAlternates } from "@/lib/seo";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { TrustBadges } from "@/components/seo/TrustBadges";
 import { KakaoConsultLink } from "@/components/seo/KakaoConsultLink";
@@ -11,7 +11,7 @@ import { faqPageJsonLd } from "@/lib/jsonld";
 import { RESORT_LANDINGS, SITE_FAQ } from "@/lib/resort-landings";
 
 export const metadata: Metadata = {
-  alternates: languageAlternates(SITE_URL),
+  alternates: pageAlternates(SITE_URL),
 };
 
 const STEPS = [

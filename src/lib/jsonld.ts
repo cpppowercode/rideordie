@@ -1,7 +1,6 @@
 import {
   INSTAGRAM_URL,
   KAKAO_CONSULT_URL,
-  NAVER_BLOG_URL,
   SITE_URL,
 } from "@/lib/site";
 import {
@@ -12,18 +11,16 @@ import {
 } from "@/lib/resort-landings";
 
 export const ORGANIZATION_NAME = "라이드올다이";
-export const ORGANIZATION_ALTERNATE_NAME = "Ride or Die";
 export const ORGANIZATION_LOGO = `${SITE_URL}/logo.svg`;
 
 export function organizationJsonLd() {
   return {
     "@context": "https://schema.org",
-    "@type": ["LocalBusiness", "SportsActivityLocation"],
+    "@type": "Organization",
     name: ORGANIZATION_NAME,
-    alternateName: ORGANIZATION_ALTERNATE_NAME,
     url: SITE_URL,
     logo: ORGANIZATION_LOGO,
-    sameAs: [INSTAGRAM_URL, NAVER_BLOG_URL, KAKAO_CONSULT_URL],
+    sameAs: [INSTAGRAM_URL, KAKAO_CONSULT_URL],
   };
 }
 

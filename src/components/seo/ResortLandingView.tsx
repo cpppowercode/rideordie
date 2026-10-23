@@ -130,6 +130,7 @@ export function ResortLandingView({ landing }: { landing: ResortLanding }) {
         ))}
 
         {showPrice ? (
+          <>
           <section className="mt-12">
             <h2 className="text-[24px] font-bold tracking-tight">가격표</h2>
             <p className="mt-3 text-[16px] leading-7 text-muted">
@@ -145,6 +146,7 @@ export function ResortLandingView({ landing }: { landing: ResortLanding }) {
               {EARLY_BIRD_COPY}입니다.
             </p>
           </section>
+          </>
         ) : (
           <section className="mt-12">
             <h2 className="text-[24px] font-bold tracking-tight">강습비</h2>
