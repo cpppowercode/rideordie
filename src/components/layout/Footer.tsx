@@ -1,5 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
+import { Instagram } from "lucide-react";
+import { INSTAGRAM_URL } from "@/lib/site";
 
 export function Footer() {
     return (
@@ -12,6 +14,15 @@ export function Footer() {
                             하이원 리조트 기반 스키·스노보드 강습.<br />
                             스키를 가르치는 게 아니라, 라이딩을 가르칩니다.
                         </p>
+                        <a
+                            href={INSTAGRAM_URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-4 inline-flex items-center gap-2 text-[15px] font-medium text-ink hover:underline"
+                        >
+                            <Instagram className="h-4 w-4" />
+                            @ski.rideordie
+                        </a>
                     </div>
 
                     <div>

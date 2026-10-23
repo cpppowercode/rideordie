@@ -2,31 +2,31 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronRight, MessageCircle, MapPin, CalendarCheck, MountainSnow, Info } from "lucide-react";
-import { CHANNEL_URL, PRODUCT_DATA } from "@/lib/mockData";
+import { ChevronRight, MapPin, CalendarCheck, MountainSnow, Info } from "lucide-react";
+import { PRODUCT_DATA } from "@/lib/mockData";
 import { ProductImageGallery } from "@/components/product/ProductImageGallery";
 import { useRouter } from "next/navigation";
 
 const FACTS = [
-    { icon: MountainSnow, label: "형태", value: "현장 강습 (하이원 리조트)" },
-    { icon: MapPin, label: "장소", value: "하이원 리조트, 강원도" },
-    { icon: CalendarCheck, label: "진행", value: "상담으로 일정·레벨·시간 확정" },
+    { icon: MountainSnow, label: "형태", value: "현장 강습 (선택한 스키장)" },
+    { icon: MapPin, label: "장소", value: "하이원 · 비발디 · 웰리힐리 · 용평 등" },
+    { icon: CalendarCheck, label: "진행", value: "날짜·시간대를 고르면 바로 접수" },
 ];
 
 export default function ProductPage() {
     const router = useRouter();
 
     const handleCheckout = () => {
-        router.push('/checkout');
+        router.push('/book');
     };
 
     const actions = (
         <>
-            <a href={CHANNEL_URL} target="_blank" rel="noopener noreferrer" className="btn-ghost flex-1">
-                <MessageCircle className="h-5 w-5" /> 상담하기
-            </a>
+            <Link href="/book" className="btn-ghost flex-1">
+                강습 안내 후 문의
+            </Link>
             <button onClick={handleCheckout} className="btn-primary flex-1">
-                상담 후 결제
+                예약하기
             </button>
         </>
     );
@@ -44,7 +44,7 @@ export default function ProductPage() {
                     <ProductImageGallery />
 
                     <div className="flex flex-col">
-                        <p className="eyebrow">하이원 리조트</p>
+                        <p className="eyebrow">스키·보드 강습</p>
                         <h1 className="mt-2 text-3xl font-bold leading-tight md:text-4xl">{PRODUCT_DATA.title}</h1>
                         <p className="mt-4 text-lg leading-relaxed text-muted">{PRODUCT_DATA.description}</p>
 
@@ -79,9 +79,9 @@ export default function ProductPage() {
                         <div className="mt-8 flex gap-3 rounded-lg bg-ice p-5">
                             <Info className="mt-0.5 h-5 w-5 shrink-0 text-brand" />
                             <div>
-                                <p className="font-bold">상담 후에만 결제됩니다</p>
+                                <p className="font-bold">날짜와 시간을 고르면 바로 접수됩니다</p>
                                 <p className="mt-1 text-[15px] leading-relaxed text-ink/75">
-                                    일정과 레벨을 채널톡에서 확인한 뒤에만 결제가 가능합니다. 상담 없이 결제하면 환불이 어려울 수 있습니다.
+                                    마감된 시간대는 선택할 수 없습니다. 접수 후 사장님이 확인 전화를 드립니다.
                                 </p>
                             </div>
                         </div>
@@ -95,17 +95,18 @@ export default function ProductPage() {
                         <div className="border-b-2 border-ink py-4 font-bold">상세정보</div>
                     </div>
 
-                    <div className="mb-12 flex justify-center overflow-hidden rounded-xl bg-snow">
-                        <div className="w-full max-w-3xl">
-                            <Image
-                                src={PRODUCT_DATA.images.detail}
-                                alt="강습 상세"
-                                width={1200}
-                                height={5000}
-                                className="h-auto w-full"
-                                unoptimized
-                            />
-                        </div>
+                    <div className="mb-12 grid gap-3 sm:grid-cols-2">
+                        {PRODUCT_DATA.images.detail.map((src, i) => (
+                            <div key={src} className="relative aspect-[4/5] overflow-hidden rounded-xl bg-snow sm:aspect-[3/4]">
+                                <Image
+                                    src={src}
+                                    alt={`강습 상세 ${i + 1}`}
+                                    fill
+                                    sizes="(min-width: 640px) 50vw, 100vw"
+                                    className="object-cover"
+                                />
+                            </div>
+                        ))}
                     </div>
 
                     <div className="rounded-xl bg-snow p-8 text-[17px] leading-relaxed text-muted">

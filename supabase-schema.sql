@@ -63,3 +63,16 @@ CREATE POLICY "Users can view their own orders"
   FOR SELECT
   TO anon
   USING (customer_email = current_setting('request.jwt.claims', true)::json->>'email');
+
+-- ---------------------------------------------------------------------------
+-- 강습 예약은 이 파일의 orders 테이블이 아니라,
+-- admin.rideordie.kr 이 쓰는 공유 Supabase 테이블 `payments` 에 저장합니다.
+-- (관리자 UI 경로: /lesson-reservations, 메뉴명 「강습예약」)
+-- 운영 DB에는 이미 테이블이 있으므로 마이그레이션을 다시 실행하지 마세요.
+--
+-- 고객 사이트가 쓰는 컬럼:
+--   customer_name, customer_phone, lesson_type, ski_resort, lesson_date,
+--   lesson_start_hour, lesson_duration_hours, participants, insurance_count,
+--   amount, payment_method, order_no, notes, instructor_id,
+--   payment_status, reservation_status, tenant_id, created_at
+-- ---------------------------------------------------------------------------

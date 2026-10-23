@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:booking": "npx tsx src/lib/booking.test.ts"
   },
   "dependencies": {
     "@react-spring/parallax": "^10.0.1",

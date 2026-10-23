@@ -16,6 +16,8 @@ export function ProductImageGallery() {
                     src={selectedImage}
                     alt="Product Main"
                     fill
+                    sizes="(min-width: 1024px) 50vw, 100vw"
+                    quality={85}
                     className="object-cover"
                     priority
                 />
@@ -30,7 +32,7 @@ export function ProductImageGallery() {
                         selectedImage === PRODUCT_DATA.images.main ? "border-brand" : "border-transparent hover:border-line"
                     )}
                 >
-                    <Image src={PRODUCT_DATA.images.main} alt="Main Thumb" fill className="object-cover" />
+                    <Image src={PRODUCT_DATA.images.main} alt="Main Thumb" fill sizes="80px" className="object-cover" />
                 </button>
 
                 {PRODUCT_DATA.images.sub.map((img, idx) => (
@@ -42,7 +44,7 @@ export function ProductImageGallery() {
                             selectedImage === img ? "border-brand" : "border-transparent hover:border-line"
                         )}
                     >
-                        <Image src={img} alt={`Sub Thumb ${idx}`} fill className="object-cover" />
+                        <Image src={img} alt={`Sub Thumb ${idx}`} fill sizes="80px" className="object-cover" />
                     </button>
                 ))}
             </div>

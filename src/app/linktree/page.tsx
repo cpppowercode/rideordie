@@ -69,14 +69,14 @@ export default function HomePage() {
                   <div className="px-0">
                     <div className="px-5">
                       <Link 
-                        href="http://rideordie.channel.io/" 
+                        href="/book" 
                         className="block h-full cursor-pointer overflow-hidden rounded-[14px] bg-white shadow-[0_2px_8px_0_rgba(23,29,46,0.08)]"
                       >
                         <div className="flex w-full rounded-[14px] bg-white">
                           <div className="relative flex flex-1 flex-col">
                             <Image
                               src="https://cdn.litt.ly/images/goBXLW1O6VPxaS5QtvkszjKyVToUZ5vK?s=600x100&m=outside&f=webp"
-                              alt="맞춤 상담 받기"
+                              alt="강습 예약하기"
                               width={600}
                               height={100}
                               className="w-full h-auto"
@@ -85,7 +85,7 @@ export default function HomePage() {
                               <div className="relative flex flex-col items-center space-y-1.5 p-5">
                                 <div className="flex items-center justify-center">
                                   <h2 className="flex-1 whitespace-pre-wrap break-all text-center text-base font-semibold">
-                                    맞춤 상담 받기 💁
+                                    강습 예약하기 ⛷️
                                   </h2>
                                 </div>
                               </div>
@@ -199,7 +199,7 @@ export default function HomePage() {
                           </div>
                         </Link>
                         <Link 
-                          href="https://www.instagram.com/rideordie.ski/" 
+                          href="https://www.instagram.com/ski.rideordie/" 
                           target="_blank" 
                           rel="noopener"
                           className="cursor-pointer"

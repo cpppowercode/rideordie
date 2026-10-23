@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { MessageCircle, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 
 interface PaymentInfo {
     orderId: string;
@@ -83,27 +83,14 @@ function SuccessContent() {
                 <p>결제금액: <span className="font-semibold text-black">{orderInfo?.totalAmount?.toLocaleString()}원</span></p>
             </div>
 
-            {/* 채널톡 안내 */}
             <div className="bg-ice p-6 rounded-xl text-left mb-8 max-w-md">
-                <div className="flex items-start gap-3 mb-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-brand rounded-full flex items-center justify-center text-white font-bold text-xl">
-                        <MessageCircle className="h-6 w-6" />
-                    </div>
-                    <div className="flex-1">
-                        <h3 className="font-bold text-ink mb-2">다음 단계</h3>
-                        <p className="text-sm text-ink/75">
-                            상담에서 확정한 일정으로 강습을 진행합니다. 변경이 필요하면 채널톡으로 연락해 주세요.
-                        </p>
-                    </div>
-                </div>
-                <a
-                    href="https://rideordie.channel.io/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-primary w-full"
-                >
-                    지금 바로 상담하기
-                </a>
+                <h3 className="font-bold text-ink mb-2">다음 단계</h3>
+                <p className="text-sm text-ink/75">
+                    예약한 일정으로 강습을 진행합니다. 변경이 필요하면 고객센터(010-2028-2744)로 연락해 주세요.
+                </p>
+                <Link href="/book" className="btn-primary mt-4 w-full">
+                    예약 내역 확인하러 가기
+                </Link>
             </div>
 
             <Link href="/" className="btn-dark">
