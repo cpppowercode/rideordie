@@ -4,7 +4,9 @@ import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
-import { TossCheckout } from './TossCheckout';
+import { KakaoConsultLink } from '@/components/seo/KakaoConsultLink';
+import { EXTRAS_COPY } from '@/lib/kcp-public';
+import { KcpCheckout } from './KcpCheckout';
 
 type OrderPayload = {
   orderNo: string;
@@ -14,12 +16,11 @@ type OrderPayload = {
   badgeFee?: number;
   orderName: string;
   customerName: string;
+  customerPhone?: string;
   lessonDate?: string | null;
   lessonTime?: string | null;
   skiResort?: string | null;
   alreadyPaid: boolean;
-  clientKey: string;
-  customerKey: string;
   testMode: boolean;
   error?: string;
 };
@@ -36,7 +37,7 @@ function PayContent() {
       return;
     }
     let cancelled = false;
-    fetch(`/api/payments/toss/order?orderNo=${encodeURIComponent(orderNo)}`)
+    fetch(`/api/payments/kcp/order?orderNo=${encodeURIComponent(orderNo)}`)
       .then(async (res) => {
         const data = (await res.json()) as OrderPayload;
         if (!res.ok) throw new Error(data.error || '결제 정보를 불러오지 못했습니다.');
@@ -55,7 +56,9 @@ function PayContent() {
       <div className="mx-auto max-w-lg px-5 py-16 text-center" data-testid="pay-error">
         <h1 className="text-[28px] font-bold">결제를 진행할 수 없습니다</h1>
         <p className="mt-3 text-muted">{error}</p>
-        <Link href="/book" className="btn-primary mt-8 inline-flex min-h-14 px-8">다시 예약하기</Link>
+        <p className="mt-2 text-[15px] text-muted">{EXTRAS_COPY}</p>
+        <KakaoConsultLink className="btn-ghost mt-6 inline-flex min-h-14 px-8">카톡 상담</KakaoConsultLink>
+        <Link href="/book" className="btn-primary mt-3 inline-flex min-h-14 px-8">다시 예약하기</Link>
       </div>
     );
   }
@@ -72,7 +75,7 @@ function PayContent() {
     return (
       <div className="mx-auto max-w-lg px-5 py-16 text-center" data-testid="pay-already">
         <h1 className="text-[28px] font-bold">이미 결제가 완료됐습니다</h1>
-        <Link href={`/book/success?orderNo=${encodeURIComponent(order.orderNo)}`} className="btn-primary mt-8 inline-flex min-h-14 px-8">
+        <Link href={`/book/pay/success?orderId=${encodeURIComponent(order.orderNo)}&amount=${order.amount}`} className="btn-primary mt-8 inline-flex min-h-14 px-8">
           예약 확인
         </Link>
       </div>
@@ -126,13 +129,12 @@ function PayContent() {
           </div>
         </dl>
         <div className="mt-6">
-          <TossCheckout
-            clientKey={order.clientKey}
-            customerKey={order.customerKey}
+          <KcpCheckout
             orderNo={order.orderNo}
             orderName={order.orderName}
             amount={order.amount}
             customerName={order.customerName}
+            customerPhone={order.customerPhone || ''}
             testMode={order.testMode}
           />
         </div>

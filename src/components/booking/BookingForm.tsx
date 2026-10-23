@@ -545,7 +545,7 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
             data-testid="step-confirm"
           >
             <h2 className="text-[22px] font-bold tracking-tight">이 내용으로 결제할까요?</h2>
-            <p className="mt-2 text-[15px] text-muted">결제가 끝나야 예약이 확정됩니다.</p>
+            <p className="mt-2 text-[15px] text-muted">결제가 끝나야 예약이 확정됩니다. 장비·리프트·숙소는 별도입니다.</p>
             <dl className="mt-6 overflow-hidden rounded-[24px] bg-white shadow-[0_8px_30px_rgba(25,31,40,0.04)]" data-testid="booking-summary">
               {[
                 ['날짜', lessonDate],
@@ -634,6 +634,9 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
               강습비 {formatWon(price.lessonAmount)} + 패찰비 {formatWon(price.badgeFee)}
             </p>
           )}
+          <p className="mt-2 text-[13px] text-muted" data-testid="booking-extras">
+            장비·리프트·숙소는 별도입니다.
+          </p>
         </div>
       )}
 

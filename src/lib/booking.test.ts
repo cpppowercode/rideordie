@@ -24,6 +24,7 @@ import {
   RESORT_HOURS,
 } from "./hours";
 import { quoteLessonPrice } from "./pricing";
+import { EXTRAS_COPY, kcpSiteCd } from "./kcp-public";
 import { SKI_RESORTS } from "./site";
 
 function sample(overrides: Partial<BookingInput> = {}): BookingInput {
@@ -74,8 +75,10 @@ assert.equal(payload.lesson_duration_hours, 2);
 assert.equal(payload.lesson_time, "09:00~11:00");
 assert.equal(payload.payment_status, "pending");
 assert.equal(payload.reservation_status, "pending");
-assert.equal(payload.payment_method, "app");
+assert.equal(payload.payment_method, "kcp");
 assert.equal(payload.amount, 170_000);
+assert.equal(EXTRAS_COPY, "장비·리프트·숙소는 별도입니다.");
+assert.equal(kcpSiteCd(), "T0000");
 assert.doesNotMatch(payload.notes, /패찰비/);
 assert.match(validateBookingInput(sample({ participants: 4 })) || "", /인원/);
 

@@ -12,7 +12,7 @@ import { GROOMING_BOOKING_ERROR, slotOverlapsGrooming } from "@/lib/grooming";
 import { findLessonStart, isLessonDuration, normalizeHalfHour } from "@/lib/hours";
 import { loadAdminBadgeRates } from "@/lib/admin-badge-fees";
 import { quoteLessonPrice } from "@/lib/pricing";
-import { tossClientKey, tossCustomerKey, tossIsTestMode } from "@/lib/toss";
+import { isKcpProduction, kcpSiteCd } from "@/lib/kcp-public";
 
 export async function POST(request: NextRequest) {
   try {
@@ -96,9 +96,8 @@ export async function POST(request: NextRequest) {
       earlyBird: quote.earlyBird,
       earlyBirdReason: quote.earlyBirdReasonLabel,
       ratio: quote.ratio,
-      clientKey: tossClientKey(),
-      customerKey: tossCustomerKey(orderNo),
-      testMode: tossIsTestMode(),
+      siteCd: kcpSiteCd(),
+      testMode: !isKcpProduction(),
       payPath: `/book/pay?orderNo=${encodeURIComponent(orderNo)}`,
     });
   } catch (error) {

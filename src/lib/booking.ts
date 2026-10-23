@@ -259,7 +259,7 @@ export function toAdminPayload(
     participants: input.participants,
     insurance_count: 0,
     amount: quote.payableAmount,
-    payment_method: "app",
+    payment_method: "kcp",
     order_no: orderNo,
     notes: buildNotes(input, quote.payableAmount, rates),
     instructor_id: null,

@@ -139,7 +139,7 @@ test.describe("desktop booking", () => {
     expect(row.reservation_status).toBe("pending");
     expect(row.payment_status).toBe("pending");
     expect(Number(row.amount)).toBe(140000);
-    expect(row.payment_method === "app" || row.payment_method === "toss" || !row.payment_method).toBeTruthy();
+    expect(row.payment_method === "kcp" || row.payment_method === "app" || !row.payment_method).toBeTruthy();
     expect(String(row.order_no)).toMatch(/^WEB_/);
     if (row.id) {
       const state = readState();

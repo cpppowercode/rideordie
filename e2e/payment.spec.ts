@@ -50,8 +50,8 @@ async function cleanupOrder(request: { fetch: Page["request"]["fetch"] }, id: st
   return { method: put.ok() ? ("cancel" as const) : ("failed" as const), status: put.status() };
 }
 
-test.describe("toss payment", () => {
-  test("shows live price, creates pending amount, toss widget, wrong-amount confirm rejected", async ({
+test.describe("kcp payment", () => {
+  test("shows live price, creates pending amount, KCP checkout, fake confirm rejected", async ({
     page,
     request,
   }, testInfo) => {
@@ -66,6 +66,7 @@ test.describe("toss payment", () => {
     await expect(page.getByTestId("live-price")).toContainText("1:1");
     await expect(page.getByTestId("live-price")).toContainText("140,000원");
     await expect(page.getByTestId("live-price")).toContainText("150,000원");
+    await expect(page.getByTestId("booking-extras")).toContainText("장비·리프트·숙소는 별도입니다");
     await shot(page, "booking_live_price");
 
     const start = page.getByTestId("start-09:00");
@@ -80,6 +81,8 @@ test.describe("toss payment", () => {
     await expect(page.getByTestId("price-payable")).toContainText("140,000원");
     await expect(page.getByTestId("price-regular")).toContainText("150,000원");
     await expect(page.getByTestId("price-early-bird")).toBeVisible();
+    await expect(page.getByTestId("step-confirm")).toContainText("장비·리프트·숙소는 별도입니다");
+    await expect(page.locator("a[href^='tel:']")).toHaveCount(0);
     await shot(page, "booking_confirm_price");
 
     if (process.env.E2E_LIVE_ADMIN !== "1") {
@@ -94,20 +97,25 @@ test.describe("toss payment", () => {
     const body = await apiRes.json();
     expect(apiRes.ok(), JSON.stringify(body)).toBeTruthy();
     expect(Number(body.amount)).toBe(140000);
+    expect(body.testMode).toBeTruthy();
 
     await expect(page.getByTestId("book-pay")).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByTestId("toss-test-mode")).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByTestId("toss-pay")).toBeEnabled({ timeout: 30_000 });
-    await shot(page, "toss_widget_ready");
+    await expect(page.getByTestId("kcp-test-mode")).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByTestId("kcp-pay")).toBeEnabled({ timeout: 10_000 });
+    await expect(page.getByTestId("pay-extras")).toContainText("장비·리프트·숙소는 별도입니다");
+    await expect(page.locator("a[href^='tel:']")).toHaveCount(0);
+    await expect(page.getByText("서울 서대문구")).toHaveCount(0);
+    await shot(page, "kcp_checkout_ready");
 
-    const bad = await request.post("/api/payments/toss/confirm", {
+    const bad = await request.post("/api/payments/confirm", {
       data: {
-        paymentKey: "fake_payment_key",
+        enc_data: "fake",
+        enc_info: "fake",
+        tran_cd: "fake",
         orderId: body.orderNo,
-        amount: 1,
       },
     });
-    expect(bad.status()).toBe(409);
+    expect(bad.ok()).toBeFalsy();
 
     const adminRes = await request.get(
       `${ADMIN_URL}?tenantId=rideordie&searchQuery=${encodeURIComponent(body.orderNo)}&showAllLessons=true&limit=20`,
@@ -118,16 +126,33 @@ test.describe("toss payment", () => {
     expect(row, `admin row missing for ${body.orderNo}`).toBeTruthy();
     expect(Number(row.amount)).toBe(140000);
     expect(row.payment_status).toBe("pending");
+    expect(row.reservation_status).toBe("pending");
 
     let paid = false;
     try {
-      await page.getByTestId("toss-pay").click();
-      const tossFrame = page.frameLocator("iframe").first();
-      await tossFrame.locator("body").waitFor({ timeout: 15_000 });
-      await shot(page, "toss_payment_window");
+      const popupPromise = page.waitForEvent("popup", { timeout: 15_000 }).catch(() => null);
+      await page.getByTestId("kcp-pay").click();
+      const popup = await popupPromise;
+      if (popup) {
+        await popup.waitForLoadState("domcontentloaded", { timeout: 15_000 }).catch(() => undefined);
+        await shot(popup, "kcp_payment_window");
+        await popup.close().catch(() => undefined);
+      } else {
+        await page.waitForTimeout(2000);
+        await shot(page, "kcp_payment_window");
+      }
     } catch {
-      await shot(page, "toss_payment_window_skipped");
+      await shot(page, "kcp_payment_window_skipped");
     }
+
+    const afterFail = await request.get(
+      `${ADMIN_URL}?tenantId=rideordie&searchQuery=${encodeURIComponent(body.orderNo)}&showAllLessons=true&limit=20`,
+      { headers: { "X-Tenant-Id": "rideordie" } }
+    );
+    const afterBody = await afterFail.json();
+    const afterRow = (afterBody.data || []).find((item: { order_no?: string }) => item.order_no === body.orderNo);
+    expect(afterRow.payment_status).toBe("pending");
+    expect(afterRow.reservation_status).toBe("pending");
 
     const cleanup = await cleanupOrder(request, row.id);
     expect(cleanup.method === "delete" || cleanup.method === "cancel").toBeTruthy();

@@ -4,6 +4,8 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
+import { KakaoConsultLink } from '@/components/seo/KakaoConsultLink';
+import { EXTRAS_COPY } from '@/lib/kcp-public';
 
 function FailContent() {
   const params = useSearchParams();
@@ -21,6 +23,7 @@ function FailContent() {
           {code ? ` (${code})` : ''}
           {' '}강습비 결제가 끝나야 예약이 확정됩니다.
         </p>
+        <p className="mt-2 text-[15px] text-muted">{EXTRAS_COPY}</p>
         <div className="mt-8 flex flex-col gap-3">
           {orderId && (
             <Link
@@ -31,6 +34,7 @@ function FailContent() {
               다시 결제하기
             </Link>
           )}
+          <KakaoConsultLink className="btn-ghost min-h-14">카톡 상담</KakaoConsultLink>
           <Link href="/book" className="btn-ghost min-h-14">예약 다시 하기</Link>
         </div>
       </div>

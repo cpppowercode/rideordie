@@ -16,7 +16,6 @@
   "dependencies": {
     "@react-spring/parallax": "^10.0.1",
     "@supabase/supabase-js": "^2.95.3",
-    "@tosspayments/tosspayments-sdk": "^2.10.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.0",
     "iconv-lite": "^0.7.3",
