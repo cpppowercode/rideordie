@@ -23,7 +23,7 @@ export default async function BookPage({
         <p className="eyebrow">라이드올다이</p>
         <h1 className="mt-2 text-[32px] font-bold tracking-tight md:text-[40px]">강습 예약</h1>
         <p className="mt-3 max-w-xl text-[16px] leading-7 text-muted">
-          강습 시간과 시작 시간을 고르고 연락처만 남기면 끝나요. 예약은 바로 접수되고, 확인 후 연락드립니다.
+          강습 시간과 시작 시간을 고른 뒤 강습비를 결제하면 예약이 확정됩니다. 장비·리프트·숙소는 별도입니다.
         </p>
         <div className="mt-10">
           <BookingForm initialResort={initialResort} />

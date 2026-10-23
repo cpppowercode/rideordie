@@ -109,19 +109,17 @@ test.describe("desktop booking", () => {
     expect(apiRes.ok(), JSON.stringify(body)).toBeTruthy();
     expect(body.success).toBeTruthy();
     expect(String(body.orderNo)).toMatch(/^WEB_/);
-    expect(Array.isArray(body.noticeSkipped)).toBeTruthy();
+    expect(Number(body.amount)).toBe(140000);
 
     writeState({
       orderNo: body.orderNo,
       reservationId: body.reservationId,
-      noticeSent: body.noticeSent,
-      noticeSkipped: body.noticeSkipped,
-      noticeFailed: body.noticeFailed,
     });
 
-    await expect(page.getByTestId("booking-success")).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByTestId("success-order-no")).toHaveText(body.orderNo);
-    await shot(page, "booking_confirmation_desktop");
+    await expect(page.getByTestId("book-pay")).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByTestId("pay-order-no")).toHaveText(body.orderNo);
+    await expect(page.getByTestId("pay-amount")).toContainText("140,000");
+    await shot(page, "booking_pay_desktop");
 
     const adminRes = await request.get(
       `${ADMIN_URL}?tenantId=rideordie&dateFrom=${LESSON_DATE}&dateTo=${LESSON_DATE}&showAllLessons=true&limit=50`,
@@ -140,6 +138,8 @@ test.describe("desktop booking", () => {
     expect(String(row.notes || "")).toMatch(/09:00~11:00/);
     expect(row.reservation_status).toBe("pending");
     expect(row.payment_status).toBe("pending");
+    expect(Number(row.amount)).toBe(140000);
+    expect(row.payment_method === "app" || row.payment_method === "toss" || !row.payment_method).toBeTruthy();
     expect(String(row.order_no)).toMatch(/^WEB_/);
     if (row.id) {
       const state = readState();
@@ -215,11 +215,11 @@ test.describe("desktop booking", () => {
       cleanup.method = "failed";
       cleanup.error = error instanceof Error ? error.message : String(error);
     }
-    writeState({ ...readState(), ...cleanup, noticeSent: body.noticeSent, noticeSkipped: body.noticeSkipped });
+    writeState({ ...readState(), ...cleanup });
     ensureDir(ARTIFACT_DIR);
     fs.writeFileSync(
       path.join(ARTIFACT_DIR, "e2e_admin_result.json"),
-      JSON.stringify({ booking: body, adminRow: row, cleanup, noticeSkipped: body.noticeSkipped, noticeSent: body.noticeSent, noticeFailed: body.noticeFailed }, null, 2)
+      JSON.stringify({ booking: body, adminRow: row, cleanup }, null, 2)
     );
   });
 });
@@ -245,14 +245,7 @@ test.describe("mobile layout", () => {
 
     await page.getByTestId("booking-next").click();
     await expect(page.getByTestId("step-confirm")).toBeVisible();
+    await expect(page.getByTestId("price-payable")).toBeVisible();
     await shot(page, "booking_step3_mobile");
-
-    const state = readState();
-    const successUrl = state.orderNo
-      ? `/book/success?orderNo=${encodeURIComponent(state.orderNo)}&date=${LESSON_DATE}&resort=${encodeURIComponent(SKI_RESORT)}&time=${encodeURIComponent(TIME_LABEL)}&name=${encodeURIComponent(TEST_NAME)}&people=1`
-      : "/book/success?orderNo=WEB_PREVIEW&date=2027-01-24&resort=하이원리조트";
-    await page.goto(successUrl);
-    await expect(page.getByTestId("booking-success")).toBeVisible();
-    await shot(page, "booking_confirmation_mobile");
   });
 });

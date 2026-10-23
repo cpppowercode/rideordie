@@ -70,7 +70,12 @@ SOLAPI_TO=
 SOLAPI_KAKAO_PFID=
 SOLAPI_KAKAO_TEMPLATE_ID=
 
-# 결제 (기존)
+# 토스페이먼츠 주문서형 위젯 (예약 확정 결제)
+# 사장님이 반드시 넣을 값. test_gck_/test_gsk_ 또는 live_gck_/live_gsk_
+NEXT_PUBLIC_TOSS_CLIENT_KEY=test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm
+TOSS_SECRET_KEY=test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6
+
+# 결제 (기존 KCP 체크아웃. /book 결제와 별개)
 NEXT_PUBLIC_KCP_SITE_CD=
 NEXT_PUBLIC_KCP_SITE_NAME=라이드올다이
 NEXT_PUBLIC_KCP_ENV=test
@@ -88,7 +93,9 @@ KCP_CERT_INFO=
 - 관리자 코드는 이 레포에 없습니다. Vercel 프로젝트 이름은 `admin` 입니다. GitHub 후보는 `cpppowercode/ski` 였으나 이 토큰으로는 private 레포에 접근하지 못했습니다.
 - 새 마이그레이션을 이 DB에 적용할 필요는 없습니다. 이미 있는 `payments` 행 형식에 맞춰 씁니다.
 
-저장 필드: `customer_name`, `customer_phone`, `lesson_type`, `ski_resort`, `lesson_date`, `lesson_start_hour`, `lesson_duration_hours`, `lesson_time`(예: `10:00~13:00`), `participants`, `notes`(강습 시간과 구간 포함), `order_no`, `amount`, `payment_method=etc`, `payment_status=pending`, `reservation_status=pending`, `tenant_id=rideordie`.
+저장 필드: `customer_name`, `customer_phone`, `lesson_type`, `ski_resort`, `lesson_date`, `lesson_start_hour`, `lesson_duration_hours`, `lesson_time`(예: `10:00~13:00`), `participants`, `notes`(강습 시간과 구간 포함), `order_no`, `amount`(서버가 계산한 강습비), `payment_method=app`(관리자 화면의 토스), `payment_status=pending` → 결제 후 `completed`, `reservation_status=pending` → 결제 후 `confirmed`, `tenant_id=rideordie`.
+
+강습비는 `src/lib/pricing.ts` 한 파일에서 관리합니다. 얼리버드 규칙은 `EARLY_BIRD_RULE` (`untilDate` 또는 `daysBeforeLesson`)이며 TODO-owner-confirm 표시가 있습니다.
 
 시작 시간은 스키장 영업시간 안에서 30분 단위로 만들고, `src/lib/grooming.ts` 정설 구간과 겹치거나 영업 종료를 넘는 시간은 숨깁니다.
 

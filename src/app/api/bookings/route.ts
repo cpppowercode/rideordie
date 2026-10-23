@@ -9,8 +9,9 @@ import {
   type BookingInput,
 } from "@/lib/booking";
 import { GROOMING_BOOKING_ERROR, slotOverlapsGrooming } from "@/lib/grooming";
-import { findLessonStart, formatLessonRange, isLessonDuration, normalizeHalfHour } from "@/lib/hours";
-import { notifyOwner } from "@/lib/notify";
+import { findLessonStart, isLessonDuration, normalizeHalfHour } from "@/lib/hours";
+import { quoteLessonPrice } from "@/lib/pricing";
+import { tossClientKey, tossCustomerKey, tossIsTestMode } from "@/lib/toss";
 
 export async function POST(request: NextRequest) {
   try {
@@ -69,30 +70,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const quote = quoteLessonPrice(input);
+    if (!quote) {
+      return NextResponse.json({ error: "강습 요금을 계산할 수 없습니다." }, { status: 400 });
+    }
+
     const orderNo = buildOrderNo();
     const payload = toAdminPayload({ ...input, startHour: start, durationHours: duration }, orderNo);
     const created = await createAdminReservation(payload);
-
-    const notice = await notifyOwner({
-      orderNo,
-      customerName: input.customerName.trim(),
-      customerPhone: payload.customer_phone,
-      skiResort: input.skiResort,
-      lessonType: input.lessonType,
-      lessonDate: input.lessonDate,
-      timeLabel: formatLessonRange(start, duration),
-      participants: input.participants,
-      childCount: input.childCount,
-      notes: payload.notes,
-    });
 
     return NextResponse.json({
       success: true,
       orderNo,
       reservationId: created.id,
-      noticeSent: notice.sent,
-      noticeSkipped: notice.skipped,
-      noticeFailed: notice.failed,
+      amount: quote.payableAmount,
+      regularAmount: quote.regularAmount,
+      earlyBird: quote.earlyBird,
+      ratio: quote.ratio,
+      clientKey: tossClientKey(),
+      customerKey: tossCustomerKey(orderNo),
+      testMode: tossIsTestMode(),
+      payPath: `/book/pay?orderNo=${encodeURIComponent(orderNo)}`,
     });
   } catch (error) {
     console.error("booking create error", error);

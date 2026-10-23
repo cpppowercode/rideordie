@@ -7,13 +7,15 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "npx tsx src/lib/booking.test.ts && npx tsx src/lib/resort-landings.test.ts",
+    "test": "npx tsx src/lib/booking.test.ts && npx tsx src/lib/pricing.test.ts && npx tsx src/lib/admin-badge-fees.test.ts && npx tsx src/lib/resort-landings.test.ts",
     "test:booking": "npx tsx src/lib/booking.test.ts",
+    "test:pricing": "npx tsx src/lib/pricing.test.ts",
     "test:e2e": "playwright test"
   },
   "dependencies": {
     "@react-spring/parallax": "^10.0.1",
     "@supabase/supabase-js": "^2.95.3",
+    "@tosspayments/tosspayments-sdk": "^2.10.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.0",
     "iconv-lite": "^0.7.3",

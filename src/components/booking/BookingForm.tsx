@@ -11,6 +11,7 @@ import {
   LESSON_DURATIONS,
   type LessonDurationHours,
 } from '@/lib/hours';
+import { formatWon, MAX_PARTICIPANTS_PER_INSTRUCTOR, quoteLessonPrice } from '@/lib/pricing';
 
 type Step = 1 | 2 | 3;
 
@@ -95,7 +96,7 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [participants, setParticipants] = useState(1);
-  const [childCount, setChildCount] = useState(1);
+  const [childCount, setChildCount] = useState(0);
   const [notes, setNotes] = useState('');
   const [liveSlots, setLiveSlots] = useState<SlotAvailability[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
@@ -111,6 +112,7 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
   const selectedStart = generatedStarts.find((slot) => slot.startHour === startHour) || null;
   const resortLabel = SKI_RESORTS.find((r) => r.value === skiResort)?.label;
   const typeLabel = LESSON_TYPES.find((t) => t.value === lessonType)?.label;
+  const price = quoteLessonPrice({ durationHours, participants, lessonDate });
 
   const slots = useMemo(() => {
     return generatedStarts.map((slot) => {
@@ -230,15 +232,7 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
       if (!res.ok || !data.success) {
         throw new Error(data.error || '예약 접수에 실패했습니다.');
       }
-      const params = new URLSearchParams({
-        orderNo: data.orderNo,
-        date: lessonDate,
-        resort: skiResort,
-        time: selectedStart?.timeLabel || '',
-        name: customerName.trim(),
-        people: String(participants),
-      });
-      router.push(`/book/success?${params.toString()}`);
+      router.push(data.payPath || `/book/pay?orderNo=${encodeURIComponent(data.orderNo)}`);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : '예약 접수에 실패했습니다.');
       setSubmitting(false);
@@ -469,8 +463,8 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
             </label>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <span className="mb-2 block text-[14px] font-semibold text-muted">총 인원</span>
-                <Stepper value={participants} min={1} max={8} onChange={(n) => {
+                <span className="mb-2 block text-[14px] font-semibold text-muted">총 인원 (강사 1명당 최대 {MAX_PARTICIPANTS_PER_INSTRUCTOR}명)</span>
+                <Stepper value={participants} min={1} max={MAX_PARTICIPANTS_PER_INSTRUCTOR} onChange={(n) => {
                   setParticipants(n);
                   if (childCount > n) setChildCount(n);
                 }} testId="input-participants" />
@@ -521,8 +515,8 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
             transition={{ duration: 0.22 }}
             data-testid="step-confirm"
           >
-            <h2 className="text-[22px] font-bold tracking-tight">이 내용으로 예약할까요?</h2>
-            <p className="mt-2 text-[15px] text-muted">접수 후 사장님이 확인 전화를 드립니다. 강습비는 별도입니다.</p>
+            <h2 className="text-[22px] font-bold tracking-tight">이 내용으로 결제할까요?</h2>
+            <p className="mt-2 text-[15px] text-muted">결제가 끝나야 예약이 확정됩니다.</p>
             <dl className="mt-6 overflow-hidden rounded-[24px] bg-white shadow-[0_8px_30px_rgba(25,31,40,0.04)]" data-testid="booking-summary">
               {[
                 ['날짜', lessonDate],
@@ -532,7 +526,7 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
                 ['종목', typeLabel],
                 ['이름', customerName.trim()],
                 ['연락처', customerPhone],
-                ['인원', `${participants}명 · 아이 ${childCount}명`],
+                ['인원', `${participants}명 · ${price?.ratio || ''} · 아이 ${childCount}명`],
                 ['요청', notes.trim() || '없음'],
               ].map(([k, v]) => (
                 <div key={k} className="flex items-start justify-between gap-6 border-b border-line px-5 py-4 last:border-0">
@@ -540,10 +534,41 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
                   <dd className="text-right text-[16px] font-semibold">{v}</dd>
                 </div>
               ))}
+              {price && (
+                <div className="flex items-start justify-between gap-6 px-5 py-4">
+                  <dt className="shrink-0 text-[15px] text-muted">강습비</dt>
+                  <dd className="text-right" data-testid="booking-price">
+                    {price.earlyBird && (
+                      <span className="mr-2 text-[14px] text-muted line-through" data-testid="price-regular">
+                        {formatWon(price.regularAmount)}
+                      </span>
+                    )}
+                    <span className="text-[18px] font-bold" data-testid="price-payable">{formatWon(price.payableAmount)}</span>
+                    {price.earlyBird && (
+                      <span className="ml-2 text-[13px] font-semibold text-brand" data-testid="price-early-bird">얼리버드</span>
+                    )}
+                  </dd>
+                </div>
+              )}
             </dl>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {price && (
+        <div className="mt-6 flex items-baseline justify-between rounded-[20px] bg-white px-5 py-4" data-testid="live-price">
+          <p className="text-[14px] font-semibold text-muted">
+            {durationHours}시간 · {price.ratio}
+            {price.earlyBird ? ' · 얼리버드' : ''}
+          </p>
+          <p className="text-right">
+            {price.earlyBird && (
+              <span className="mr-2 text-[13px] text-muted line-through">{formatWon(price.regularAmount)}</span>
+            )}
+            <span className="text-[20px] font-bold">{formatWon(price.payableAmount)}</span>
+          </p>
+        </div>
+      )}
 
       {error && (
         <p className="mt-5 rounded-2xl bg-red-50 px-4 py-3 text-[14px] font-medium text-red-600" data-testid="booking-error">
@@ -580,7 +605,7 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
             onClick={handleSubmit}
             className="btn-primary min-h-14 flex-[2] text-[18px]"
           >
-            {submitting ? '접수 중…' : '예약 접수하기'}
+            {submitting ? '결제 준비 중…' : price ? `${formatWon(price.payableAmount)} 결제하기` : '결제하기'}
           </button>
         )}
       </div>

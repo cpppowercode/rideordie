@@ -12,6 +12,8 @@ export type BookingNotice = {
   participants: number;
   childCount: number;
   notes: string;
+  amount?: number;
+  paymentKey?: string;
 };
 
 export type NotifyResult = {
@@ -42,6 +44,8 @@ function noticeText(notice: BookingNotice): string {
     `날짜: ${notice.lessonDate}`,
     `시간: ${notice.timeLabel}`,
     `인원: ${notice.participants}명 (아이 ${notice.childCount}명)`,
+    `결제: ${notice.amount != null ? `${notice.amount.toLocaleString("ko-KR")}원` : "-"}`,
+    `결제키: ${notice.paymentKey || "-"}`,
     `메모: ${notice.notes || "-"}`,
     "",
     "admin.rideordie.kr → 테이블 → 강습예약에서 확인할 수 있습니다.",
@@ -62,7 +66,7 @@ async function sendResend(notice: BookingNotice): Promise<boolean> {
     body: JSON.stringify({
       from,
       to: [ownerEmail()],
-      subject: `[라이드올다이] 새 강습 예약 — ${notice.customerName} (${notice.lessonDate})`,
+      subject: `[라이드올다이] 결제 완료 예약 — ${notice.customerName} (${notice.lessonDate})`,
       text: noticeText(notice),
     }),
   });
@@ -184,7 +188,7 @@ export async function notifyOwner(notice: BookingNotice): Promise<NotifyResult> 
 
   if (sent.length === 0) {
     console.warn(
-      "[notify] 예약은 저장됐지만 사장 알림을 보내지 못했습니다. RESEND_API_KEY 또는 웹훅을 설정해 주세요.",
+      "[notify] 결제는 완료됐지만 사장 알림을 보내지 못했습니다. RESEND_API_KEY 또는 웹훅을 설정해 주세요.",
       { skipped, failed }
     );
   }

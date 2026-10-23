@@ -5,6 +5,7 @@ export type AdminReservation = ExistingReservation & {
   id?: string;
   order_no?: string | null;
   customer_name?: string | null;
+  lesson_type?: string | null;
   notes?: string | null;
   payment_status?: string | null;
   reservation_status?: string | null;
