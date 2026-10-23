@@ -20,6 +20,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "yearly",
       priority: 0.3,
     },
+    {
+      url: `${SITE_URL}/resorts`,
+      lastModified,
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
     ...RESORT_LANDINGS.map((row) => ({
       url: `${SITE_URL}/resorts/${row.slug}`,
       lastModified,

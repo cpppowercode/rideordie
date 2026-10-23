@@ -8,7 +8,8 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { TrustBadges } from "@/components/seo/TrustBadges";
 import { KakaoConsultLink } from "@/components/seo/KakaoConsultLink";
 import { faqPageJsonLd } from "@/lib/jsonld";
-import { RESORT_LANDINGS, SITE_FAQ } from "@/lib/resort-landings";
+import { SITE_FAQ } from "@/lib/resort-landings";
+import { ResortCards } from "@/components/seo/ResortCards";
 
 export const metadata: Metadata = {
   alternates: pageAlternates(SITE_URL),
@@ -92,24 +93,22 @@ export default function Home() {
       </section>
 
       <section className="mx-auto w-full max-w-6xl px-5 py-16 md:py-20">
-        <p className="eyebrow">RESORTS</p>
-        <h2 className="mt-3 text-[32px] font-bold tracking-tight md:text-[40px]">강습 스키장</h2>
+        <div className="flex items-end justify-between gap-6">
+          <div>
+            <p className="eyebrow">RESORTS</p>
+            <h2 className="mt-3 text-[32px] font-bold tracking-tight md:text-[40px]">강습 스키장</h2>
+          </div>
+          <Link
+            href="/resorts"
+            className="hidden text-[15px] font-semibold text-brand hover:underline sm:inline"
+          >
+            스키장 목록
+          </Link>
+        </div>
         <p className="mt-3 max-w-2xl text-[16px] leading-7 text-muted">
           하이원, 비발디, 웰리힐리, 용평, 지산에서 어린이 스키·보드강습을 진행합니다.
         </p>
-        <ul className="mt-8 grid gap-3 sm:grid-cols-2 md:grid-cols-5">
-          {RESORT_LANDINGS.map((row) => (
-            <li key={row.slug}>
-              <Link
-                href={`/resorts/${row.slug}`}
-                className="flex h-full flex-col rounded-[20px] border border-line bg-white px-5 py-6 transition-colors hover:border-brand hover:bg-ice"
-              >
-                <span className="text-[18px] font-bold tracking-tight">{row.shortName}</span>
-                <span className="mt-1 text-[14px] text-muted">어린이 스키·보드강습</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <ResortCards />
       </section>
 
       <section className="mx-auto grid w-full max-w-6xl items-center gap-12 px-5 py-20 md:grid-cols-2 md:gap-16 md:py-28">
