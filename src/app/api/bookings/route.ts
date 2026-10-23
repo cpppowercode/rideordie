@@ -8,6 +8,7 @@ import {
   validateBookingInput,
   type BookingInput,
 } from "@/lib/booking";
+import { GROOMING_BOOKING_ERROR, slotOverlapsGrooming } from "@/lib/grooming";
 import { notifyOwner } from "@/lib/notify";
 import { LESSON_SLOTS } from "@/lib/site";
 
@@ -34,6 +35,10 @@ export async function POST(request: NextRequest) {
     const slot = LESSON_SLOTS.find((item) => item.id === input.slotId);
     if (!slot) {
       return NextResponse.json({ error: "시간대를 선택해 주세요." }, { status: 400 });
+    }
+
+    if (slotOverlapsGrooming(input.skiResort, slot.startHour, slot.durationHours)) {
+      return NextResponse.json({ error: GROOMING_BOOKING_ERROR }, { status: 409 });
     }
 
     const existing = await listReservationsForDate({

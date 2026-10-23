@@ -11,6 +11,13 @@ import {
   type BookingInput,
 } from "./booking";
 import { notifyChannelStatus } from "./notify";
+import {
+  GROOMING_BREAKS,
+  GROOMING_LABEL,
+  formatGroomingHour,
+  slotOverlapsGrooming,
+} from "./grooming";
+import { LESSON_SLOTS, SKI_RESORTS } from "./site";
 
 function sample(overrides: Partial<BookingInput> = {}): BookingInput {
   return {
@@ -73,6 +80,31 @@ assert.equal(hasDuplicateBooking(existing, "010-1234-5678", 9, 2), true);
 assert.equal(hasDuplicateBooking(existing, "010-1234-5678", 13, 2), false);
 assert.equal(slotIsFull(existing, "하이원리조트", 9, 2, 1), true);
 assert.equal(slotIsFull(existing, "하이원리조트", 9, 2, 2), false);
+
+assert.equal(SKI_RESORTS.every((resort) => resort.value in GROOMING_BREAKS), true);
+assert.equal(GROOMING_LABEL, "정설 시간");
+assert.equal(formatGroomingHour(16), "16:00");
+assert.equal(formatGroomingHour(16.5), "16:30");
+assert.equal(formatGroomingHour(17.5), "17:30");
+
+assert.equal(slotOverlapsGrooming("하이원리조트", 13, 4), true); // pm4 13–17 overlaps 16–18
+assert.equal(slotOverlapsGrooming("하이원리조트", 18, 2), false); // night2 starts when grooming ends
+assert.equal(slotOverlapsGrooming("하이원리조트", 9, 2), false);
+assert.equal(slotOverlapsGrooming("비발디파크", 18, 2), true); // 17:30–19:00 vs 18–20
+assert.equal(slotOverlapsGrooming("비발디파크", 13, 4), false);
+assert.equal(slotOverlapsGrooming("용평리조트", 18, 2), true);
+assert.equal(slotOverlapsGrooming("용평리조트", 13, 4), false); // pm4 ends at 17:00
+assert.equal(slotOverlapsGrooming("지산포레스트", 18, 2), true);
+assert.equal(slotOverlapsGrooming("오투리조트", 13, 4), true); // 16:30–18:00 vs 13–17
+assert.equal(slotOverlapsGrooming("오투리조트", 18, 2), false);
+assert.equal(slotOverlapsGrooming("웰리힐리파크", 18, 2), true);
+assert.equal(slotOverlapsGrooming("웰리힐리파크", 13, 4), true);
+assert.equal(slotOverlapsGrooming("곤지암리조트", 18, 2), true);
+assert.equal(slotOverlapsGrooming("알파인미확인", 18, 2), true); // default 17–19
+
+const night2 = LESSON_SLOTS.find((slot) => slot.id === "night2");
+assert.ok(night2);
+assert.equal(slotOverlapsGrooming("비발디파크", night2.startHour, night2.durationHours), true);
 
 const channels = notifyChannelStatus();
 assert.deepEqual(

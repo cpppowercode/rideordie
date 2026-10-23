@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { listReservationsForDate } from "@/lib/admin-reservations";
 import { overlappingReservations } from "@/lib/booking";
+import { GROOMING_REASON, slotOverlapsGrooming } from "@/lib/grooming";
 import { bookingSlotCapacity, LESSON_SLOTS, SKI_RESORTS } from "@/lib/site";
 
 export async function GET(request: NextRequest) {
@@ -18,12 +19,26 @@ export async function GET(request: NextRequest) {
     const capacity = bookingSlotCapacity();
     const existing = await listReservationsForDate({ date, skiResort });
     const slots = LESSON_SLOTS.map((slot) => {
+      if (slotOverlapsGrooming(skiResort, slot.startHour, slot.durationHours)) {
+        return {
+          id: slot.id,
+          label: slot.label,
+          timeLabel: slot.timeLabel,
+          startHour: slot.startHour,
+          durationHours: slot.durationHours,
+          used: 0,
+          remaining: 0,
+          available: false,
+          reason: GROOMING_REASON,
+        };
+      }
       const used = overlappingReservations(
         existing,
         skiResort,
         slot.startHour,
         slot.durationHours
       ).length;
+      const remaining = Math.max(0, capacity - used);
       return {
         id: slot.id,
         label: slot.label,
@@ -31,8 +46,9 @@ export async function GET(request: NextRequest) {
         startHour: slot.startHour,
         durationHours: slot.durationHours,
         used,
-        remaining: Math.max(0, capacity - used),
-        available: used < capacity,
+        remaining,
+        available: remaining > 0,
+        reason: remaining > 0 ? null : "full",
       };
     });
 
