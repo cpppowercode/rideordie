@@ -47,36 +47,18 @@ export const LESSON_SLOTS: LessonSlot[] = [
   { id: "night2", label: "야간 2시간", startHour: 18, durationHours: 2, timeLabel: "18:00–20:00" },
 ];
 
-export const PHOTO_SOURCES = [
-  {
-    file: "/images/lessons/hero.png",
-    credit: "Unsplash",
-    url: "https://unsplash.com/photos/person-skiing-on-snow-covered-ground-1551698618",
-    photoId: "photo-1551698618-1dfe5d97d256",
-  },
-  {
-    file: "/images/lessons/gallery-1.jpg",
-    credit: "Pexels / 848612",
-    url: "https://www.pexels.com/photo/848612/",
-  },
-  {
-    file: "/images/lessons/gallery-2.jpg",
-    credit: "Pexels / 376697",
-    url: "https://www.pexels.com/photo/376697/",
-  },
-  {
-    file: "/images/lessons/gallery-3.jpg",
-    credit: "Pexels / 2433353",
-    url: "https://www.pexels.com/photo/2433353/",
-  },
-  {
-    file: "/images/lessons/gallery-4.jpg",
-    credit: "Pexels / 257961",
-    url: "https://www.pexels.com/photo/257961/",
-  },
-  {
-    file: "/images/lessons/gallery-6.jpg",
-    credit: "Pexels / 352093",
-    url: "https://www.pexels.com/photo/352093/",
-  },
-] as const;
+/** Real lesson photos owned by RideOrDie. Stock photos were removed. */
+export const LESSON_PHOTOS = {
+  hero: "/images/lessons/hero.webp",
+  heroMobile: "/images/lessons/hero-mobile.webp",
+  lesson: "/images/lessons/lesson.webp",
+  kids: "/images/lessons/gallery-kids.webp",
+  night: "/images/lessons/gallery-night.webp",
+  skiKids: "/images/lessons/gallery-ski-kids.webp",
+  carve: "/images/lessons/gallery-carve.webp",
+  liftKid: "/images/lessons/gallery-lift-kid.webp",
+  lift: "/images/lessons/gallery-lift.webp",
+  jump: "/images/lessons/gallery-jump.webp",
+  coach: "/images/lessons/gallery-coach.webp",
+  nightLift: "/images/lessons/gallery-night-lift.webp",
+} as const;
