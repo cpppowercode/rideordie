@@ -4,6 +4,16 @@ import { LESSON_PHOTOS, SITE_URL } from "@/lib/site";
 export const DEFAULT_OG_IMAGE = `${SITE_URL}${LESSON_PHOTOS.hero}`;
 export const DEFAULT_OG_ALT = "라이드올다이 스키·보드 강습";
 
+export function languageAlternates(url: string): NonNullable<Metadata["alternates"]> {
+  return {
+    canonical: url,
+    languages: {
+      "ko-KR": url,
+      "x-default": url,
+    },
+  };
+}
+
 export function pageMetadata({
   title,
   description,
@@ -23,7 +33,7 @@ export function pageMetadata({
   return {
     title: absoluteTitle ? { absolute: title } : title,
     description,
-    alternates: { canonical: url },
+    alternates: languageAlternates(url),
     openGraph: {
       title,
       description,
