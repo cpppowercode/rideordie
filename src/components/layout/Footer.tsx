@@ -63,7 +63,11 @@ export function Footer() {
                 <a href="mailto:contact@rideordie.kr" className="hover:text-ink">contact@rideordie.kr</a>
               </li>
             </ul>
-            <h3 className="mb-3 mt-8 text-[13px] font-semibold tracking-[0.04em] text-muted">강습 스키장</h3>
+            <h3 className="mb-3 mt-8 text-[13px] font-semibold tracking-[0.04em] text-muted">
+              <Link href="/resorts" className="hover:text-ink">
+                강습 스키장
+              </Link>
+            </h3>
             <ul className="space-y-2 text-[15px] text-muted">
               {RESORT_LANDINGS.map((row) => (
                 <li key={row.slug}>

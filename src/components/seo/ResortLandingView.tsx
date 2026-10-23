@@ -5,6 +5,7 @@ import { KakaoConsultLink } from "@/components/seo/KakaoConsultLink";
 import {
   bookHref,
   EARLY_BIRD_COPY,
+  EARLY_BIRD_LABEL,
   formatManwon,
   REGULAR_PRICE_TABLE,
   RESORT_LANDINGS,
@@ -141,9 +142,9 @@ export function ResortLandingView({ landing }: { landing: ResortLanding }) {
             </div>
           </section>
           <section className="mt-12">
-            <h2 className="text-[24px] font-bold tracking-tight">얼리버드 규칙</h2>
+            <h2 className="text-[24px] font-bold tracking-tight">{EARLY_BIRD_LABEL}</h2>
             <p className="mt-3 text-[16px] leading-7 text-muted">
-              {EARLY_BIRD_COPY}입니다.
+              {EARLY_BIRD_COPY}
             </p>
           </section>
           </>
@@ -151,7 +152,7 @@ export function ResortLandingView({ landing }: { landing: ResortLanding }) {
           <section className="mt-12">
             <h2 className="text-[24px] font-bold tracking-tight">강습비</h2>
             <p className="mt-3 text-[17px] leading-8 text-muted">
-              {EARLY_BIRD_COPY}입니다. 숙소·리프트권·장비는 별도입니다.
+              {EARLY_BIRD_COPY}. 숙소·리프트권·장비는 별도입니다.
               {landing.mentionBadgeFee ? " 패찰비도 별도입니다." : ""}
             </p>
             {landing.layout !== "minimal" ? (
