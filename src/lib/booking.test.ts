@@ -59,9 +59,11 @@ assert.match(validateBookingInput(sample({ customerPhone: "123" })) || "", /휴�
 assert.match(validateBookingInput(sample({ childCount: 3, participants: 2 })) || "", /아이/);
 assert.match(validateBookingInput(sample({ lessonDate: "2001-01-01" })) || "", /날짜/);
 assert.match(validateBookingInput(sample({ skiResort: "오투리조트" })) || "", /스키장/);
+assert.match(validateBookingInput(sample({ skiResort: "곤지암리조트" })) || "", /스키장/);
 assert.match(validateBookingInput(sample({ durationHours: 5 })) || "", /강습 시간/);
 assert.match(validateBookingInput(sample({ startHour: 20.5 })) || "", /운영 시간/);
 assert.equal(SKI_RESORTS.some((resort) => resort.value === "오투리조트"), false);
+assert.equal(SKI_RESORTS.some((resort) => resort.value === "곤지암리조트"), false);
 
 const payload = toAdminPayload(sample(), "WEB_TEST");
 assert.equal(payload.customer_phone, "01012345678");
@@ -128,7 +130,6 @@ assert.equal(slotOverlapsGrooming("용평리조트", 13, 4), false); // ends at 
 assert.equal(slotOverlapsGrooming("지산포레스트", 18, 2), true);
 assert.equal(slotOverlapsGrooming("웰리힐리파크", 18, 2), true);
 assert.equal(slotOverlapsGrooming("웰리힐리파크", 13, 4), true);
-assert.equal(slotOverlapsGrooming("곤지암리조트", 18, 2), true);
 assert.equal(slotOverlapsGrooming("알파인미확인", 18, 2), true); // default 17–19
 
 const high1Two = startHours("하이원리조트", 2);

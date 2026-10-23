@@ -91,15 +91,6 @@ export const RESORT_HOURS: Record<ResortValue, ResortHours> = {
     confirmed: true,
     note: "Night skiing listed through 02:00 (26:00 in booking hours).",
   },
-
-  // 곤지암: 동절기 주간+야간 through midnight.
-  // Source: https://m.konjiamresort.co.kr/contact/noticeView.dev?idx=1441
-  곤지암리조트: {
-    openHour: 9,
-    closeHour: 24,
-    source: "https://m.konjiamresort.co.kr/contact/noticeView.dev?idx=1441",
-    confirmed: true,
-  },
 };
 
 export function resortHoursFor(skiResort: string): ResortHours {
