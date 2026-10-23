@@ -25,6 +25,18 @@ export const SKI_RESORTS = [
   { value: "곤지암리조트", label: "곤지암" },
 ] as const;
 
+/** Customer-facing teaching resorts. Booking picker stays SKI_RESORTS. */
+export const TEACHING_RESORTS = [
+  "하이원",
+  "비발디",
+  "웰리힐리",
+  "용평",
+  "지산",
+] as const;
+
+export const TEACHING_RESORTS_COPY = TEACHING_RESORTS.join(", ");
+export const TEACHING_RESORTS_INLINE = TEACHING_RESORTS.join(" · ");
+
 export const LESSON_TYPES = [
   { value: "ski", label: "스키" },
   { value: "board", label: "보드" },

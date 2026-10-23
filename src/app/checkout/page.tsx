@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { CalendarCheck } from 'lucide-react';
 import { PRODUCT_DATA } from '@/lib/mockData';
+import { TEACHING_RESORTS_COPY } from '@/lib/site';
 import { executeKcpPay, KcpPayForm } from '@/components/checkout/KcpPayForm';
 import {
     expectedPayAmount,
@@ -209,7 +210,7 @@ export default function CheckoutPage() {
                         <h3 className="mb-4 text-lg font-bold">주문 요약</h3>
                         <div className="mb-4 border-b border-line pb-4">
                             <p className="font-medium leading-snug">{PRODUCT_DATA.title}</p>
-                            <p className="mt-1 text-sm text-muted">하이원 현장 강습</p>
+                            <p className="mt-1 text-sm text-muted">{TEACHING_RESORTS_COPY} 현장 강습</p>
                         </div>
 
                         <div className="mb-6 flex items-end justify-between">

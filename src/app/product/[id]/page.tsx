@@ -4,12 +4,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { ChevronRight, MapPin, CalendarCheck, MountainSnow, Info } from "lucide-react";
 import { PRODUCT_DATA } from "@/lib/mockData";
+import { TEACHING_RESORTS_INLINE } from "@/lib/site";
 import { ProductImageGallery } from "@/components/product/ProductImageGallery";
 import { useRouter } from "next/navigation";
 
 const FACTS = [
     { icon: MountainSnow, label: "형태", value: "현장 강습 (선택한 스키장)" },
-    { icon: MapPin, label: "장소", value: "하이원 · 비발디 · 웰리힐리 · 용평 등" },
+    { icon: MapPin, label: "장소", value: TEACHING_RESORTS_INLINE },
     { icon: CalendarCheck, label: "진행", value: "날짜·시간대를 고르면 바로 접수" },
 ];
 
