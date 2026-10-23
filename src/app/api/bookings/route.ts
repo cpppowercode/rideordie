@@ -9,12 +9,14 @@ import {
   type BookingInput,
 } from "@/lib/booking";
 import { GROOMING_BOOKING_ERROR, slotOverlapsGrooming } from "@/lib/grooming";
+import { findLessonStart, formatLessonRange, isLessonDuration, normalizeHalfHour } from "@/lib/hours";
 import { notifyOwner } from "@/lib/notify";
-import { LESSON_SLOTS } from "@/lib/site";
 
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as Partial<BookingInput>;
+    const durationHours = Number(body.durationHours);
+    const startHour = Number(body.startHour);
     const input: BookingInput = {
       customerName: String(body.customerName || ""),
       customerPhone: String(body.customerPhone || ""),
@@ -23,7 +25,8 @@ export async function POST(request: NextRequest) {
       skiResort: String(body.skiResort || ""),
       lessonType: String(body.lessonType || "ski"),
       lessonDate: String(body.lessonDate || ""),
-      slotId: String(body.slotId || ""),
+      durationHours,
+      startHour,
       notes: String(body.notes || ""),
     };
 
@@ -32,13 +35,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: validationError }, { status: 400 });
     }
 
-    const slot = LESSON_SLOTS.find((item) => item.id === input.slotId);
-    if (!slot) {
-      return NextResponse.json({ error: "시간대를 선택해 주세요." }, { status: 400 });
+    const duration = isLessonDuration(input.durationHours) ? input.durationHours : null;
+    const start = Number.isFinite(input.startHour) ? normalizeHalfHour(input.startHour) : NaN;
+    if (!duration || !Number.isFinite(start)) {
+      return NextResponse.json({ error: "시작 시간을 선택해 주세요." }, { status: 400 });
     }
 
-    if (slotOverlapsGrooming(input.skiResort, slot.startHour, slot.durationHours)) {
+    if (slotOverlapsGrooming(input.skiResort, start, duration)) {
       return NextResponse.json({ error: GROOMING_BOOKING_ERROR }, { status: 409 });
+    }
+
+    const slot = findLessonStart(input.skiResort, duration, start);
+    if (!slot) {
+      return NextResponse.json({ error: "선택한 시간에는 강습을 예약할 수 없습니다." }, { status: 400 });
     }
 
     const existing = await listReservationsForDate({
@@ -46,14 +55,14 @@ export async function POST(request: NextRequest) {
       skiResort: input.skiResort,
     });
 
-    if (hasDuplicateBooking(existing, input.customerPhone, slot.startHour, slot.durationHours)) {
+    if (hasDuplicateBooking(existing, input.customerPhone, start, duration)) {
       return NextResponse.json(
         { error: "같은 날짜·시간대에 이미 예약이 있습니다. 다른 시간을 선택하거나 고객센터로 문의해 주세요." },
         { status: 409 }
       );
     }
 
-    if (slotIsFull(existing, input.skiResort, slot.startHour, slot.durationHours)) {
+    if (slotIsFull(existing, input.skiResort, start, duration)) {
       return NextResponse.json(
         { error: "선택한 시간대는 예약이 마감되었습니다. 다른 시간을 선택해 주세요." },
         { status: 409 }
@@ -61,7 +70,7 @@ export async function POST(request: NextRequest) {
     }
 
     const orderNo = buildOrderNo();
-    const payload = toAdminPayload(input, orderNo);
+    const payload = toAdminPayload({ ...input, startHour: start, durationHours: duration }, orderNo);
     const created = await createAdminReservation(payload);
 
     const notice = await notifyOwner({
@@ -71,7 +80,7 @@ export async function POST(request: NextRequest) {
       skiResort: input.skiResort,
       lessonType: input.lessonType,
       lessonDate: input.lessonDate,
-      timeLabel: slot.timeLabel,
+      timeLabel: formatLessonRange(start, duration),
       participants: input.participants,
       childCount: input.childCount,
       notes: payload.notes,

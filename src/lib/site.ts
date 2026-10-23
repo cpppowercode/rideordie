@@ -31,34 +31,18 @@ export const LESSON_TYPES = [
   { value: "both", label: "둘 다" },
 ] as const;
 
-export type LessonSlot = {
-  id: string;
-  label: string;
-  startHour: number;
-  durationHours: number;
-  timeLabel: string;
-};
-
-export const LESSON_SLOTS: LessonSlot[] = [
-  { id: "am2", label: "오전 2시간", startHour: 9, durationHours: 2, timeLabel: "09:00–11:00" },
-  { id: "pm2", label: "오후 2시간", startHour: 13, durationHours: 2, timeLabel: "13:00–15:00" },
-  { id: "am4", label: "오전 4시간", startHour: 9, durationHours: 4, timeLabel: "09:00–13:00" },
-  { id: "pm4", label: "오후 4시간", startHour: 13, durationHours: 4, timeLabel: "13:00–17:00" },
-  { id: "night2", label: "야간 2시간", startHour: 18, durationHours: 2, timeLabel: "18:00–20:00" },
-];
-
-/** Real lesson photos owned by RideOrDie. Stock photos were removed. */
+/**
+ * Real lesson photos owned by RideOrDie.
+ * Only shots without identifiable children's faces are shipped
+ * (backs, helmets+goggles covering the face, or distant riding).
+ */
 export const LESSON_PHOTOS = {
   hero: "/images/lessons/hero.webp",
   heroMobile: "/images/lessons/hero-mobile.webp",
   lesson: "/images/lessons/lesson.webp",
-  kids: "/images/lessons/gallery-kids.webp",
-  night: "/images/lessons/gallery-night.webp",
-  skiKids: "/images/lessons/gallery-ski-kids.webp",
   carve: "/images/lessons/gallery-carve.webp",
-  liftKid: "/images/lessons/gallery-lift-kid.webp",
   lift: "/images/lessons/gallery-lift.webp",
   jump: "/images/lessons/gallery-jump.webp",
-  coach: "/images/lessons/gallery-coach.webp",
-  nightLift: "/images/lessons/gallery-night-lift.webp",
+  air: "/images/lessons/gallery-air.webp",
+  slope: "/images/lessons/gallery-slope.webp",
 } as const;

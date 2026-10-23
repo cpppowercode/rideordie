@@ -64,38 +64,9 @@ await (await extract(heroFile, mobileRegion))
   .jpeg({ quality: 80 })
   .toFile(path.join(PREVIEW, "hero-mobile.jpg"));
 
+// Children's faces must not ship. Lesson / air / slope come from
+// scripts/privacy-safe-photos.mjs (backs or helmet+goggles covering the face).
 const gallery = [
-  {
-    name: "lesson",
-    file: "photo_36_692f.jpg",
-    // Keep both kids and the instructor.
-    region: { left: 80, top: 40, width: 2320, height: 1880 },
-    width: 1400,
-  },
-  {
-    name: "gallery-kids",
-    file: "photo_12_bd80.jpg",
-    region: { left: 420, top: 0, width: 1536, height: 1920 },
-    width: 1200,
-  },
-  {
-    name: "gallery-night",
-    file: "photo_10_40e4.jpg",
-    region: { left: 180, top: 0, width: 2048, height: 2560 },
-    width: 1200,
-  },
-  {
-    name: "gallery-ski-kids",
-    file: "photo_14_83fc.jpg",
-    region: null,
-    width: 1200,
-  },
-  {
-    name: "gallery-lift-kid",
-    file: "photo_13_ea2e.jpg",
-    region: null,
-    width: 1200,
-  },
   {
     name: "gallery-lift",
     file: "photo_08_2730.jpg",
@@ -111,18 +82,6 @@ const gallery = [
   {
     name: "gallery-jump",
     file: "photo_42_79fe.jpg",
-    region: null,
-    width: 1200,
-  },
-  {
-    name: "gallery-coach",
-    file: "photo_34_52c2.jpg",
-    region: { left: 0, top: 120, width: 1920, height: 1800 },
-    width: 1200,
-  },
-  {
-    name: "gallery-night-lift",
-    file: "photo_00_c921.jpg",
     region: null,
     width: 1200,
   },

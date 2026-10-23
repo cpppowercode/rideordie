@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { listReservationsForDate } from "@/lib/admin-reservations";
 import { overlappingReservations } from "@/lib/booking";
-import { GROOMING_REASON, slotOverlapsGrooming } from "@/lib/grooming";
-import { bookingSlotCapacity, LESSON_SLOTS, SKI_RESORTS } from "@/lib/site";
+import { generateLessonStarts, isLessonDuration } from "@/lib/hours";
+import { bookingSlotCapacity, SKI_RESORTS } from "@/lib/site";
 
 export async function GET(request: NextRequest) {
   const date = request.nextUrl.searchParams.get("date") || "";
   const skiResort = request.nextUrl.searchParams.get("skiResort") || "";
+  const durationHours = Number(request.nextUrl.searchParams.get("duration"));
 
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
     return NextResponse.json({ error: "날짜를 선택해 주세요." }, { status: 400 });
@@ -14,24 +15,14 @@ export async function GET(request: NextRequest) {
   if (!SKI_RESORTS.some((resort) => resort.value === skiResort)) {
     return NextResponse.json({ error: "스키장을 선택해 주세요." }, { status: 400 });
   }
+  if (!isLessonDuration(durationHours)) {
+    return NextResponse.json({ error: "강습 시간을 선택해 주세요." }, { status: 400 });
+  }
 
   try {
     const capacity = bookingSlotCapacity();
     const existing = await listReservationsForDate({ date, skiResort });
-    const slots = LESSON_SLOTS.map((slot) => {
-      if (slotOverlapsGrooming(skiResort, slot.startHour, slot.durationHours)) {
-        return {
-          id: slot.id,
-          label: slot.label,
-          timeLabel: slot.timeLabel,
-          startHour: slot.startHour,
-          durationHours: slot.durationHours,
-          used: 0,
-          remaining: 0,
-          available: false,
-          reason: GROOMING_REASON,
-        };
-      }
+    const slots = generateLessonStarts(skiResort, durationHours).map((slot) => {
       const used = overlappingReservations(
         existing,
         skiResort,
@@ -41,10 +32,9 @@ export async function GET(request: NextRequest) {
       const remaining = Math.max(0, capacity - used);
       return {
         id: slot.id,
-        label: slot.label,
-        timeLabel: slot.timeLabel,
         startHour: slot.startHour,
         durationHours: slot.durationHours,
+        timeLabel: slot.timeLabel,
         used,
         remaining,
         available: remaining > 0,
@@ -56,6 +46,7 @@ export async function GET(request: NextRequest) {
       success: true,
       date,
       skiResort,
+      durationHours,
       capacity,
       slots,
     });
