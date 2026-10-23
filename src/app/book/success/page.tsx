@@ -3,7 +3,7 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { CheckCircle, Loader2 } from 'lucide-react';
+import { Check, Loader2, Phone } from 'lucide-react';
 import { OWNER_PHONE } from '@/lib/site';
 
 function SuccessContent() {
@@ -11,26 +11,68 @@ function SuccessContent() {
   const orderNo = params.get('orderNo');
   const date = params.get('date');
   const resort = params.get('resort');
+  const time = params.get('time');
+  const name = params.get('name');
+  const people = params.get('people');
 
   return (
-    <div className="flex min-h-[60vh] flex-col items-center justify-center p-4 text-center">
-      <div className="mb-6 rounded-full bg-ice p-6">
-        <CheckCircle className="h-16 w-16 text-brand" />
-      </div>
-      <h1 className="mb-4 text-3xl font-bold">예약이 접수되었습니다</h1>
-      <div className="mb-8 max-w-md space-y-2 text-lg text-muted">
-        {orderNo && (
-          <p>
-            예약번호: <span className="font-semibold text-ink">{orderNo}</span>
-          </p>
-        )}
-        {date && <p>날짜: <span className="font-semibold text-ink">{date}</span></p>}
-        {resort && <p>스키장: <span className="font-semibold text-ink">{resort}</span></p>}
-        <p>남겨 주신 번호로 일정 확인 연락을 드립니다.</p>
-      </div>
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <a href={`tel:${OWNER_PHONE}`} className="btn-ghost">전화하기 {OWNER_PHONE}</a>
-        <Link href="/" className="btn-dark">홈으로</Link>
+    <div className="bg-snow" data-testid="booking-success">
+      <div className="mx-auto flex min-h-[70vh] max-w-lg flex-col items-center px-5 py-16 text-center">
+        <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-brand text-white shadow-[0_10px_24px_rgba(49,130,246,0.35)]">
+          <Check className="h-8 w-8" strokeWidth={2.5} />
+        </div>
+        <p className="eyebrow">예약 접수</p>
+        <h1 className="mt-2 text-[32px] font-bold tracking-tight md:text-[40px]">예약이 접수됐어요</h1>
+        <p className="mt-3 text-[16px] leading-7 text-muted">
+          남겨 주신 번호로 일정 확인 연락을 드립니다.
+        </p>
+
+        <dl className="mt-8 w-full overflow-hidden rounded-[24px] bg-white text-left shadow-[0_8px_30px_rgba(25,31,40,0.04)]">
+          {orderNo && (
+            <div className="flex justify-between gap-4 border-b border-line px-5 py-4">
+              <dt className="text-[15px] text-muted">예약번호</dt>
+              <dd className="font-semibold" data-testid="success-order-no">{orderNo}</dd>
+            </div>
+          )}
+          {name && (
+            <div className="flex justify-between gap-4 border-b border-line px-5 py-4">
+              <dt className="text-[15px] text-muted">이름</dt>
+              <dd className="font-semibold">{name}</dd>
+            </div>
+          )}
+          {date && (
+            <div className="flex justify-between gap-4 border-b border-line px-5 py-4">
+              <dt className="text-[15px] text-muted">날짜</dt>
+              <dd className="font-semibold">{date}</dd>
+            </div>
+          )}
+          {time && (
+            <div className="flex justify-between gap-4 border-b border-line px-5 py-4">
+              <dt className="text-[15px] text-muted">시간</dt>
+              <dd className="font-semibold">{time}</dd>
+            </div>
+          )}
+          {resort && (
+            <div className="flex justify-between gap-4 border-b border-line px-5 py-4">
+              <dt className="text-[15px] text-muted">스키장</dt>
+              <dd className="font-semibold">{resort}</dd>
+            </div>
+          )}
+          {people && (
+            <div className="flex justify-between gap-4 px-5 py-4">
+              <dt className="text-[15px] text-muted">인원</dt>
+              <dd className="font-semibold">{people}명</dd>
+            </div>
+          )}
+        </dl>
+
+        <div className="mt-8 flex w-full flex-col gap-3">
+          <a href={`tel:${OWNER_PHONE}`} className="btn-ghost min-h-14">
+            <Phone className="h-4 w-4" />
+            전화하기 {OWNER_PHONE}
+          </a>
+          <Link href="/" className="btn-primary min-h-14">홈으로</Link>
+        </div>
       </div>
     </div>
   );
@@ -40,7 +82,7 @@ export default function BookSuccessPage() {
   return (
     <Suspense fallback={
       <div className="flex min-h-[60vh] items-center justify-center">
-        <Loader2 className="h-16 w-16 animate-spin text-brand" />
+        <Loader2 className="h-10 w-10 animate-spin text-brand" />
       </div>
     }>
       <SuccessContent />

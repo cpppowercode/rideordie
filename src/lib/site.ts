@@ -10,9 +10,11 @@ export const ADMIN_TENANT_ID =
   process.env.ADMIN_TENANT_ID || "rideordie";
 
 /** Concurrent lessons allowed for the same resort + overlapping time. */
-export const BOOKING_SLOT_CAPACITY = Number(
-  process.env.BOOKING_SLOT_CAPACITY || "6"
-);
+export function bookingSlotCapacity(): number {
+  const raw = process.env["BOOKING_SLOT_CAPACITY"];
+  const n = Number(raw ?? "6");
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : 6;
+}
 
 export const SKI_RESORTS = [
   { value: "하이원리조트", label: "하이원" },

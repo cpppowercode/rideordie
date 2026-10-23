@@ -11,7 +11,7 @@ export function ProductImageGallery() {
     return (
         <div className="flex flex-col gap-4">
             {/* Main Image */}
-            <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-snow">
+            <div className="relative aspect-square w-full overflow-hidden rounded-[24px] bg-snow">
                 <Image
                     src={selectedImage}
                     alt="Product Main"

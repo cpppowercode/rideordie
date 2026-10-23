@@ -2,10 +2,11 @@
 
 export default function ServicePolicy() {
   return (
-    <main className="bg-white text-black min-h-screen">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <h1 className="text-3xl md:text-4xl font-bold text-center mt-10 mb-4">Ride or Die 서비스 이용약관</h1>
-        <p className="text-center text-gray-600 mb-8">(전자상거래 표준약관 준용·스포츠 강습 특화)</p>
+    <main className="min-h-screen bg-white text-ink">
+      <div className="mx-auto max-w-3xl px-5 py-14 md:py-20">
+        <p className="eyebrow text-center">LEGAL</p>
+        <h1 className="mt-3 text-center text-[32px] font-bold tracking-tight md:text-[40px]">서비스 이용약관</h1>
+        <p className="mt-3 text-center text-muted">(전자상거래 표준약관 준용·스포츠 강습 특화)</p>
         
         {/* 서비스 이용약관 */}
         <section className="mb-12 space-y-8">

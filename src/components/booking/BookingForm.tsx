@@ -2,8 +2,12 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ChevronLeft, ChevronRight, Minus, Plus } from 'lucide-react';
 import { LESSON_SLOTS, LESSON_TYPES, SKI_RESORTS } from '@/lib/site';
-import { todayYmd } from '@/lib/booking';
+import { formatPhoneDisplay, todayYmd } from '@/lib/booking';
+
+type Step = 1 | 2 | 3;
 
 type SlotAvailability = {
   id: string;
@@ -37,10 +41,43 @@ function monthMatrix(year: number, monthIndex: number): (string | null)[][] {
   return rows;
 }
 
+function Stepper({ value, min, max, onChange, testId }: {
+  value: number;
+  min: number;
+  max: number;
+  onChange: (n: number) => void;
+  testId: string;
+}) {
+  return (
+    <div className="flex h-14 items-center justify-between rounded-2xl border border-line bg-white px-2">
+      <button
+        type="button"
+        aria-label="줄이기"
+        disabled={value <= min}
+        onClick={() => onChange(Math.max(min, value - 1))}
+        className="inline-flex h-11 w-11 items-center justify-center rounded-full hover:bg-snow disabled:opacity-30"
+      >
+        <Minus className="h-4 w-4" />
+      </button>
+      <span data-testid={testId} className="min-w-8 text-center text-[20px] font-bold">{value}</span>
+      <button
+        type="button"
+        aria-label="늘리기"
+        disabled={value >= max}
+        onClick={() => onChange(Math.min(max, value + 1))}
+        className="inline-flex h-11 w-11 items-center justify-center rounded-full hover:bg-snow disabled:opacity-30"
+      >
+        <Plus className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}
+
 export function BookingForm() {
   const router = useRouter();
   const today = todayYmd();
   const initial = new Date();
+  const [step, setStep] = useState<Step>(1);
   const [viewYear, setViewYear] = useState(initial.getFullYear());
   const [viewMonth, setViewMonth] = useState(initial.getMonth());
   const [lessonDate, setLessonDate] = useState(today);
@@ -67,6 +104,9 @@ export function BookingForm() {
 
   const weeks = useMemo(() => monthMatrix(viewYear, viewMonth), [viewYear, viewMonth]);
   const monthLabel = `${viewYear}년 ${viewMonth + 1}월`;
+  const selectedSlot = LESSON_SLOTS.find((s) => s.id === slotId);
+  const resortLabel = SKI_RESORTS.find((r) => r.value === skiResort)?.label;
+  const typeLabel = LESSON_TYPES.find((t) => t.value === lessonType)?.label;
 
   useEffect(() => {
     let cancelled = false;
@@ -101,13 +141,39 @@ export function BookingForm() {
     setViewMonth(next.getMonth());
   };
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
+  const canGoNext = () => {
+    if (step === 1) return Boolean(lessonDate && skiResort && slotId);
+    if (step === 2) {
+      return customerName.trim().length >= 2 && customerPhone.replace(/\D/g, '').length >= 10 && childCount <= participants;
+    }
+    return true;
+  };
+
+  const goNext = () => {
     setError('');
-    if (childCount > participants) {
-      setError('아이 인원은 총 인원 이하로 입력해 주세요.');
+    if (step === 1 && !slotId) {
+      setError('시간대를 선택해 주세요.');
       return;
     }
+    if (step === 2) {
+      if (customerName.trim().length < 2) {
+        setError('이름을 두 글자 이상 입력해 주세요.');
+        return;
+      }
+      if (customerPhone.replace(/\D/g, '').length < 10) {
+        setError('휴대폰 번호를 확인해 주세요.');
+        return;
+      }
+      if (childCount > participants) {
+        setError('아이 인원은 총 인원 이하로 입력해 주세요.');
+        return;
+      }
+    }
+    setStep((s) => (s === 3 ? 3 : ((s + 1) as Step)));
+  };
+
+  const handleSubmit = async () => {
+    setError('');
     setSubmitting(true);
     try {
       const res = await fetch('/api/bookings', {
@@ -133,6 +199,9 @@ export function BookingForm() {
         orderNo: data.orderNo,
         date: lessonDate,
         resort: skiResort,
+        time: selectedSlot?.timeLabel || '',
+        name: customerName.trim(),
+        people: String(participants),
       });
       router.push(`/book/success?${params.toString()}`);
     } catch (err: unknown) {
@@ -142,155 +211,306 @@ export function BookingForm() {
   };
 
   const inputClass =
-    'w-full rounded-xl border border-line bg-white px-4 py-3.5 text-lg outline-none focus:border-brand focus:ring-2 focus:ring-brand/20';
+    'w-full rounded-2xl border border-line bg-white px-4 py-4 text-[17px] outline-none transition-shadow placeholder:text-muted/60 focus:border-brand focus:ring-4 focus:ring-brand/15';
+
+  const STEPS = [
+    { n: 1, label: '일정' },
+    { n: 2, label: '정보' },
+    { n: 3, label: '확인' },
+  ] as const;
 
   return (
-    <form onSubmit={handleSubmit} className="grid gap-6 lg:grid-cols-3">
-      <div className="space-y-6 lg:col-span-2">
-        <section className="card p-6 md:p-7">
-          <h2 className="mb-4 text-xl font-bold">날짜 선택</h2>
-          <div className="mb-4 flex items-center justify-between">
-            <button type="button" onClick={() => shiftMonth(-1)} className="btn-ghost px-4 py-2 text-sm">
-              이전 달
-            </button>
-            <p className="font-semibold">{monthLabel}</p>
-            <button type="button" onClick={() => shiftMonth(1)} className="btn-ghost px-4 py-2 text-sm">
-              다음 달
-            </button>
-          </div>
-          <div className="grid grid-cols-7 gap-1 text-center text-sm text-muted">
-            {['일', '월', '화', '수', '목', '금', '토'].map((day) => (
-              <div key={day} className="py-2 font-medium">{day}</div>
-            ))}
-            {weeks.flat().map((ymd, index) => {
-              if (!ymd) return <div key={`e-${index}`} />;
-              const disabled = ymd < today;
-              const selected = ymd === lessonDate;
-              return (
-                <button
-                  key={ymd}
-                  type="button"
-                  disabled={disabled}
-                  onClick={() => setLessonDate(ymd)}
-                  className={`rounded-lg py-2.5 text-[15px] ${
-                    selected
-                      ? 'bg-brand font-bold text-white'
-                      : disabled
-                        ? 'cursor-not-allowed text-line'
-                        : 'hover:bg-ice'
+    <div className="mx-auto w-full max-w-[560px]" data-testid="booking-form">
+      <ol className="mb-8 flex items-center gap-2" data-testid={`booking-step-${step}`}>
+        {STEPS.map((item, i) => {
+          const active = step === item.n;
+          const done = step > item.n;
+          return (
+            <li key={item.n} className="flex flex-1 items-center gap-2">
+              <div className="flex items-center gap-2">
+                <span
+                  className={`inline-flex h-7 w-7 items-center justify-center rounded-full text-[13px] font-bold ${
+                    active || done ? 'bg-brand text-white' : 'bg-snow text-muted'
                   }`}
                 >
-                  {Number(ymd.slice(-2))}
-                </button>
-              );
-            })}
-          </div>
-        </section>
+                  {item.n}
+                </span>
+                <span className={`text-[14px] font-semibold ${active ? 'text-ink' : 'text-muted'}`}>{item.label}</span>
+              </div>
+              {i < STEPS.length - 1 && (
+                <span className={`h-px flex-1 ${done ? 'bg-brand' : 'bg-line'}`} />
+              )}
+            </li>
+          );
+        })}
+      </ol>
 
-        <section className="card p-6 md:p-7">
-          <h2 className="mb-4 text-xl font-bold">스키장 · 시간대</h2>
-          <label className="mb-4 block">
-            <span className="mb-1.5 block text-[15px] font-medium">스키장</span>
-            <select value={skiResort} onChange={(e) => setSkiResort(e.target.value)} className={inputClass}>
-              {SKI_RESORTS.map((resort) => (
-                <option key={resort.value} value={resort.value}>{resort.label}</option>
-              ))}
-            </select>
-          </label>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {slots.map((slot) => {
-              const selected = slotId === slot.id;
-              const disabled = loadingSlots || !slot.available;
-              return (
-                <button
-                  key={slot.id}
-                  type="button"
-                  disabled={disabled}
-                  onClick={() => setSlotId(slot.id)}
-                  className={`rounded-xl border-2 px-4 py-4 text-left ${
-                    selected
-                      ? 'border-brand bg-ice'
-                      : disabled
-                        ? 'cursor-not-allowed border-line bg-snow text-muted'
-                        : 'border-line hover:border-brand/40'
-                  }`}
-                >
-                  <span className="block font-bold">{slot.label}</span>
-                  <span className="mt-1 block text-sm">{slot.timeLabel}</span>
-                  <span className="mt-2 block text-sm text-muted">
-                    {loadingSlots ? '확인 중…' : slot.available ? `잔여 ${slot.remaining}팀` : '마감'}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </section>
+      <AnimatePresence mode="wait">
+        {step === 1 && (
+          <motion.div
+            key="step-1"
+            initial={{ opacity: 0, x: 24 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -24 }}
+            transition={{ duration: 0.22 }}
+            className="space-y-6"
+            data-testid="step-schedule"
+          >
+            <section>
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-[22px] font-bold tracking-tight">날짜를 골라 주세요</h2>
+                <div className="flex items-center gap-1">
+                  <button type="button" data-testid="cal-prev" onClick={() => shiftMonth(-1)} className="inline-flex h-11 w-11 items-center justify-center rounded-full hover:bg-snow" aria-label="이전 달">
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
+                  <p className="min-w-[7.5rem] text-center text-[15px] font-semibold">{monthLabel}</p>
+                  <button type="button" data-testid="cal-next" onClick={() => shiftMonth(1)} className="inline-flex h-11 w-11 items-center justify-center rounded-full hover:bg-snow" aria-label="다음 달">
+                    <ChevronRight className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+              <div className="rounded-[24px] bg-white p-3 shadow-[0_8px_30px_rgba(25,31,40,0.04)] sm:p-4">
+                <div className="grid grid-cols-7 gap-1 text-center text-[13px] font-medium text-muted">
+                  {['일', '월', '화', '수', '목', '금', '토'].map((day) => (
+                    <div key={day} className="py-2">{day}</div>
+                  ))}
+                  {weeks.flat().map((ymd, index) => {
+                    if (!ymd) return <div key={`e-${index}`} className="h-12" />;
+                    const disabled = ymd < today;
+                    const selected = ymd === lessonDate;
+                    return (
+                      <button
+                        key={ymd}
+                        type="button"
+                        data-testid={`day-${ymd}`}
+                        disabled={disabled}
+                        onClick={() => setLessonDate(ymd)}
+                        className={`h-12 rounded-full text-[15px] transition-colors ${
+                          selected
+                            ? 'bg-brand font-bold text-white'
+                            : disabled
+                              ? 'cursor-not-allowed text-line'
+                              : 'hover:bg-ice'
+                        }`}
+                      >
+                        {Number(ymd.slice(-2))}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </section>
 
-        <section className="card p-6 md:p-7">
-          <h2 className="mb-5 text-xl font-bold">예약자 정보</h2>
-          <div className="grid gap-4 sm:grid-cols-2">
+            <section>
+              <h2 className="mb-3 text-[22px] font-bold tracking-tight">스키장</h2>
+              <div className="flex flex-wrap gap-2">
+                {SKI_RESORTS.map((resort) => {
+                  const selected = skiResort === resort.value;
+                  return (
+                    <button
+                      key={resort.value}
+                      type="button"
+                      data-testid={`resort-${resort.value}`}
+                      onClick={() => setSkiResort(resort.value)}
+                      className={`min-h-12 rounded-full px-4 text-[15px] font-semibold transition-colors ${
+                        selected ? 'bg-ink text-white' : 'bg-white text-ink ring-1 ring-line hover:bg-snow'
+                      }`}
+                    >
+                      {resort.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
+            <section>
+              <h2 className="mb-3 text-[22px] font-bold tracking-tight">시간대</h2>
+              <div className="grid gap-2">
+                {slots.map((slot) => {
+                  const selected = slotId === slot.id;
+                  const disabled = loadingSlots || !slot.available;
+                  return (
+                    <button
+                      key={slot.id}
+                      type="button"
+                      data-testid={`slot-${slot.id}`}
+                      disabled={disabled}
+                      onClick={() => setSlotId(slot.id)}
+                      className={`flex min-h-[72px] items-center justify-between rounded-[20px] px-5 text-left transition-all ${
+                        selected
+                          ? 'bg-ice ring-2 ring-brand'
+                          : disabled
+                            ? 'cursor-not-allowed bg-snow text-muted'
+                            : 'bg-white ring-1 ring-line hover:ring-brand/40'
+                      }`}
+                    >
+                      <span>
+                        <span className="block text-[17px] font-bold">{slot.label}</span>
+                        <span className="mt-0.5 block text-[14px] text-muted">{slot.timeLabel}</span>
+                      </span>
+                      <span className={`text-[13px] font-semibold ${slot.available ? 'text-brand' : 'text-muted'}`}>
+                        {loadingSlots ? '확인 중' : slot.available ? `잔여 ${slot.remaining}팀` : '마감'}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          </motion.div>
+        )}
+
+        {step === 2 && (
+          <motion.div
+            key="step-2"
+            initial={{ opacity: 0, x: 24 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -24 }}
+            transition={{ duration: 0.22 }}
+            className="space-y-6"
+            data-testid="step-info"
+          >
+            <h2 className="text-[22px] font-bold tracking-tight">예약자 정보를 알려 주세요</h2>
             <label className="block">
-              <span className="mb-1.5 block text-[15px] font-medium">이름</span>
-              <input value={customerName} onChange={(e) => setCustomerName(e.target.value)} required className={inputClass} placeholder="홍길동" autoComplete="name" />
+              <span className="mb-2 block text-[14px] font-semibold text-muted">이름</span>
+              <input
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+                required
+                className={inputClass}
+                placeholder="홍길동"
+                autoComplete="name"
+                data-testid="input-name"
+              />
             </label>
             <label className="block">
-              <span className="mb-1.5 block text-[15px] font-medium">연락처</span>
-              <input value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} required className={inputClass} placeholder="010-1234-5678" autoComplete="tel" inputMode="tel" />
+              <span className="mb-2 block text-[14px] font-semibold text-muted">휴대폰 번호</span>
+              <input
+                value={customerPhone}
+                onChange={(e) => setCustomerPhone(formatPhoneDisplay(e.target.value))}
+                required
+                className={inputClass}
+                placeholder="010-1234-5678"
+                autoComplete="tel"
+                inputMode="tel"
+                data-testid="input-phone"
+              />
             </label>
-            <label className="block">
-              <span className="mb-1.5 block text-[15px] font-medium">총 인원</span>
-              <input type="number" min={1} max={8} value={participants} onChange={(e) => setParticipants(Number(e.target.value))} required className={inputClass} />
-            </label>
-            <label className="block">
-              <span className="mb-1.5 block text-[15px] font-medium">아이 인원</span>
-              <input type="number" min={0} max={8} value={childCount} onChange={(e) => setChildCount(Number(e.target.value))} required className={inputClass} />
-            </label>
-          </div>
-          <fieldset className="mt-5">
-            <legend className="mb-2 text-[15px] font-medium">강습 종목</legend>
-            <div className="flex flex-wrap gap-2">
-              {LESSON_TYPES.map((type) => (
-                <label
-                  key={type.value}
-                  className={`cursor-pointer rounded-lg border-2 px-4 py-2 font-semibold ${
-                    lessonType === type.value ? 'border-brand bg-ice text-brand' : 'border-line'
-                  }`}
-                >
-                  <input type="radio" className="sr-only" checked={lessonType === type.value} onChange={() => setLessonType(type.value)} />
-                  {type.label}
-                </label>
-              ))}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <span className="mb-2 block text-[14px] font-semibold text-muted">총 인원</span>
+                <Stepper value={participants} min={1} max={8} onChange={(n) => {
+                  setParticipants(n);
+                  if (childCount > n) setChildCount(n);
+                }} testId="input-participants" />
+              </div>
+              <div>
+                <span className="mb-2 block text-[14px] font-semibold text-muted">아이 인원</span>
+                <Stepper value={childCount} min={0} max={participants} onChange={setChildCount} testId="input-children" />
+              </div>
             </div>
-          </fieldset>
-          <label className="mt-5 block">
-            <span className="mb-1.5 block text-[15px] font-medium">요청 사항 (선택)</span>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={4}
-              className={inputClass}
-              placeholder="아이 나이, 처음 타는지, 여강사 요청 등"
-            />
-          </label>
-        </section>
-      </div>
+            <fieldset>
+              <legend className="mb-2 text-[14px] font-semibold text-muted">강습 종목</legend>
+              <div className="grid grid-cols-3 gap-2">
+                {LESSON_TYPES.map((type) => (
+                  <button
+                    key={type.value}
+                    type="button"
+                    data-testid={`type-${type.value}`}
+                    onClick={() => setLessonType(type.value)}
+                    className={`min-h-14 rounded-2xl text-[16px] font-semibold ${
+                      lessonType === type.value ? 'bg-ink text-white' : 'bg-white ring-1 ring-line'
+                    }`}
+                  >
+                    {type.label}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+            <label className="block">
+              <span className="mb-2 block text-[14px] font-semibold text-muted">요청 사항 (선택)</span>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                rows={4}
+                className={inputClass}
+                placeholder="아이 나이, 처음 타는지, 여강사 요청 등"
+                data-testid="input-notes"
+              />
+            </label>
+          </motion.div>
+        )}
 
-      <aside className="lg:col-span-1">
-        <div className="card sticky top-24 p-6">
-          <h3 className="mb-4 text-lg font-bold">예약 요약</h3>
-          <dl className="space-y-3 text-[15px]">
-            <div className="flex justify-between gap-4"><dt className="text-muted">날짜</dt><dd className="font-medium">{lessonDate}</dd></div>
-            <div className="flex justify-between gap-4"><dt className="text-muted">스키장</dt><dd className="font-medium">{SKI_RESORTS.find((r) => r.value === skiResort)?.label}</dd></div>
-            <div className="flex justify-between gap-4"><dt className="text-muted">시간</dt><dd className="font-medium">{LESSON_SLOTS.find((s) => s.id === slotId)?.timeLabel || '미선택'}</dd></div>
-            <div className="flex justify-between gap-4"><dt className="text-muted">인원</dt><dd className="font-medium">{participants}명 / 아이 {childCount}명</dd></div>
-          </dl>
-          {error && <p className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
-          <button type="submit" disabled={submitting || !slotId} className="btn-primary mt-6 w-full py-4 text-lg">
-            {submitting ? '접수 중…' : '강습 예약하기'}
+        {step === 3 && (
+          <motion.div
+            key="step-3"
+            initial={{ opacity: 0, x: 24 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -24 }}
+            transition={{ duration: 0.22 }}
+            data-testid="step-confirm"
+          >
+            <h2 className="text-[22px] font-bold tracking-tight">이 내용으로 예약할까요?</h2>
+            <p className="mt-2 text-[15px] text-muted">접수 후 사장님이 확인 전화를 드립니다. 강습비는 별도입니다.</p>
+            <dl className="mt-6 overflow-hidden rounded-[24px] bg-white shadow-[0_8px_30px_rgba(25,31,40,0.04)]" data-testid="booking-summary">
+              {[
+                ['날짜', lessonDate],
+                ['스키장', resortLabel],
+                ['시간', selectedSlot?.timeLabel],
+                ['종목', typeLabel],
+                ['이름', customerName.trim()],
+                ['연락처', customerPhone],
+                ['인원', `${participants}명 · 아이 ${childCount}명`],
+                ['요청', notes.trim() || '없음'],
+              ].map(([k, v]) => (
+                <div key={k} className="flex items-start justify-between gap-6 border-b border-line px-5 py-4 last:border-0">
+                  <dt className="shrink-0 text-[15px] text-muted">{k}</dt>
+                  <dd className="text-right text-[16px] font-semibold">{v}</dd>
+                </div>
+              ))}
+            </dl>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {error && (
+        <p className="mt-5 rounded-2xl bg-red-50 px-4 py-3 text-[14px] font-medium text-red-600" data-testid="booking-error">
+          {error}
+        </p>
+      )}
+
+      <div className="sticky bottom-0 -mx-4 mt-8 flex gap-2 bg-gradient-to-t from-snow via-snow to-snow/0 px-4 pb-5 pt-6">
+        {step > 1 && (
+          <button
+            type="button"
+            data-testid="booking-back"
+            onClick={() => { setError(''); setStep((s) => (s - 1) as Step); }}
+            className="btn-ghost min-h-14 flex-1"
+          >
+            이전
           </button>
-          <p className="mt-3 text-center text-sm text-muted">예약 후 사장님이 일정 확인 전화를 드립니다.</p>
-        </div>
-      </aside>
-    </form>
+        )}
+        {step < 3 ? (
+          <button
+            type="button"
+            data-testid="booking-next"
+            disabled={!canGoNext()}
+            onClick={goNext}
+            className="btn-primary min-h-14 flex-[2]"
+          >
+            다음
+          </button>
+        ) : (
+          <button
+            type="button"
+            data-testid="booking-submit"
+            disabled={submitting}
+            onClick={handleSubmit}
+            className="btn-primary min-h-14 flex-[2] text-[18px]"
+          >
+            {submitting ? '접수 중…' : '예약 접수하기'}
+          </button>
+        )}
+      </div>
+    </div>
   );
 }

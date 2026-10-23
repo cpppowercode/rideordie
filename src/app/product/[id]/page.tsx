@@ -45,15 +45,15 @@ export default function ProductPage() {
 
                     <div className="flex flex-col">
                         <p className="eyebrow">스키·보드 강습</p>
-                        <h1 className="mt-2 text-3xl font-bold leading-tight md:text-4xl">{PRODUCT_DATA.title}</h1>
-                        <p className="mt-4 text-lg leading-relaxed text-muted">{PRODUCT_DATA.description}</p>
+                        <h1 className="mt-2 text-[32px] font-bold leading-tight tracking-tight md:text-[40px]">{PRODUCT_DATA.title}</h1>
+                        <p className="mt-4 text-[17px] leading-7 text-muted">{PRODUCT_DATA.description}</p>
 
                         <p className="mt-6">
-                            <span className="text-4xl font-extrabold">{PRODUCT_DATA.price.toLocaleString()}</span>
-                            <span className="ml-1 text-xl">원</span>
+                            <span className="text-[40px] font-extrabold tracking-tight">{PRODUCT_DATA.price.toLocaleString()}</span>
+                            <span className="ml-1 text-xl text-muted">원</span>
                         </p>
 
-                        <ul className="mt-8 divide-y divide-line rounded-xl border border-line">
+                        <ul className="mt-8 divide-y divide-line rounded-[24px] border border-line">
                             {FACTS.map(({ icon: Icon, label, value }) => (
                                 <li key={label} className="flex items-center gap-4 px-5 py-4 text-[17px]">
                                     <Icon className="h-5 w-5 shrink-0 text-brand" />
@@ -76,7 +76,7 @@ export default function ProductPage() {
                             ))}
                         </div>
 
-                        <div className="mt-8 flex gap-3 rounded-lg bg-ice p-5">
+                        <div className="mt-8 flex gap-3 rounded-[20px] bg-ice p-5">
                             <Info className="mt-0.5 h-5 w-5 shrink-0 text-brand" />
                             <div>
                                 <p className="font-bold">날짜와 시간을 고르면 바로 접수됩니다</p>
@@ -97,7 +97,7 @@ export default function ProductPage() {
 
                     <div className="mb-12 grid gap-3 sm:grid-cols-2">
                         {PRODUCT_DATA.images.detail.map((src, i) => (
-                            <div key={src} className="relative aspect-[4/5] overflow-hidden rounded-xl bg-snow sm:aspect-[3/4]">
+                            <div key={src} className="relative aspect-[4/5] overflow-hidden rounded-[24px] bg-snow sm:aspect-[3/4]">
                                 <Image
                                     src={src}
                                     alt={`강습 상세 ${i + 1}`}
@@ -117,7 +117,7 @@ export default function ProductPage() {
                     </div>
                 </div>
 
-                <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white/95 backdrop-blur lg:hidden">
+                <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white/90 backdrop-blur-xl lg:hidden">
                     <div className="mx-auto flex max-w-6xl gap-3 px-4 py-3">{actions}</div>
                 </div>
             </div>

@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     const payload = toAdminPayload(input, orderNo);
     const created = await createAdminReservation(payload);
 
-    const noticeSent = await notifyOwner({
+    const notice = await notifyOwner({
       orderNo,
       customerName: input.customerName.trim(),
       customerPhone: payload.customer_phone,
@@ -76,7 +76,9 @@ export async function POST(request: NextRequest) {
       success: true,
       orderNo,
       reservationId: created.id,
-      noticeSent,
+      noticeSent: notice.sent,
+      noticeSkipped: notice.skipped,
+      noticeFailed: notice.failed,
     });
   } catch (error) {
     console.error("booking create error", error);

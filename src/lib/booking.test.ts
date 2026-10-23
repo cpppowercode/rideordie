@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {
   buildNotes,
+  formatPhoneDisplay,
   hasDuplicateBooking,
   normalizePhone,
   slotsOverlap,
@@ -9,6 +10,7 @@ import {
   validateBookingInput,
   type BookingInput,
 } from "./booking";
+import { notifyChannelStatus } from "./notify";
 
 function sample(overrides: Partial<BookingInput> = {}): BookingInput {
   return {
@@ -26,6 +28,8 @@ function sample(overrides: Partial<BookingInput> = {}): BookingInput {
 }
 
 assert.equal(normalizePhone("010-1234-5678"), "01012345678");
+assert.equal(formatPhoneDisplay("01000000000"), "010-0000-0000");
+assert.equal(validateBookingInput(sample({ customerName: "테스트 예약 (삭제 예정)", customerPhone: "010-0000-0000" })), null);
 assert.equal(slotsOverlap(9, 2, 10, 2), true);
 assert.equal(slotsOverlap(9, 2, 11, 2), false);
 assert.equal(slotsOverlap(13, 4, 15, 2), true);
@@ -69,5 +73,12 @@ assert.equal(hasDuplicateBooking(existing, "010-1234-5678", 9, 2), true);
 assert.equal(hasDuplicateBooking(existing, "010-1234-5678", 13, 2), false);
 assert.equal(slotIsFull(existing, "하이원리조트", 9, 2, 1), true);
 assert.equal(slotIsFull(existing, "하이원리조트", 9, 2, 2), false);
+
+const channels = notifyChannelStatus();
+assert.deepEqual(
+  channels.map((c) => c.name),
+  ["email(Resend)", "slack", "discord", "solapi"]
+);
+assert.ok(channels.every((c) => typeof c.configured === "boolean"));
 
 console.log("booking tests passed");

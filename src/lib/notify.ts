@@ -14,6 +14,12 @@ export type BookingNotice = {
   notes: string;
 };
 
+export type NotifyResult = {
+  sent: string[];
+  skipped: string[];
+  failed: string[];
+};
+
 function ownerEmail(): string {
   return process.env.OWNER_NOTIFY_EMAIL || OWNER_EMAIL;
 }
@@ -135,23 +141,43 @@ async function sendSolapi(notice: BookingNotice): Promise<boolean> {
   return true;
 }
 
-export async function notifyOwner(notice: BookingNotice): Promise<string[]> {
-  const sent: string[] = [];
-  const errors: string[] = [];
+export const NOTIFY_CHANNELS = [
+  { name: "email(Resend)", configured: () => Boolean(process.env.RESEND_API_KEY) },
+  { name: "slack", configured: () => Boolean(process.env.SLACK_WEBHOOK_URL) },
+  { name: "discord", configured: () => Boolean(process.env.DISCORD_WEBHOOK_URL) },
+  { name: "solapi", configured: () => Boolean(process.env.SOLAPI_API_KEY && process.env.SOLAPI_API_SECRET && process.env.SOLAPI_TO) },
+] as const;
 
-  const tasks: Array<[string, () => Promise<boolean>]> = [
-    ["email(Resend)", () => sendResend(notice)],
-    ["slack", () => sendWebhook(process.env.SLACK_WEBHOOK_URL, notice, "slack")],
-    ["discord", () => sendWebhook(process.env.DISCORD_WEBHOOK_URL, notice, "discord")],
-    ["solapi", () => sendSolapi(notice)],
+export function notifyChannelStatus() {
+  return NOTIFY_CHANNELS.map((channel) => ({
+    name: channel.name,
+    configured: channel.configured(),
+  }));
+}
+
+export async function notifyOwner(notice: BookingNotice): Promise<NotifyResult> {
+  const sent: string[] = [];
+  const skipped: string[] = [];
+  const failed: string[] = [];
+
+  const tasks: Array<[string, boolean, () => Promise<boolean>]> = [
+    ["email(Resend)", Boolean(process.env.RESEND_API_KEY), () => sendResend(notice)],
+    ["slack", Boolean(process.env.SLACK_WEBHOOK_URL), () => sendWebhook(process.env.SLACK_WEBHOOK_URL, notice, "slack")],
+    ["discord", Boolean(process.env.DISCORD_WEBHOOK_URL), () => sendWebhook(process.env.DISCORD_WEBHOOK_URL, notice, "discord")],
+    ["solapi", Boolean(process.env.SOLAPI_API_KEY && process.env.SOLAPI_API_SECRET && process.env.SOLAPI_TO), () => sendSolapi(notice)],
   ];
 
-  for (const [name, run] of tasks) {
+  for (const [name, ready, run] of tasks) {
+    if (!ready) {
+      skipped.push(name);
+      continue;
+    }
     try {
       if (await run()) sent.push(name);
+      else skipped.push(name);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      errors.push(`${name}: ${message}`);
+      failed.push(`${name}: ${message}`);
       console.error(`[notify] ${name} failed`, error);
     }
   }
@@ -159,8 +185,8 @@ export async function notifyOwner(notice: BookingNotice): Promise<string[]> {
   if (sent.length === 0) {
     console.warn(
       "[notify] 예약은 저장됐지만 사장 알림을 보내지 못했습니다. RESEND_API_KEY 또는 웹훅을 설정해 주세요.",
-      errors
+      { skipped, failed }
     );
   }
-  return sent;
+  return { sent, skipped, failed };
 }

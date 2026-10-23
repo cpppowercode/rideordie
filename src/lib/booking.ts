@@ -1,4 +1,4 @@
-import { BOOKING_SLOT_CAPACITY, LESSON_SLOTS, SKI_RESORTS } from "@/lib/site";
+import { bookingSlotCapacity, LESSON_SLOTS, SKI_RESORTS } from "@/lib/site";
 
 export type BookingInput = {
   customerName: string;
@@ -111,7 +111,7 @@ export function slotIsFull(
   skiResort: string,
   startHour: number,
   durationHours: number,
-  capacity = BOOKING_SLOT_CAPACITY
+  capacity = bookingSlotCapacity()
 ): boolean {
   return overlappingReservations(existing, skiResort, startHour, durationHours).length >= capacity;
 }

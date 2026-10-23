@@ -35,10 +35,13 @@ npm run dev
 
 브라우저에서 [http://localhost:3000](http://localhost:3000)을 열어 결과를 확인하세요.
 
-예약 로직 단위 테스트:
+테스트:
 
 ```bash
-npx tsx src/lib/booking.test.ts
+npm test                 # 예약 로직 단위 테스트
+npx playwright test      # 예약 화면 스크린샷·흐름 (서버 필요)
+E2E_LIVE_ADMIN=1 BOOKING_SLOT_CAPACITY=1 npx playwright test e2e/booking.spec.ts
+                         # 실제 admin.rideordie.kr 에 테스트 예약을 만들고 지웁니다
 ```
 
 ## 환경 변수

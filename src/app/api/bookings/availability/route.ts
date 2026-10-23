@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { listReservationsForDate } from "@/lib/admin-reservations";
 import { overlappingReservations } from "@/lib/booking";
-import { BOOKING_SLOT_CAPACITY, LESSON_SLOTS, SKI_RESORTS } from "@/lib/site";
+import { bookingSlotCapacity, LESSON_SLOTS, SKI_RESORTS } from "@/lib/site";
 
 export async function GET(request: NextRequest) {
   const date = request.nextUrl.searchParams.get("date") || "";
@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    const capacity = bookingSlotCapacity();
     const existing = await listReservationsForDate({ date, skiResort });
     const slots = LESSON_SLOTS.map((slot) => {
       const used = overlappingReservations(
@@ -30,8 +31,8 @@ export async function GET(request: NextRequest) {
         startHour: slot.startHour,
         durationHours: slot.durationHours,
         used,
-        remaining: Math.max(0, BOOKING_SLOT_CAPACITY - used),
-        available: used < BOOKING_SLOT_CAPACITY,
+        remaining: Math.max(0, capacity - used),
+        available: used < capacity,
       };
     });
 
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
       success: true,
       date,
       skiResort,
-      capacity: BOOKING_SLOT_CAPACITY,
+      capacity,
       slots,
     });
   } catch (error) {
