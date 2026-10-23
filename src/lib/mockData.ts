@@ -8,7 +8,7 @@ export const PRODUCT_DATA = {
     images: {
         hero: LESSON_PHOTOS.hero,
         heroMobile: LESSON_PHOTOS.heroMobile,
-        main: LESSON_PHOTOS.lesson,
+        main: "/assets/mainThumb.png",
         sub: [
             LESSON_PHOTOS.kids,
             LESSON_PHOTOS.night,
@@ -36,8 +36,8 @@ export const PRODUCT_DATA = {
         },
         {
             id: "opt-duration",
-            name: "시간대",
-            values: ["2시간 (오전)", "2시간 (오후)", "4시간 (종일)", "2시간 (야간)"],
+            name: "강습 시간",
+            values: ["2시간", "3시간", "4시간"],
         },
         {
             id: "opt-level",

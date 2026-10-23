@@ -7,7 +7,7 @@ const TEST_NAME = "테스트 예약 (삭제 예정)";
 const TEST_PHONE = "010-0000-0000";
 const LESSON_DATE = "2026-12-20";
 const SKI_RESORT = "하이원리조트";
-const SLOT_ID = "night2";
+const START_ID = "09:00";
 
 async function shot(page: import("@playwright/test").Page, name: string, fullPage = true) {
   fs.mkdirSync(ARTIFACT_DIR, { recursive: true });
@@ -42,7 +42,8 @@ test("clean visual captures", async ({ page }, testInfo) => {
   await goToDecember(page);
   await page.getByTestId(`day-${LESSON_DATE}`).click();
   await page.getByTestId(`resort-${SKI_RESORT}`).click();
-  await page.getByTestId(`slot-${SLOT_ID}`).click();
+  await page.getByTestId("duration-2").click();
+  await page.getByTestId(`start-${START_ID}`).click();
   await shot(page, `final_booking_schedule_${suffix}`);
 
   await page.getByTestId("booking-next").click();
@@ -57,7 +58,7 @@ test("clean visual captures", async ({ page }, testInfo) => {
   await shot(page, `final_booking_review_${suffix}`);
 
   await page.goto(
-    `/book/success?orderNo=${encodeURIComponent("WEB_1792754666968_C3ZXY2")}&date=${LESSON_DATE}&resort=${encodeURIComponent(SKI_RESORT)}&time=${encodeURIComponent("18:00–20:00")}&name=${encodeURIComponent(TEST_NAME)}&people=1`
+    `/book/success?orderNo=${encodeURIComponent("WEB_1792754666968_C3ZXY2")}&date=${LESSON_DATE}&resort=${encodeURIComponent(SKI_RESORT)}&time=${encodeURIComponent("09:00~11:00")}&name=${encodeURIComponent(TEST_NAME)}&people=1`
   );
   await expect(page.getByTestId("booking-success")).toBeVisible();
   await shot(page, `final_booking_done_${suffix}`);

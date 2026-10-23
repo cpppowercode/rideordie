@@ -4,15 +4,19 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Minus, Plus } from 'lucide-react';
-import { LESSON_SLOTS, LESSON_TYPES, SKI_RESORTS } from '@/lib/site';
+import { LESSON_TYPES, SKI_RESORTS } from '@/lib/site';
 import { formatPhoneDisplay, todayYmd } from '@/lib/booking';
-import { GROOMING_LABEL, slotOverlapsGrooming } from '@/lib/grooming';
+import {
+  generateLessonStarts,
+  LESSON_DURATIONS,
+  type LessonDurationHours,
+} from '@/lib/hours';
 
 type Step = 1 | 2 | 3;
 
 type SlotAvailability = {
   id: string;
-  label: string;
+  startHour: number;
   timeLabel: string;
   available: boolean;
   remaining: number;
@@ -83,45 +87,68 @@ export function BookingForm() {
   const [viewMonth, setViewMonth] = useState(initial.getMonth());
   const [lessonDate, setLessonDate] = useState(today);
   const [skiResort, setSkiResort] = useState<string>(SKI_RESORTS[0].value);
-  const [slotId, setSlotId] = useState('');
+  const [durationHours, setDurationHours] = useState<LessonDurationHours>(2);
+  const [startHour, setStartHour] = useState<number | null>(null);
   const [lessonType, setLessonType] = useState<string>('ski');
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [participants, setParticipants] = useState(1);
   const [childCount, setChildCount] = useState(1);
   const [notes, setNotes] = useState('');
-  const [slots, setSlots] = useState<SlotAvailability[]>(
-    LESSON_SLOTS.map((slot) => ({
-      id: slot.id,
-      label: slot.label,
-      timeLabel: slot.timeLabel,
-      available: true,
-      remaining: 0,
-    }))
-  );
+  const [liveSlots, setLiveSlots] = useState<SlotAvailability[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
   const weeks = useMemo(() => monthMatrix(viewYear, viewMonth), [viewYear, viewMonth]);
   const monthLabel = `${viewYear}년 ${viewMonth + 1}월`;
-  const selectedSlot = LESSON_SLOTS.find((s) => s.id === slotId);
+  const generatedStarts = useMemo(
+    () => generateLessonStarts(skiResort, durationHours),
+    [skiResort, durationHours]
+  );
+  const selectedStart = generatedStarts.find((slot) => slot.startHour === startHour) || null;
   const resortLabel = SKI_RESORTS.find((r) => r.value === skiResort)?.label;
   const typeLabel = LESSON_TYPES.find((t) => t.value === lessonType)?.label;
+
+  const slots = useMemo(() => {
+    return generatedStarts.map((slot) => {
+      const live = liveSlots.find((item) => item.startHour === slot.startHour);
+      return {
+        id: slot.id,
+        startHour: slot.startHour,
+        timeLabel: slot.timeLabel,
+        available: live ? live.available : true,
+        remaining: live?.remaining ?? 0,
+      };
+    });
+  }, [generatedStarts, liveSlots]);
+
+  useEffect(() => {
+    setStartHour((current) => {
+      if (current == null) return current;
+      return generatedStarts.some((slot) => slot.startHour === current) ? current : null;
+    });
+  }, [generatedStarts]);
 
   useEffect(() => {
     let cancelled = false;
     setLoadingSlots(true);
+    setLiveSlots([]);
     setError('');
-    fetch(`/api/bookings/availability?date=${lessonDate}&skiResort=${encodeURIComponent(skiResort)}`)
+    fetch(
+      `/api/bookings/availability?date=${lessonDate}&skiResort=${encodeURIComponent(skiResort)}&duration=${durationHours}`
+    )
       .then(async (res) => {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || '예약 현황을 불러오지 못했습니다.');
         if (!cancelled) {
-          setSlots(data.slots);
-          setSlotId((current) => {
-            const stillOpen = data.slots.find((slot: SlotAvailability) => slot.id === current && slot.available);
-            return stillOpen ? current : '';
+          setLiveSlots(data.slots);
+          setStartHour((current) => {
+            if (current == null) return current;
+            const stillOpen = data.slots.find(
+              (slot: SlotAvailability) => slot.startHour === current && slot.available
+            );
+            return stillOpen ? current : null;
           });
         }
       })
@@ -134,7 +161,7 @@ export function BookingForm() {
     return () => {
       cancelled = true;
     };
-  }, [lessonDate, skiResort]);
+  }, [lessonDate, skiResort, durationHours]);
 
   const shiftMonth = (delta: number) => {
     const next = new Date(viewYear, viewMonth + delta, 1);
@@ -143,7 +170,7 @@ export function BookingForm() {
   };
 
   const canGoNext = () => {
-    if (step === 1) return Boolean(lessonDate && skiResort && slotId);
+    if (step === 1) return Boolean(lessonDate && skiResort && durationHours && startHour != null);
     if (step === 2) {
       return customerName.trim().length >= 2 && customerPhone.replace(/\D/g, '').length >= 10 && childCount <= participants;
     }
@@ -152,8 +179,8 @@ export function BookingForm() {
 
   const goNext = () => {
     setError('');
-    if (step === 1 && !slotId) {
-      setError('시간대를 선택해 주세요.');
+    if (step === 1 && startHour == null) {
+      setError('시작 시간을 선택해 주세요.');
       return;
     }
     if (step === 2) {
@@ -175,6 +202,10 @@ export function BookingForm() {
 
   const handleSubmit = async () => {
     setError('');
+    if (startHour == null) {
+      setError('시작 시간을 선택해 주세요.');
+      return;
+    }
     setSubmitting(true);
     try {
       const res = await fetch('/api/bookings', {
@@ -188,7 +219,8 @@ export function BookingForm() {
           skiResort,
           lessonType,
           lessonDate,
-          slotId,
+          durationHours,
+          startHour,
           notes,
         }),
       });
@@ -200,7 +232,7 @@ export function BookingForm() {
         orderNo: data.orderNo,
         date: lessonDate,
         resort: skiResort,
-        time: selectedSlot?.timeLabel || '',
+        time: selectedStart?.timeLabel || '',
         name: customerName.trim(),
         people: String(participants),
       });
@@ -312,16 +344,7 @@ export function BookingForm() {
                       key={resort.value}
                       type="button"
                       data-testid={`resort-${resort.value}`}
-                      onClick={() => {
-                        setSkiResort(resort.value);
-                        setSlotId((current) => {
-                          const slot = LESSON_SLOTS.find((item) => item.id === current);
-                          if (!slot) return current;
-                          return slotOverlapsGrooming(resort.value, slot.startHour, slot.durationHours)
-                            ? ''
-                            : current;
-                        });
-                      }}
+                      onClick={() => setSkiResort(resort.value)}
                       className={`min-h-12 rounded-full px-4 text-[15px] font-semibold transition-colors ${
                         selected ? 'bg-ink text-white' : 'bg-white text-ink ring-1 ring-line hover:bg-snow'
                       }`}
@@ -334,31 +357,49 @@ export function BookingForm() {
             </section>
 
             <section>
-              <h2 className="mb-3 text-[22px] font-bold tracking-tight">시간대</h2>
-              <div className="grid gap-2">
-                {slots.map((slot) => {
-                  const selected = slotId === slot.id;
-                  const slotDef = LESSON_SLOTS.find((item) => item.id === slot.id);
-                  const isGrooming = Boolean(
-                    slotDef &&
-                      slotOverlapsGrooming(skiResort, slotDef.startHour, slotDef.durationHours)
+              <h2 className="mb-3 text-[22px] font-bold tracking-tight">강습 시간</h2>
+              <div className="grid grid-cols-3 gap-2">
+                {LESSON_DURATIONS.map((hours) => {
+                  const selected = durationHours === hours;
+                  return (
+                    <button
+                      key={hours}
+                      type="button"
+                      data-testid={`duration-${hours}`}
+                      onClick={() => setDurationHours(hours)}
+                      className={`min-h-14 rounded-2xl text-[16px] font-semibold ${
+                        selected ? 'bg-ink text-white' : 'bg-white text-ink ring-1 ring-line hover:bg-snow'
+                      }`}
+                    >
+                      {hours}시간
+                    </button>
                   );
-                  const disabled = isGrooming || loadingSlots || !slot.available;
-                  const badge = isGrooming
-                    ? GROOMING_LABEL
-                    : loadingSlots
-                      ? '확인 중'
-                      : slot.available
-                        ? `잔여 ${slot.remaining}팀`
-                        : '마감';
+                })}
+              </div>
+            </section>
+
+            <section>
+              <h2 className="mb-1 text-[22px] font-bold tracking-tight">시작 시간</h2>
+              <p className="mb-3 text-[14px] leading-5 text-muted">
+                30분 단위입니다. 정설 시간과 겹치거나 영업 종료를 넘는 시간은 보이지 않아요.
+              </p>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3" data-testid="start-grid">
+                {slots.map((slot) => {
+                  const selected = startHour === slot.startHour;
+                  const disabled = loadingSlots ? false : !slot.available;
+                  const badge = loadingSlots
+                    ? '확인 중'
+                    : slot.available
+                      ? `잔여 ${slot.remaining}팀`
+                      : '마감';
                   return (
                     <button
                       key={slot.id}
                       type="button"
-                      data-testid={`slot-${slot.id}`}
+                      data-testid={`start-${slot.id}`}
                       disabled={disabled}
-                      onClick={() => setSlotId(slot.id)}
-                      className={`flex min-h-[72px] items-center justify-between rounded-[20px] px-5 text-left transition-all ${
+                      onClick={() => setStartHour(slot.startHour)}
+                      className={`flex min-h-[72px] flex-col items-start justify-center rounded-[20px] px-4 py-3 text-left transition-all ${
                         selected
                           ? 'bg-ice ring-2 ring-brand'
                           : disabled
@@ -366,14 +407,11 @@ export function BookingForm() {
                             : 'bg-white ring-1 ring-line hover:ring-brand/40'
                       }`}
                     >
-                      <span>
-                        <span className="block text-[17px] font-bold">{slot.label}</span>
-                        <span className="mt-0.5 block text-[14px] text-muted">{slot.timeLabel}</span>
-                      </span>
+                      <span className="block text-[16px] font-bold leading-5">{slot.timeLabel}</span>
                       <span
-                        data-testid={`slot-badge-${slot.id}`}
-                        className={`text-[13px] font-semibold ${
-                          isGrooming || !slot.available ? 'text-muted' : 'text-brand'
+                        data-testid={`start-badge-${slot.id}`}
+                        className={`mt-1 text-[12px] font-semibold ${
+                          !slot.available && !loadingSlots ? 'text-muted' : 'text-brand'
                         }`}
                       >
                         {badge}
@@ -382,6 +420,11 @@ export function BookingForm() {
                   );
                 })}
               </div>
+              {slots.length === 0 && (
+                <p className="rounded-2xl bg-snow px-4 py-5 text-[14px] text-muted">
+                  이 스키장에서 예약 가능한 시작 시간이 없습니다.
+                </p>
+              )}
             </section>
           </motion.div>
         )}
@@ -482,7 +525,8 @@ export function BookingForm() {
               {[
                 ['날짜', lessonDate],
                 ['스키장', resortLabel],
-                ['시간', selectedSlot?.timeLabel],
+                ['강습 시간', `${durationHours}시간`],
+                ['시간', selectedStart?.timeLabel],
                 ['종목', typeLabel],
                 ['이름', customerName.trim()],
                 ['연락처', customerPhone],

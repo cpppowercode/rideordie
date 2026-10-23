@@ -31,22 +31,6 @@ export const LESSON_TYPES = [
   { value: "both", label: "둘 다" },
 ] as const;
 
-export type LessonSlot = {
-  id: string;
-  label: string;
-  startHour: number;
-  durationHours: number;
-  timeLabel: string;
-};
-
-export const LESSON_SLOTS: LessonSlot[] = [
-  { id: "am2", label: "오전 2시간", startHour: 9, durationHours: 2, timeLabel: "09:00–11:00" },
-  { id: "pm2", label: "오후 2시간", startHour: 13, durationHours: 2, timeLabel: "13:00–15:00" },
-  { id: "am4", label: "오전 4시간", startHour: 9, durationHours: 4, timeLabel: "09:00–13:00" },
-  { id: "pm4", label: "오후 4시간", startHour: 13, durationHours: 4, timeLabel: "13:00–17:00" },
-  { id: "night2", label: "야간 2시간", startHour: 18, durationHours: 2, timeLabel: "18:00–20:00" },
-];
-
 /** Real lesson photos owned by RideOrDie. Stock photos were removed. */
 export const LESSON_PHOTOS = {
   hero: "/images/lessons/hero.webp",

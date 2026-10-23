@@ -1,4 +1,14 @@
-import { bookingSlotCapacity, LESSON_SLOTS, SKI_RESORTS } from "@/lib/site";
+import {
+  findLessonStart,
+  formatLessonRange,
+  isLessonDuration,
+  lessonFitsOperatingHours,
+  normalizeHalfHour,
+} from "@/lib/hours";
+import { slotsOverlap } from "@/lib/overlap";
+import { bookingSlotCapacity, SKI_RESORTS } from "@/lib/site";
+
+export { slotsOverlap };
 
 export type BookingInput = {
   customerName: string;
@@ -8,7 +18,8 @@ export type BookingInput = {
   skiResort: string;
   lessonType: string;
   lessonDate: string;
-  slotId: string;
+  durationHours: number;
+  startHour: number;
   notes?: string;
 };
 
@@ -68,15 +79,6 @@ export function parseLessonDuration(reservation: ExistingReservation): number {
   const end = Number(match[3]) + (match[4] ? Number(match[4]) / 60 : 0);
   const duration = end - start;
   return duration > 0 ? duration : 2;
-}
-
-export function slotsOverlap(
-  startA: number,
-  durationA: number,
-  startB: number,
-  durationB: number
-): boolean {
-  return startA < startB + durationB && startB < startA + durationA;
 }
 
 export function isBlockingReservation(reservation: ExistingReservation): boolean {
@@ -154,8 +156,14 @@ export function validateBookingInput(input: BookingInput): string | null {
   if (!DATE_RE.test(input.lessonDate) || input.lessonDate < todayYmd()) {
     return "예약 날짜를 오늘 이후로 선택해 주세요.";
   }
-  if (!LESSON_SLOTS.some((slot) => slot.id === input.slotId)) {
-    return "시간대를 선택해 주세요.";
+  if (!isLessonDuration(input.durationHours)) {
+    return "강습 시간을 선택해 주세요.";
+  }
+  if (!Number.isFinite(input.startHour)) {
+    return "시작 시간을 선택해 주세요.";
+  }
+  if (!lessonFitsOperatingHours(input.skiResort, input.startHour, input.durationHours)) {
+    return "운영 시간 안에서 시작 시간을 선택해 주세요.";
   }
   if ((input.notes || "").length > 1000) {
     return "메모는 1000자 이내로 작성해 주세요.";
@@ -164,10 +172,13 @@ export function validateBookingInput(input: BookingInput): string | null {
 }
 
 export function buildNotes(input: BookingInput): string {
+  const range = formatLessonRange(input.startHour, input.durationHours);
   const parts = [
     "[홈페이지 예약]",
     `총 ${input.participants}명`,
     `아이 ${input.childCount}명`,
+    `강습 ${input.durationHours}시간`,
+    range,
   ];
   const extra = (input.notes || "").trim();
   if (extra) parts.push(extra);
@@ -180,8 +191,16 @@ export function buildOrderNo(): string {
 }
 
 export function toAdminPayload(input: BookingInput, orderNo: string) {
-  const slot = LESSON_SLOTS.find((item) => item.id === input.slotId);
-  if (!slot) throw new Error("시간대를 선택해 주세요.");
+  if (!isLessonDuration(input.durationHours)) {
+    throw new Error("강습 시간을 선택해 주세요.");
+  }
+  const startHour = normalizeHalfHour(input.startHour);
+  const durationHours = input.durationHours;
+  const timeLabel = formatLessonRange(startHour, durationHours);
+  const slot = findLessonStart(input.skiResort, durationHours, startHour);
+  if (!slot && !lessonFitsOperatingHours(input.skiResort, startHour, durationHours)) {
+    throw new Error("시작 시간을 선택해 주세요.");
+  }
 
   return {
     customer_name: input.customerName.trim(),
@@ -189,8 +208,9 @@ export function toAdminPayload(input: BookingInput, orderNo: string) {
     lesson_type: input.lessonType,
     ski_resort: input.skiResort,
     lesson_date: input.lessonDate,
-    lesson_start_hour: slot.startHour,
-    lesson_duration_hours: slot.durationHours,
+    lesson_start_hour: startHour,
+    lesson_duration_hours: durationHours,
+    lesson_time: timeLabel,
     participants: input.participants,
     insurance_count: 0,
     amount: 0,

@@ -6,9 +6,12 @@ const ARTIFACT_DIR = "/opt/cursor/artifacts/screenshots";
 const STATE_FILE = "/tmp/rideordie-e2e-booking.json";
 const TEST_NAME = "테스트 예약 (삭제 예정)";
 const TEST_PHONE = "010-0000-0000";
-const LESSON_DATE = process.env.E2E_LESSON_DATE || "2026-12-20";
+const LESSON_DATE = process.env.E2E_LESSON_DATE || "2027-01-24";
 const SKI_RESORT = "하이원리조트";
-const SLOT_ID = "night2";
+const DURATION_HOURS = 2;
+const START_HOUR = 9;
+const START_ID = "09:00";
+const TIME_LABEL = "09:00~11:00";
 const ADMIN_URL = "https://admin.rideordie.kr/api/reservations";
 
 type BookingState = {
@@ -46,8 +49,8 @@ function writeState(state: BookingState) {
   fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2));
 }
 
-async function goToDecember(page: Page) {
-  for (let i = 0; i < 8; i += 1) {
+async function goToLessonMonth(page: Page) {
+  for (let i = 0; i < 16; i += 1) {
     if (await page.getByTestId(`day-${LESSON_DATE}`).count()) return;
     await page.getByTestId("cal-next").click();
   }
@@ -55,12 +58,14 @@ async function goToDecember(page: Page) {
 }
 
 async function fillSchedule(page: Page) {
-  await goToDecember(page);
+  await goToLessonMonth(page);
   await page.getByTestId(`day-${LESSON_DATE}`).click();
   await page.getByTestId(`resort-${SKI_RESORT}`).click();
-  const slot = page.getByTestId(`slot-${SLOT_ID}`);
-  await expect(slot).toBeEnabled({ timeout: 20_000 });
-  await slot.click();
+  await page.getByTestId(`duration-${DURATION_HOURS}`).click();
+  const start = page.getByTestId(`start-${START_ID}`);
+  await expect(start).toBeVisible({ timeout: 20_000 });
+  await expect(start).toBeEnabled({ timeout: 20_000 });
+  await start.click();
 }
 
 test.describe("desktop booking", () => {
@@ -77,6 +82,7 @@ test.describe("desktop booking", () => {
     await page.getByTestId("home-cta-book").click();
     await expect(page.getByTestId("booking-form")).toBeVisible();
     await fillSchedule(page);
+    await expect(page.getByTestId("start-grid")).toContainText(TIME_LABEL);
     await shot(page, "booking_step1_desktop");
 
     await page.getByTestId("booking-next").click();
@@ -90,6 +96,8 @@ test.describe("desktop booking", () => {
     await page.getByTestId("booking-next").click();
     await expect(page.getByTestId("step-confirm")).toBeVisible();
     await expect(page.getByTestId("booking-summary")).toContainText(TEST_NAME);
+    await expect(page.getByTestId("booking-summary")).toContainText("2시간");
+    await expect(page.getByTestId("booking-summary")).toContainText(TIME_LABEL);
     await shot(page, "booking_step3_desktop");
 
     const responsePromise = page.waitForResponse(
@@ -126,6 +134,10 @@ test.describe("desktop booking", () => {
     expect(row.customer_name).toBe(TEST_NAME);
     expect(String(row.customer_phone).replace(/\D/g, "")).toBe("01000000000");
     expect(row.ski_resort).toContain("하이원");
+    expect(Number(row.lesson_start_hour)).toBe(START_HOUR);
+    expect(Number(row.lesson_duration_hours)).toBe(DURATION_HOURS);
+    expect(String(row.notes || "")).toMatch(/강습 2시간/);
+    expect(String(row.notes || "")).toMatch(/09:00~11:00/);
     expect(row.reservation_status).toBe("pending");
     expect(row.payment_status).toBe("pending");
     expect(String(row.order_no)).toMatch(/^WEB_/);
@@ -143,7 +155,8 @@ test.describe("desktop booking", () => {
         skiResort: SKI_RESORT,
         lessonType: "ski",
         lessonDate: LESSON_DATE,
-        slotId: SLOT_ID,
+        durationHours: DURATION_HOURS,
+        startHour: START_HOUR,
         notes: "duplicate-phone probe",
       },
     });
@@ -160,7 +173,8 @@ test.describe("desktop booking", () => {
         skiResort: SKI_RESORT,
         lessonType: "ski",
         lessonDate: LESSON_DATE,
-        slotId: SLOT_ID,
+        durationHours: DURATION_HOURS,
+        startHour: START_HOUR,
         notes: "capacity probe",
       },
     });
@@ -235,8 +249,8 @@ test.describe("mobile layout", () => {
 
     const state = readState();
     const successUrl = state.orderNo
-      ? `/book/success?orderNo=${encodeURIComponent(state.orderNo)}&date=${LESSON_DATE}&resort=${encodeURIComponent(SKI_RESORT)}&time=${encodeURIComponent("18:00–20:00")}&name=${encodeURIComponent(TEST_NAME)}&people=1`
-      : "/book/success?orderNo=WEB_PREVIEW&date=2026-12-20&resort=하이원리조트";
+      ? `/book/success?orderNo=${encodeURIComponent(state.orderNo)}&date=${LESSON_DATE}&resort=${encodeURIComponent(SKI_RESORT)}&time=${encodeURIComponent(TIME_LABEL)}&name=${encodeURIComponent(TEST_NAME)}&people=1`
+      : "/book/success?orderNo=WEB_PREVIEW&date=2027-01-24&resort=하이원리조트";
     await page.goto(successUrl);
     await expect(page.getByTestId("booking-success")).toBeVisible();
     await shot(page, "booking_confirmation_mobile");

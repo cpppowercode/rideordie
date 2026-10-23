@@ -1,4 +1,4 @@
-import { slotsOverlap } from "@/lib/booking";
+import { slotsOverlap } from "@/lib/overlap";
 import { SKI_RESORTS } from "@/lib/site";
 
 /**

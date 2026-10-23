@@ -5,7 +5,7 @@
 ## 주요 기능
 
 - 🎿 스키·스노보드 강습 상품 조회 및 예약
-- 📅 날짜·시간대 선택 후 강습 예약 실저장 (admin.rideordie.kr 강습예약과 동기화)
+- 📅 강습 시간(2·3·4시간)과 시작 시간 선택 후 강습 예약 실저장 (admin.rideordie.kr 강습예약과 동기화)
 - 💳 NHN KCP 표준결제
 - 📱 반응형 디자인 (모바일/데스크톱)
 - 🔒 비로그인 예약 지원
@@ -88,14 +88,16 @@ KCP_CERT_INFO=
 - 관리자 코드는 이 레포에 없습니다. Vercel 프로젝트 이름은 `admin` 입니다. GitHub 후보는 `cpppowercode/ski` 였으나 이 토큰으로는 private 레포에 접근하지 못했습니다.
 - 새 마이그레이션을 이 DB에 적용할 필요는 없습니다. 이미 있는 `payments` 행 형식에 맞춰 씁니다.
 
-저장 필드: `customer_name`, `customer_phone`, `lesson_type`, `ski_resort`, `lesson_date`, `lesson_start_hour`, `lesson_duration_hours`, `participants`, `notes`, `order_no`, `amount`, `payment_method=etc`, `payment_status=pending`, `reservation_status=pending`, `tenant_id=rideordie`.
+저장 필드: `customer_name`, `customer_phone`, `lesson_type`, `ski_resort`, `lesson_date`, `lesson_start_hour`, `lesson_duration_hours`, `lesson_time`(예: `10:00~13:00`), `participants`, `notes`(강습 시간과 구간 포함), `order_no`, `amount`, `payment_method=etc`, `payment_status=pending`, `reservation_status=pending`, `tenant_id=rideordie`.
+
+시작 시간은 스키장 영업시간 안에서 30분 단위로 만들고, `src/lib/grooming.ts` 정설 구간과 겹치거나 영업 종료를 넘는 시간은 숨깁니다.
 
 ## 사진 출처
 
 히어로·갤러리는 사장님이 촬영한 실제 강습 사진입니다. 경로는 `src/lib/site.ts` 의 `LESSON_PHOTOS` 입니다. 스톡 사진은 쓰지 않습니다.
 
 - 히어로: `photo_32` 민트 재킷 보더 카빙 (데스크톱·모바일 각각 크롭)
-- 강습 안내: `photo_36` 강사와 아이들
+- 강습 안내: `/assets/mainThumb.png` (PR #3의 `photo_36`에서 되돌림)
 - 갤러리: `photo_12`, `photo_10`, `photo_14`, `photo_37` 등
 
 ## 프로젝트 구조
