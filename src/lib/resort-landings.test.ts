@@ -20,8 +20,15 @@ assert.equal(bookHref("high1"), "/book?resort=high1");
 assert.equal(resortCanonical("high1"), "https://rideordie.kr/resorts/high1");
 assert.equal(resortLandingBySlug("missing"), undefined);
 assert.equal(REGULAR_PRICE_TABLE.amounts["1:1"][2], 150_000);
-assert.equal(EARLY_BIRD_COPY, "얼리버드 할인 기간 있음");
-assert.equal(EARLY_BIRD_COPY.includes("2월"), false);
+assert.equal(
+  EARLY_BIRD_COPY,
+  "1:1 2시간 정가 15만원, 각 리조트 개장 후 첫 2주 안에 예약하거나 2월 중순 이후 강습은 특가 14만원"
+);
+assert.equal(EARLY_BIRD_COPY.includes("2월 한 달"), false);
+assert.equal(
+  JSON.stringify(RESORT_LANDINGS).includes("2월 한 달"),
+  false
+);
 
 const titles = new Set(RESORT_LANDINGS.map((row) => row.title));
 const descriptions = new Set(RESORT_LANDINGS.map((row) => row.description));
