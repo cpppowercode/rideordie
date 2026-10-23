@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { PRODUCT_DATA } from "@/lib/mockData";
-import { INSTAGRAM_URL } from "@/lib/site";
+import { INSTAGRAM_URL, TEACHING_RESORTS_COPY, TEACHING_RESORTS_INLINE } from "@/lib/site";
 
 const STEPS = [
   { title: "날짜와 시간", body: "원하는 스키장과 강습 시간(2·3·4시간)을 고릅니다. 정설·마감된 시간은 바로 보이지 않아요." },
@@ -12,13 +12,13 @@ const STEPS = [
 const HIGHLIGHTS = [
   { k: "레벨", v: "입문부터 상급 카빙까지" },
   { k: "구성", v: "1:1 · 소그룹 현장 강습" },
-  { k: "장소", v: "하이원 · 비발디 · 용평 등" },
+  { k: "장소", v: TEACHING_RESORTS_INLINE },
   { k: "운영", v: "연중무휴 010-2028-2744" },
 ];
 
 const FAQ = [
   { q: "상담 없이 바로 예약할 수 있나요?", a: "네. 홈페이지에서 강습 시간과 시작 시간을 고르면 바로 접수됩니다. 정설·마감된 시간은 선택할 수 없고, 확인 후 연락드립니다." },
-  { q: "강습은 어디서 진행하나요?", a: "하이원, 비발디파크, 웰리힐리파크, 용평, 지산, 곤지암 등 예약 시 선택한 스키장에서 진행합니다." },
+  { q: "강습은 어디서 진행하나요?", a: `${TEACHING_RESORTS_COPY}에서 강습합니다. 예약 시 선택한 스키장에서 진행합니다.` },
   { q: "스키를 처음 타는데 괜찮을까요?", a: "네. 입문(첫 스키)부터 상급(카빙)까지 실력에 맞춰 진행합니다. 아이 강습도 가능합니다." },
   { q: "일정을 바꾸거나 취소하고 싶어요.", a: "예약일 3일 전까지는 위약금 없이 날짜·시간을 변경할 수 있습니다. 강습 당일 취소는 환불되지 않습니다. 기상 악화 등 긴급한 경우 고객센터로 연락해 주세요." },
 ];
@@ -57,8 +57,8 @@ export default function Home() {
             라이딩을 가르칩니다.
           </h1>
           <p className="animate-fade-up mt-4 max-w-xl text-[16px] leading-7 text-white/85 md:mt-5 md:text-[20px]" style={{ animationDelay: "160ms" }}>
-            입문부터 상급까지, 레벨에 맞춰 1:1 또는 소그룹으로 진행합니다.
-            날짜와 시간만 고르면 예약이 끝나요.
+            {TEACHING_RESORTS_COPY}에서 강습합니다. 입문부터 상급까지, 레벨에 맞춰
+            1:1 또는 소그룹으로 진행합니다. 날짜와 시간만 고르면 예약이 끝나요.
           </p>
           <div className="animate-fade-up mt-7 flex flex-col gap-3 sm:flex-row md:mt-9" style={{ animationDelay: "240ms" }}>
             <Link href="/book" className="btn-primary px-8 py-4 text-[18px]" data-testid="home-cta-book">
@@ -104,7 +104,7 @@ export default function Home() {
           <dl className="mt-8 divide-y divide-line border-y border-line text-[16px]">
             <div className="flex gap-8 py-5">
               <dt className="w-16 shrink-0 text-muted">장소</dt>
-              <dd className="font-medium">하이원 · 비발디 · 웰리힐리 · 용평 등</dd>
+              <dd className="font-medium">{TEACHING_RESORTS_INLINE}</dd>
             </div>
             {PRODUCT_DATA.options.map((opt) => (
               <div key={opt.id} className="flex gap-8 py-5">

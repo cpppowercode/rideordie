@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Instagram } from "lucide-react";
-import { INSTAGRAM_URL } from "@/lib/site";
+import { INSTAGRAM_URL, TEACHING_RESORTS_COPY } from "@/lib/site";
 
 export function Footer() {
   return (
@@ -11,7 +11,7 @@ export function Footer() {
           <div className="md:col-span-2">
             <Image src="/logo.svg" alt="RideOrDie" width={88} height={40} className="h-9 w-auto" />
             <p className="mt-5 max-w-sm text-[16px] leading-7 text-muted">
-              하이원 리조트 기반 스키·스노보드 강습.
+              {TEACHING_RESORTS_COPY}에서 스키·스노보드 강습합니다.
               <br />
               스키를 가르치는 게 아니라, 라이딩을 가르칩니다.
             </p>
