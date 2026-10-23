@@ -1,31 +1,36 @@
 import Link from "next/link";
 import Image from "next/image";
+import type { Metadata } from "next";
 import { PRODUCT_DATA } from "@/lib/mockData";
-import { INSTAGRAM_URL, TEACHING_RESORTS_COPY, TEACHING_RESORTS_INLINE } from "@/lib/site";
+import { INSTAGRAM_URL, SITE_URL, TEACHING_RESORTS_COPY, TEACHING_RESORTS_INLINE } from "@/lib/site";
+import { pageAlternates } from "@/lib/seo";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { TrustBadges } from "@/components/seo/TrustBadges";
+import { KakaoConsultLink } from "@/components/seo/KakaoConsultLink";
+import { faqPageJsonLd } from "@/lib/jsonld";
+import { RESORT_LANDINGS, SITE_FAQ } from "@/lib/resort-landings";
+
+export const metadata: Metadata = {
+  alternates: pageAlternates(SITE_URL),
+};
 
 const STEPS = [
   { title: "날짜와 시간", body: "원하는 스키장과 강습 시간(2·3·4시간)을 고릅니다. 정설·마감된 시간은 바로 보이지 않아요." },
   { title: "연락처만", body: "이름과 휴대폰 번호, 인원을 남기면 접수가 끝납니다." },
-  { title: "확인 전화", body: "사장님이 일정을 확인하고, 당일 스키장에서 만납니다." },
+  { title: "확인 안내", body: "사장님이 일정을 확인하고, 당일 스키장에서 만납니다." },
 ];
 
 const HIGHLIGHTS = [
   { k: "레벨", v: "입문부터 상급 카빙까지" },
-  { k: "구성", v: "1:1 · 소그룹 현장 강습" },
+  { k: "구성", v: "1:1 · 2:1 · 3:1 현장 강습" },
   { k: "장소", v: TEACHING_RESORTS_INLINE },
-  { k: "운영", v: "연중무휴 010-2028-2744" },
-];
-
-const FAQ = [
-  { q: "상담 없이 바로 예약할 수 있나요?", a: "네. 홈페이지에서 강습 시간과 시작 시간을 고르면 바로 접수됩니다. 정설·마감된 시간은 선택할 수 없고, 확인 후 연락드립니다." },
-  { q: "강습은 어디서 진행하나요?", a: `${TEACHING_RESORTS_COPY}에서 강습합니다. 예약 시 선택한 스키장에서 진행합니다.` },
-  { q: "스키를 처음 타는데 괜찮을까요?", a: "네. 입문(첫 스키)부터 상급(카빙)까지 실력에 맞춰 진행합니다. 아이 강습도 가능합니다." },
-  { q: "일정을 바꾸거나 취소하고 싶어요.", a: "예약일 3일 전까지는 위약금 없이 날짜·시간을 변경할 수 있습니다. 강습 당일 취소는 환불되지 않습니다. 기상 악화 등 긴급한 경우 고객센터로 연락해 주세요." },
+  { k: "상담", v: "카톡 상담 · 연중무휴" },
 ];
 
 export default function Home() {
   return (
     <div className="flex flex-col" data-testid="home-page">
+      <JsonLd data={faqPageJsonLd(SITE_FAQ)} />
       <section className="relative isolate min-h-[calc(100svh-4rem)] overflow-hidden bg-ink text-white" data-testid="home-hero">
         <Image
           src={PRODUCT_DATA.images.hero}
@@ -60,16 +65,17 @@ export default function Home() {
             {TEACHING_RESORTS_COPY}에서 강습합니다. 입문부터 상급까지, 레벨에 맞춰
             1:1 또는 소그룹으로 진행합니다. 날짜와 시간만 고르면 예약이 끝나요.
           </p>
+          <TrustBadges className="animate-fade-up mt-5" />
           <div className="animate-fade-up mt-7 flex flex-col gap-3 sm:flex-row md:mt-9" style={{ animationDelay: "240ms" }}>
             <Link href="/book" className="btn-primary px-8 py-4 text-[18px]" data-testid="home-cta-book">
               강습 예약하기
             </Link>
-            <Link
-              href={`/product/${PRODUCT_DATA.id}`}
+            <KakaoConsultLink
               className="btn border border-white/30 bg-white/10 px-8 py-4 text-[18px] text-white backdrop-blur hover:bg-white/20"
+              testId="home-cta-kakao"
             >
-              강습 안내 보기
-            </Link>
+              카톡 상담
+            </KakaoConsultLink>
           </div>
         </div>
       </section>
@@ -83,6 +89,27 @@ export default function Home() {
             </div>
           ))}
         </div>
+      </section>
+
+      <section className="mx-auto w-full max-w-6xl px-5 py-16 md:py-20">
+        <p className="eyebrow">RESORTS</p>
+        <h2 className="mt-3 text-[32px] font-bold tracking-tight md:text-[40px]">강습 스키장</h2>
+        <p className="mt-3 max-w-2xl text-[16px] leading-7 text-muted">
+          하이원, 비발디, 웰리힐리, 용평, 지산에서 어린이 스키·보드강습을 진행합니다.
+        </p>
+        <ul className="mt-8 grid gap-3 sm:grid-cols-2 md:grid-cols-5">
+          {RESORT_LANDINGS.map((row) => (
+            <li key={row.slug}>
+              <Link
+                href={`/resorts/${row.slug}`}
+                className="flex h-full flex-col rounded-[20px] border border-line bg-white px-5 py-6 transition-colors hover:border-brand hover:bg-ice"
+              >
+                <span className="text-[18px] font-bold tracking-tight">{row.shortName}</span>
+                <span className="mt-1 text-[14px] text-muted">어린이 스키·보드강습</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section className="mx-auto grid w-full max-w-6xl items-center gap-12 px-5 py-20 md:grid-cols-2 md:gap-16 md:py-28">
@@ -114,7 +141,7 @@ export default function Home() {
             ))}
             <div className="flex gap-8 py-5">
               <dt className="w-16 shrink-0 text-muted">강습비</dt>
-              <dd className="text-[22px] font-bold tracking-tight">{PRODUCT_DATA.price.toLocaleString()}원</dd>
+              <dd className="text-[22px] font-bold tracking-tight">1:1 2시간 정가 15만원</dd>
             </div>
           </dl>
           <div className="mt-8 flex flex-wrap gap-3">
@@ -140,10 +167,10 @@ export default function Home() {
             ))}
           </ol>
           <p className="mt-10 text-[16px] text-muted">
-            부모님 전화 상담도 가능합니다. 연중 무휴{" "}
-            <a href="tel:010-2028-2744" className="font-semibold text-ink underline decoration-line underline-offset-4">
-              010-2028-2744
-            </a>
+            일정 상담은 카카오톡으로 받습니다.{" "}
+            <KakaoConsultLink className="font-semibold text-ink underline decoration-line underline-offset-4">
+              카톡 상담 열기
+            </KakaoConsultLink>
           </p>
         </div>
       </section>
@@ -182,7 +209,7 @@ export default function Home() {
         <p className="eyebrow">FAQ</p>
         <h2 className="mt-3 text-[32px] font-bold tracking-tight md:text-[40px]">자주 묻는 질문</h2>
         <div className="mt-8 border-t border-line">
-          {FAQ.map(({ q, a }) => (
+          {SITE_FAQ.map(({ q, a }) => (
             <details key={q} className="group border-b border-line py-6">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-[18px] font-semibold tracking-tight">
                 {q}
@@ -198,11 +225,16 @@ export default function Home() {
         <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-8 px-5 md:flex-row md:items-center">
           <div>
             <h2 className="text-[28px] font-bold tracking-tight md:text-[36px]">이번 시즌, 슬로프에서 만나요</h2>
-            <p className="mt-3 text-[16px] text-white/70">날짜만 고르면 바로 접수됩니다. 확인 전화는 사장님이 드려요.</p>
+            <p className="mt-3 text-[16px] text-white/70">날짜만 고르면 바로 접수됩니다. 확인 안내는 사장님이 드려요.</p>
           </div>
-          <Link href="/book" className="btn-primary px-8 py-4 text-[18px]">
-            강습 예약하기
-          </Link>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <KakaoConsultLink className="btn border border-white/30 bg-white/10 px-8 py-4 text-[18px] text-white hover:bg-white/20">
+              카톡 상담
+            </KakaoConsultLink>
+            <Link href="/book" className="btn-primary px-8 py-4 text-[18px]">
+              강습 예약하기
+            </Link>
+          </div>
         </div>
       </section>
     </div>

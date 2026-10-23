@@ -1,4 +1,10 @@
+import { pageMetadata } from "@/lib/seo";
 
+export const metadata = pageMetadata({
+  title: "이용약관 · 개인정보 처리방침",
+  description: "라이드올다이 서비스 이용약관과 개인정보 처리방침. 환불은 제9조를 따릅니다.",
+  path: "/service-policy",
+});
 
 export default function ServicePolicy() {
   return (
@@ -100,7 +106,7 @@ export default function ServicePolicy() {
           </div>
           
           <div>
-            <h2 className="text-2xl font-semibold mb-4 text-gray-800">제9조 (결제 및 환불 규정)</h2>
+            <h2 id="article-9" className="scroll-mt-24 text-2xl font-semibold mb-4 text-gray-800">제9조 (결제 및 환불 규정)</h2>
             <div className="text-gray-600 leading-relaxed space-y-4">
               <div>
                 <p className="font-semibold mb-2">결제수단:</p>

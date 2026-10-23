@@ -1,6 +1,13 @@
 export const INSTAGRAM_URL = "https://www.instagram.com/ski.rideordie/";
+export const NAVER_BLOG_URL = "https://blog.naver.com/rideordieski";
+export const KAKAO_CONSULT_URL = "https://pf.kakao.com/_xfWMxaG";
 export const OWNER_EMAIL = "contact@rideordie.kr";
+/** 약관·사업자 고지 등 법적 표기에만 사용. 마케팅 화면에는 노출하지 않습니다. */
 export const OWNER_PHONE = "010-2028-2744";
+
+export const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL || "https://rideordie.kr"
+).replace(/\/$/, "");
 
 export const ADMIN_RESERVATIONS_URL =
   process.env.ADMIN_RESERVATIONS_URL ||
