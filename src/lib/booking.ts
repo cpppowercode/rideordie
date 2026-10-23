@@ -6,6 +6,7 @@ import {
   normalizeHalfHour,
 } from "@/lib/hours";
 import { slotsOverlap } from "@/lib/overlap";
+import type { AdminBadgeRates } from "@/lib/admin-badge-fees";
 import { quoteLessonPrice, MAX_PARTICIPANTS_PER_INSTRUCTOR } from "@/lib/pricing";
 import { bookingSlotCapacity, SKI_RESORTS } from "@/lib/site";
 
@@ -194,9 +195,13 @@ export function validateBookingInput(input: BookingInput): string | null {
   return null;
 }
 
-export function buildNotes(input: BookingInput, quoteAmount?: number): string {
+export function buildNotes(
+  input: BookingInput,
+  quoteAmount?: number,
+  rates?: AdminBadgeRates
+): string {
   const range = formatLessonRange(input.startHour, input.durationHours);
-  const quote = quoteLessonPrice(input);
+  const quote = quoteLessonPrice({ ...input, rates });
   const parts = [
     "[홈페이지 예약]",
     `총 ${input.participants}명`,
@@ -222,7 +227,11 @@ export function buildOrderNo(): string {
   return `WEB_${Date.now()}_${rand}`.slice(0, 50);
 }
 
-export function toAdminPayload(input: BookingInput, orderNo: string) {
+export function toAdminPayload(
+  input: BookingInput,
+  orderNo: string,
+  rates?: AdminBadgeRates
+) {
   if (!isLessonDuration(input.durationHours)) {
     throw new Error("강습 시간을 선택해 주세요.");
   }
@@ -233,7 +242,7 @@ export function toAdminPayload(input: BookingInput, orderNo: string) {
   if (!slot && !lessonFitsOperatingHours(input.skiResort, startHour, durationHours)) {
     throw new Error("시작 시간을 선택해 주세요.");
   }
-  const quote = quoteLessonPrice(input);
+  const quote = quoteLessonPrice({ ...input, rates });
   if (!quote) {
     throw new Error("강습 요금을 계산할 수 없습니다.");
   }
@@ -252,7 +261,7 @@ export function toAdminPayload(input: BookingInput, orderNo: string) {
     amount: quote.payableAmount,
     payment_method: "app",
     order_no: orderNo,
-    notes: buildNotes(input, quote.payableAmount),
+    notes: buildNotes(input, quote.payableAmount, rates),
     instructor_id: null,
     payment_status: "pending",
     reservation_status: "pending",

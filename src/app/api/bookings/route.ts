@@ -10,6 +10,7 @@ import {
 } from "@/lib/booking";
 import { GROOMING_BOOKING_ERROR, slotOverlapsGrooming } from "@/lib/grooming";
 import { findLessonStart, isLessonDuration, normalizeHalfHour } from "@/lib/hours";
+import { loadAdminBadgeRates } from "@/lib/admin-badge-fees";
 import { quoteLessonPrice } from "@/lib/pricing";
 import { tossClientKey, tossCustomerKey, tossIsTestMode } from "@/lib/toss";
 
@@ -70,13 +71,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const quote = quoteLessonPrice(input);
+    const rates = await loadAdminBadgeRates();
+    const quote = quoteLessonPrice({ ...input, rates });
     if (!quote) {
       return NextResponse.json({ error: "강습 요금을 계산할 수 없습니다." }, { status: 400 });
     }
 
     const orderNo = buildOrderNo();
-    const payload = toAdminPayload({ ...input, startHour: start, durationHours: duration }, orderNo);
+    const payload = toAdminPayload(
+      { ...input, startHour: start, durationHours: duration },
+      orderNo,
+      rates
+    );
     const created = await createAdminReservation(payload);
 
     return NextResponse.json({

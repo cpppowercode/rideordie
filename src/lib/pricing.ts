@@ -1,3 +1,8 @@
+import {
+  badgeFeeForResort,
+  FALLBACK_ADMIN_BADGE_RATES,
+  type AdminBadgeRates,
+} from "@/lib/admin-badge-fees";
 import type { LessonDurationHours } from "@/lib/hours";
 import { SKI_RESORTS } from "@/lib/site";
 
@@ -11,13 +16,13 @@ type ResortValue = (typeof SKI_RESORTS)[number]["value"];
 
 /**
  * 패찰비 산정 단위.
- * 기본은 강습 1회당 1회(`per-lesson`). 인원당으로 바꾸려면 리조트 config의
- * `badgeFeeBasis`만 `"per-person"`으로 바꾸면 `quoteLessonPrice`가 인원을 곱합니다.
+ * 지산·비발디는 관리자 계산기 기준으로 인원당(`per-person`).
+ * 비발디는 거기에 시간당을 곱합니다.
  */
 export type SurchargeBasis = "per-lesson" | "per-person";
 
 export type ResortSurcharge = {
-  /** 패찰비 단가(원). 0이면 부과하지 않음. */
+  /** 패찰비 1인당 단가(원). 2시간 기준. 0이면 부과하지 않음. */
   badgeFee: number;
   badgeFeeBasis: SurchargeBasis;
 };
@@ -27,27 +32,29 @@ const ZERO_SURCHARGE: ResortSurcharge = {
   badgeFeeBasis: "per-lesson",
 };
 
+function surchargeFromRates(skiResort: ResortValue, rates: AdminBadgeRates): ResortSurcharge {
+  const quoted = badgeFeeForResort({
+    skiResort,
+    participants: 1,
+    durationHours: 2,
+    rates,
+  });
+  if (quoted.amount <= 0) return { ...ZERO_SURCHARGE };
+  return { badgeFee: quoted.unit, badgeFeeBasis: quoted.basis };
+}
+
 /**
- * 리조트별 패찰비.
- * 지산·비발디만 부과하고 나머지는 0입니다.
- * 기본 산정은 강습 1회당(`per-lesson`). 인원당으로 바꾸려면 `badgeFeeBasis`만 `"per-person"`으로 바꿉니다.
- *
- * TODO-owner-confirm: 비발디·지산 `badgeFee` 금액을 넣어 주세요. 지금은 0원 플레이스홀더입니다.
+ * 리조트별 패찰비(2시간 1인 기준 단가).
+ * 실제 청구액은 `badgeFeeForResort`(인원·시간)를 씁니다.
+ * 숫자는 admin `/Calculator` `passFee` 공식 (fallback: 비발디 12,500원/인원/시간,
+ * 지산 2시간 35,000원/인원).
  */
 export const RESORT_SURCHARGES: Record<ResortValue, ResortSurcharge> = {
-  하이원리조트: { ...ZERO_SURCHARGE },
-  비발디파크: {
-    // TODO-owner-confirm: 비발디 패찰비(원)
-    badgeFee: 0,
-    badgeFeeBasis: "per-lesson",
-  },
-  웰리힐리파크: { ...ZERO_SURCHARGE },
-  용평리조트: { ...ZERO_SURCHARGE },
-  지산포레스트: {
-    // TODO-owner-confirm: 지산 패찰비(원)
-    badgeFee: 0,
-    badgeFeeBasis: "per-lesson",
-  },
+  하이원리조트: surchargeFromRates("하이원리조트", FALLBACK_ADMIN_BADGE_RATES),
+  비발디파크: surchargeFromRates("비발디파크", FALLBACK_ADMIN_BADGE_RATES),
+  웰리힐리파크: surchargeFromRates("웰리힐리파크", FALLBACK_ADMIN_BADGE_RATES),
+  용평리조트: surchargeFromRates("용평리조트", FALLBACK_ADMIN_BADGE_RATES),
+  지산포레스트: surchargeFromRates("지산포레스트", FALLBACK_ADMIN_BADGE_RATES),
 };
 
 type PriceTable = Record<InstructorRatio, Record<LessonDurationHours, number>>;
@@ -141,11 +148,12 @@ export type PriceQuote = {
   regularAmount: number;
   /** 이번 예약 강습비 (얼리버드면 특가, 패찰비 제외). */
   lessonAmount: number;
-  /** 패찰비 단가 (config 값). */
+  /** 패찰비 1인당 단가 (이번 강습 시간 기준). */
   badgeFeeUnit: number;
-  /** 적용된 패찰비 총액. per-person이면 단가 × 인원. */
+  /** 적용된 패찰비 총액. 지산·비발디는 인원당. */
   badgeFee: number;
   badgeFeeBasis: SurchargeBasis;
+  badgeFeeLabel: string;
   /** 결제 총액 = lessonAmount + badgeFee. */
   payableAmount: number;
   earlyBird: boolean;
@@ -153,12 +161,25 @@ export type PriceQuote = {
   earlyBirdReasonLabel: string;
 };
 
-export function resortSurcharge(skiResort: string | undefined): ResortSurcharge {
+export function resortSurcharge(
+  skiResort: string | undefined,
+  rates: AdminBadgeRates = FALLBACK_ADMIN_BADGE_RATES
+): ResortSurcharge {
   if (!skiResort) return ZERO_SURCHARGE;
-  return RESORT_SURCHARGES[skiResort as ResortValue] ?? ZERO_SURCHARGE;
+  if ((skiResort as ResortValue) in RESORT_SURCHARGES || skiResort.includes("지산") || skiResort.includes("비발디")) {
+    const quoted = badgeFeeForResort({
+      skiResort,
+      participants: 1,
+      durationHours: 2,
+      rates,
+    });
+    if (quoted.amount <= 0) return { ...ZERO_SURCHARGE };
+    return { badgeFee: quoted.unit, badgeFeeBasis: quoted.basis };
+  }
+  return ZERO_SURCHARGE;
 }
 
-/** 단가와 산정 단위로 패찰비 총액을 계산합니다. 나중에 per-person으로 바꿔도 호출부는 그대로입니다. */
+/** 단가와 산정 단위로 패찰비 총액을 계산합니다. 지산·비발디 실청구는 `badgeFeeForResort`를 씁니다. */
 export function badgeFeeAmount(surcharge: ResortSurcharge, participants: number): number {
   if (surcharge.badgeFee <= 0) return 0;
   if (surcharge.badgeFeeBasis === "per-person") {
@@ -281,6 +302,7 @@ export function quoteLessonPrice(input: {
   lessonDate: string;
   skiResort?: string;
   now?: Date;
+  rates?: AdminBadgeRates;
 }): PriceQuote | null {
   const duration = input.durationHours;
   if (duration !== 2 && duration !== 3 && duration !== 4) return null;
@@ -293,17 +315,22 @@ export function quoteLessonPrice(input: {
   });
   const regularAmount = REGULAR_PRICES[ratio][duration];
   const lessonAmount = decision.earlyBird ? EARLY_BIRD_PRICES[ratio][duration] : regularAmount;
-  const surcharge = resortSurcharge(input.skiResort);
-  const badgeFee = badgeFeeAmount(surcharge, input.participants);
+  const billed = badgeFeeForResort({
+    skiResort: input.skiResort,
+    participants: input.participants,
+    durationHours: duration,
+    rates: input.rates ?? FALLBACK_ADMIN_BADGE_RATES,
+  });
   return {
     ratio,
     durationHours: duration,
     regularAmount,
     lessonAmount,
-    badgeFeeUnit: surcharge.badgeFee,
-    badgeFee,
-    badgeFeeBasis: surcharge.badgeFeeBasis,
-    payableAmount: lessonAmount + badgeFee,
+    badgeFeeUnit: billed.unit,
+    badgeFee: billed.amount,
+    badgeFeeBasis: billed.basis,
+    badgeFeeLabel: billed.label,
+    payableAmount: lessonAmount + billed.amount,
     earlyBird: decision.earlyBird,
     earlyBirdReasons: decision.reasons,
     earlyBirdReasonLabel: decision.reasonLabel,

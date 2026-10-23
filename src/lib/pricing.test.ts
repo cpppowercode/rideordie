@@ -14,6 +14,7 @@ import {
   RESORT_OPENING_DATES,
   RESORT_SURCHARGES,
 } from "./pricing";
+import { badgeFeeForResort } from "./admin-badge-fees";
 import { SKI_RESORTS } from "./site";
 
 assert.equal(ratioFromParticipants(1), "1:1");
@@ -108,10 +109,10 @@ assert.equal(SKI_RESORTS.every((resort) => resort.value in RESORT_SURCHARGES), t
 assert.equal(RESORT_SURCHARGES["하이원리조트"].badgeFee, 0);
 assert.equal(RESORT_SURCHARGES["용평리조트"].badgeFee, 0);
 assert.equal(RESORT_SURCHARGES["웰리힐리파크"].badgeFee, 0);
-assert.equal(RESORT_SURCHARGES["비발디파크"].badgeFeeBasis, "per-lesson");
-assert.equal(RESORT_SURCHARGES["지산포레스트"].badgeFeeBasis, "per-lesson");
-assert.ok(Number.isFinite(RESORT_SURCHARGES["비발디파크"].badgeFee));
-assert.ok(Number.isFinite(RESORT_SURCHARGES["지산포레스트"].badgeFee));
+assert.equal(RESORT_SURCHARGES["비발디파크"].badgeFeeBasis, "per-person");
+assert.equal(RESORT_SURCHARGES["지산포레스트"].badgeFeeBasis, "per-person");
+assert.equal(RESORT_SURCHARGES["비발디파크"].badgeFee, 25_000);
+assert.equal(RESORT_SURCHARGES["지산포레스트"].badgeFee, 35_000);
 
 assert.equal(badgeFeeAmount({ badgeFee: 10_000, badgeFeeBasis: "per-lesson" }, 3), 10_000);
 assert.equal(badgeFeeAmount({ badgeFee: 10_000, badgeFeeBasis: "per-person" }, 3), 30_000);
@@ -126,9 +127,25 @@ const jisan = quoteLessonPrice({
 });
 assert.ok(jisan);
 assert.equal(jisan.lessonAmount, 170_000);
-assert.equal(jisan.badgeFee, badgeFeeAmount(RESORT_SURCHARGES["지산포레스트"], 2));
+assert.equal(jisan.badgeFee, badgeFeeForResort({
+  skiResort: "지산포레스트",
+  participants: 2,
+  durationHours: 2,
+}).amount);
+assert.equal(jisan.badgeFee, 70_000);
 assert.equal(jisan.payableAmount, jisan.lessonAmount + jisan.badgeFee);
-assert.equal(jisan.badgeFeeBasis, "per-lesson");
+assert.equal(jisan.badgeFeeBasis, "per-person");
+
+const vivaldi = quoteLessonPrice({
+  durationHours: 2,
+  participants: 1,
+  lessonDate: "2099-01-15",
+  skiResort: "비발디파크",
+  now: new Date("2026-10-23T00:00:00+09:00"),
+});
+assert.ok(vivaldi);
+assert.equal(vivaldi.badgeFee, 25_000);
+assert.equal(vivaldi.payableAmount, vivaldi.lessonAmount + 25_000);
 
 const high1 = quoteLessonPrice({
   durationHours: 2,

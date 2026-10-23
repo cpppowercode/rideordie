@@ -137,4 +137,22 @@ test.describe("toss payment", () => {
       JSON.stringify({ booking: body, adminRow: row, cleanup, paid }, null, 2)
     );
   });
+
+  test("지산·비발디 패찰비를 인원당으로 보여 준다", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "데스크톱에서 패찰비를 확인합니다.");
+
+    await page.goto("/book");
+    await expect(page.getByTestId("booking-form")).toBeVisible();
+    await goToLessonMonth(page);
+    await page.getByTestId(`day-${LESSON_DATE}`).click();
+    await page.getByTestId("duration-2").click();
+
+    await page.getByTestId("resort-지산포레스트").click();
+    await expect(page.getByTestId("live-price-badge")).toContainText("패찰비 35,000원");
+    await shot(page, "booking_jisan_badge_fee");
+
+    await page.getByTestId("resort-비발디파크").click();
+    await expect(page.getByTestId("live-price-badge")).toContainText("패찰비 25,000원");
+    await shot(page, "booking_vivaldi_badge_fee");
+  });
 });

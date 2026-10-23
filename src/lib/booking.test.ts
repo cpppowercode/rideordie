@@ -89,11 +89,9 @@ assert.ok(jisanQuote);
 const jisanPayload = toAdminPayload(sample({ skiResort: "지산포레스트" }), "WEB_JISAN");
 assert.equal(jisanPayload.amount, jisanQuote.payableAmount);
 assert.equal(jisanPayload.amount, jisanQuote.lessonAmount + jisanQuote.badgeFee);
-if (jisanQuote.badgeFee > 0) {
-  assert.match(jisanPayload.notes, /패찰비/);
-} else {
-  assert.doesNotMatch(jisanPayload.notes, /패찰비/);
-}
+assert.equal(jisanQuote.badgeFee, 70_000);
+assert.equal(jisanPayload.amount, 240_000);
+assert.match(jisanPayload.notes, /패찰비/);
 assert.match(payload.notes, /홈페이지 예약/);
 assert.match(payload.notes, /강습 2시간/);
 assert.match(payload.notes, /09:00~11:00/);

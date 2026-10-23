@@ -11,6 +11,10 @@ import {
   LESSON_DURATIONS,
   type LessonDurationHours,
 } from '@/lib/hours';
+import {
+  FALLBACK_ADMIN_BADGE_RATES,
+  type AdminBadgeRates,
+} from '@/lib/admin-badge-fees';
 import { formatWon, MAX_PARTICIPANTS_PER_INSTRUCTOR, quoteLessonPrice } from '@/lib/pricing';
 
 type Step = 1 | 2 | 3;
@@ -102,6 +106,7 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [badgeRates, setBadgeRates] = useState<AdminBadgeRates>(FALLBACK_ADMIN_BADGE_RATES);
 
   const weeks = useMemo(() => monthMatrix(viewYear, viewMonth), [viewYear, viewMonth]);
   const monthLabel = `${viewYear}년 ${viewMonth + 1}월`;
@@ -112,7 +117,13 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
   const selectedStart = generatedStarts.find((slot) => slot.startHour === startHour) || null;
   const resortLabel = SKI_RESORTS.find((r) => r.value === skiResort)?.label;
   const typeLabel = LESSON_TYPES.find((t) => t.value === lessonType)?.label;
-  const price = quoteLessonPrice({ durationHours, participants, lessonDate, skiResort });
+  const price = quoteLessonPrice({
+    durationHours,
+    participants,
+    lessonDate,
+    skiResort,
+    rates: badgeRates,
+  });
 
   const slots = useMemo(() => {
     return generatedStarts.map((slot) => {
@@ -133,6 +144,24 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
       return generatedStarts.some((slot) => slot.startHour === current) ? current : null;
     });
   }, [generatedStarts]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/pricing/badge-fees')
+      .then(async (res) => {
+        if (!res.ok) return null;
+        return (await res.json()) as AdminBadgeRates;
+      })
+      .then((rates) => {
+        if (!cancelled && rates?.vivaldiPerPersonPerHour) setBadgeRates(rates);
+      })
+      .catch(() => {
+        /* fallback rates already on screen */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -563,7 +592,9 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
                   </div>
                   {price.badgeFee > 0 && (
                     <div className="flex items-start justify-between gap-6 border-b border-line px-5 py-4">
-                      <dt className="shrink-0 text-[15px] text-muted">패찰비</dt>
+                      <dt className="shrink-0 text-[15px] text-muted">
+                        패찰비{price.badgeFeeLabel ? ` (${price.badgeFeeLabel})` : ''}
+                      </dt>
                       <dd className="text-right text-[16px] font-semibold" data-testid="price-badge-fee">
                         {formatWon(price.badgeFee)}
                       </dd>

@@ -10,6 +10,7 @@
     "test": "npx tsx src/lib/booking.test.ts && npx tsx src/lib/pricing.test.ts && npx tsx src/lib/admin-badge-fees.test.ts && npx tsx src/lib/resort-landings.test.ts",
     "test:booking": "npx tsx src/lib/booking.test.ts",
     "test:pricing": "npx tsx src/lib/pricing.test.ts",
+    "test:badge-fees": "npx tsx src/lib/admin-badge-fees.test.ts",
     "test:e2e": "playwright test"
   },
   "dependencies": {
