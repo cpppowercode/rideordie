@@ -1,192 +1,53 @@
-# 토스페이먼츠 결제 연동 설정 가이드
+# NHN KCP 결제 설정
 
-## 1. Supabase 프로젝트 설정
+`/book` 예약 마법사 끝의 **결제하기**가 KCP 결제창을 엽니다. 승인(`res_cd=0000`)이 끝난 뒤에만 관리자 DB를 확정하고 사장 알림을 보냅니다. 실패·취소는 미확정입니다.
 
-### 1.1 Supabase 계정 및 프로젝트 생성
+금액은 서버에서만 계산합니다. 클라이언트 금액을 믿지 않습니다.
 
-1. [Supabase](https://supabase.com)에 가입
-2. 새 프로젝트 생성
-3. 프로젝트 설정 완료 대기 (약 2분)
+- 가격표: `src/lib/pricing.ts` (`REGULAR_PRICES`, `EARLY_BIRD_PRICES`)
+- 얼리버드: 개장 후 첫 2주 안에 예약하거나 2월 중순 이후 강습
+- 지산·비발디 패찰비: 관리자 계산기(`/Calculator`) 요율, 실패 시 fallback
 
-### 1.2 데이터베이스 테이블 생성
+장비·리프트·숙소는 별도입니다. 결제 화면에는 전화·주소를 넣지 않습니다.
 
-1. Supabase 대시보드에서 `SQL Editor` 메뉴로 이동
-2. 프로젝트 루트의 `supabase-schema.sql` 파일 내용 복사
-3. SQL Editor에 붙여넣기 후 실행
+## 환경 변수
 
-### 1.3 API 키 확인
-
-1. Supabase 대시보드에서 `Settings` > `API` 메뉴로 이동
-2. 다음 정보 복사:
-   - `Project URL`
-   - `anon public key`
-   - `service_role key` (⚠️ 절대 노출 금지)
-
----
-
-## 2. 토스페이먼츠 설정
-
-### 2.1 가맹점 등록
-
-1. [토스페이먼츠 개발자센터](https://developers.tosspayments.com) 가입
-2. 테스트 연동 정보 확인:
-   - 클라이언트 키 (test_ck_...)
-   - 시크릿 키 (test_sk_...) (⚠️ 절대 노출 금지)
-
-### 2.2 실제 운영 전환 (선택)
-
-1. 사업자 정보 등록
-2. 심사 완료 후 실제 키 발급
-3. 환경 변수를 테스트 키에서 실제 키로 변경
-
----
-
-## 3. 환경 변수 설정
-
-### 3.1 .env.local 파일 생성
-
-프로젝트 루트에 `.env.local` 파일을 생성하고 다음 내용 입력:
+테스트(기본):
 
 ```env
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
-
-# Toss Payments
-NEXT_PUBLIC_TOSS_CLIENT_KEY=test_ck_YOUR_CLIENT_KEY
-TOSS_SECRET_KEY=test_sk_YOUR_SECRET_KEY
+NEXT_PUBLIC_KCP_SITE_CD=T0000
+NEXT_PUBLIC_KCP_SITE_NAME=라이드올다이
+NEXT_PUBLIC_KCP_ENV=test
+KCP_ENV=test
+# 비워 두면 T0000 공개 테스트 인증서를 씁니다.
+KCP_CERT_INFO=
 ```
 
-### 3.2 값 입력
+라이브 전환 — 코드 수정 없이 아래만 바꿉니다.
 
-- Supabase 값: 1.3에서 복사한 값 입력
-- 토스페이먼츠 값: 2.1에서 복사한 값 입력
-
-⚠️ **주의**: `.env.local` 파일은 절대 Git에 커밋하지 마세요!
-
----
-
-## 4. 개발 서버 실행
-
-```bash
-npm run dev
+```env
+NEXT_PUBLIC_KCP_SITE_CD=계약_사이트코드
+NEXT_PUBLIC_KCP_SITE_NAME=라이드올다이
+NEXT_PUBLIC_KCP_ENV=production
+KCP_ENV=production
+KCP_CERT_INFO=-----BEGIN CERTIFICATE-----...-----END CERTIFICATE-----
 ```
 
-브라우저에서 `http://localhost:3000` 접속
+`KCP_CERT_INFO`는 파트너관리자 → 기술관리센터 → 인증센터 → KCP-PG API에서 받은 PEM을 한 줄로 넣습니다.
 
----
+## 테스트 결제
 
-## 5. 테스트 결제
+1. `/book`에서 날짜·시간·연락처를 고른 뒤 **결제하기**
+2. KCP 테스트 사이트코드 `T0000` 결제창이 열립니다
+3. 승인되면 `/book/pay/success` 및 관리자 `payments` 행이 `confirmed` / `completed`
+4. 창을 닫거나 실패하면 `/book/pay/fail`, 예약은 `pending`
 
-### 5.1 테스트 카드 정보
+실제 출금은 되지 않습니다. 카카오머니만 당일 취소가 필요합니다.
 
-- **카드번호**: 4000-0000-0000-0008
-- **유효기간**: 미래 날짜 (예: 12/28)
-- **CVC**: 아무 숫자 3자리 (예: 123)
-- **비밀번호**: 아무 숫자 2자리 (예: 12)
+## 관련 API
 
-### 5.2 테스트 절차
-
-1. 상품 페이지 접속
-2. 옵션 선택 후 "바로 구매" 클릭
-3. 주문자 정보 입력
-4. "주문하기" 버튼 클릭
-5. 토스페이먼츠 결제창에서 테스트 카드 정보 입력
-6. 결제 완료 확인
-
-### 5.3 결제 확인
-
-1. Supabase 대시보드에서 `Table Editor` > `orders` 확인
-2. `payment_logs` 테이블에서 결제 로그 확인
-
----
-
-## 6. 배포 설정 (Vercel)
-
-### 6.1 환경 변수 설정
-
-Vercel 대시보드에서:
-
-1. Project Settings > Environment Variables
-2. `.env.local`의 모든 환경 변수 추가
-3. Production, Preview, Development 모두 체크
-
-### 6.2 배포
-
-```bash
-git add .
-git commit -m "Add payment integration"
-git push
-```
-
-Vercel이 자동으로 배포합니다.
-
----
-
-## 7. 실제 운영 전환 체크리스트
-
-- [ ] 토스페이먼츠 가맹점 심사 완료
-- [ ] 실제 클라이언트 키/시크릿 키 발급
-- [ ] 환경 변수를 테스트 키에서 실제 키로 변경
-- [ ] Vercel 환경 변수 업데이트
-- [ ] 실제 카드로 소액 테스트 결제
-- [ ] Supabase RLS 정책 검토
-- [ ] 에러 로깅 설정 (Sentry 등)
-- [ ] 결제 웹훅 설정 (선택)
-
----
-
-## 8. 문제 해결
-
-### 결제창이 안 뜨는 경우
-
-- 브라우저 콘솔에서 에러 확인
-- `NEXT_PUBLIC_TOSS_CLIENT_KEY` 환경 변수 확인
-- 개발 서버 재시작
-
-### 결제 승인 실패
-
-- Supabase 테이블이 생성되었는지 확인
-- `TOSS_SECRET_KEY` 환경 변수 확인
-- 네트워크 탭에서 API 응답 확인
-
-### 주문이 DB에 저장 안 됨
-
-- Supabase URL과 키 확인
-- `supabase-schema.sql` 실행 여부 확인
-- Supabase 대시보드에서 직접 테이블 확인
-
----
-
-## 9. 보안 주의사항
-
-1. **시크릿 키 절대 노출 금지**
-   - `SUPABASE_SERVICE_ROLE_KEY`
-   - `TOSS_SECRET_KEY`
-   - 이 키들은 서버에서만 사용되며, 클라이언트에 노출되면 안 됨
-
-2. **환경 변수 관리**
-   - `.env.local`을 `.gitignore`에 포함
-   - 팀원과는 안전한 방법으로 공유 (1Password, LastPass 등)
-
-3. **Supabase RLS 설정**
-   - `supabase-schema.sql`의 정책 검토
-   - 필요시 추가 보안 정책 설정
-
----
-
-## 10. 도움말
-
-문제가 발생하면:
-
-1. 개발자 콘솔 확인
-2. Supabase 로그 확인
-3. 토스페이먼츠 개발자 센터 문서 참고
-4. 이슈 생성 또는 contact@rideordie.kr로 문의
-
----
-
-**설정 완료!** 🎉
-
-이제 실제 결제를 테스트해보세요.
+- `POST /api/bookings` — 미확정 예약 생성, 서버 금액
+- `GET /api/payments/kcp/order` — 결제 화면용 주문
+- `POST /api/payments/kcp/register` — 모바일 거래등록
+- `POST /api/payments/confirm` — PC 승인 + 예약 확정
+- `POST /api/payments/kcp/return` — 모바일 콜백 + 예약 확정

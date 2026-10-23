@@ -9,9 +9,12 @@ export const SITE_URL = (
   process.env.NEXT_PUBLIC_SITE_URL || "https://rideordie.kr"
 ).replace(/\/$/, "");
 
+export const ADMIN_ORIGIN =
+  process.env.ADMIN_ORIGIN || "https://admin.rideordie.kr";
+
 export const ADMIN_RESERVATIONS_URL =
   process.env.ADMIN_RESERVATIONS_URL ||
-  "https://admin.rideordie.kr/api/reservations";
+  `${ADMIN_ORIGIN}/api/reservations`;
 
 export const ADMIN_TENANT_ID =
   process.env.ADMIN_TENANT_ID || "rideordie";

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { finalizeKcpBookingPayment, loadBookingPayContext } from "@/lib/kcp-booking";
 import { approveKcpPayment, expectedPayAmount, toKcpPayType } from "@/lib/kcp";
 
 export async function POST(request: NextRequest) {
@@ -13,6 +14,26 @@ export async function POST(request: NextRequest) {
 
     if (!enc_data || !enc_info || !tran_cd || !orderId) {
       return NextResponse.json({ error: "필수 정보가 누락되었습니다." }, { status: 400 });
+    }
+
+    const booking = await loadBookingPayContext(orderId);
+    if (booking) {
+      const result = await finalizeKcpBookingPayment({
+        enc_data,
+        enc_info,
+        tran_cd,
+        orderId,
+        payMethod,
+      });
+      return NextResponse.json({
+        success: true,
+        alreadyPaid: result.alreadyPaid,
+        payment: {
+          orderId: result.orderNo,
+          totalAmount: result.amount,
+          tno: result.tno,
+        },
+      });
     }
 
     const amount = expectedPayAmount();

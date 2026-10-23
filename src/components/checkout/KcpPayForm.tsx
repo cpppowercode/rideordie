@@ -19,6 +19,8 @@ type Props = {
   approvalKey?: string;
   payUrl?: string;
   retUrl?: string;
+  successPath?: string;
+  failPath?: string;
 };
 
 export function KcpPayForm({
@@ -31,6 +33,8 @@ export function KcpPayForm({
   approvalKey,
   payUrl,
   retUrl,
+  successPath = "/checkout/success",
+  failPath = "/checkout/fail",
 }: Props) {
   const formRef = useRef<HTMLFormElement>(null);
   const method = KCP_PAY_METHODS[payMethod];
@@ -55,7 +59,11 @@ export function KcpPayForm({
       const ordrId = (form.elements.namedItem("ordr_idxx") as HTMLInputElement | null)?.value;
 
       if (resCd !== "0000") {
-        alert(`[${resCd || "FAIL"}] ${resMsg || "결제가 취소되었거나 실패했습니다."}`);
+        const fail = new URL(failPath, window.location.origin);
+        fail.searchParams.set("orderId", ordrId || orderId);
+        fail.searchParams.set("code", resCd || "FAIL");
+        fail.searchParams.set("message", resMsg || "결제가 취소되었거나 실패했습니다.");
+        window.location.href = fail.toString();
         closeEvent?.();
         return;
       }
@@ -76,12 +84,19 @@ export function KcpPayForm({
           if (!data.success) throw new Error(data.error || "결제 승인에 실패했습니다.");
           const amountValue = data.payment?.totalAmount ?? amount;
           const tno = data.payment?.tno || "";
-          window.location.href = `/checkout/success?orderId=${encodeURIComponent(ordrId || orderId)}&amount=${amountValue}&tno=${encodeURIComponent(tno)}`;
+          const success = new URL(successPath, window.location.origin);
+          success.searchParams.set("orderId", ordrId || orderId);
+          success.searchParams.set("amount", String(amountValue));
+          success.searchParams.set("tno", tno);
+          window.location.href = success.toString();
         })
         .catch((error: unknown) => {
           const message = error instanceof Error ? error.message : "결제 승인에 실패했습니다.";
-          alert(message);
-          closeEvent?.();
+          const fail = new URL(failPath, window.location.origin);
+          fail.searchParams.set("orderId", ordrId || orderId);
+          fail.searchParams.set("code", "APPROVE_FAIL");
+          fail.searchParams.set("message", message);
+          window.location.href = fail.toString();
         });
     };
 
@@ -92,7 +107,7 @@ export function KcpPayForm({
     script.async = true;
     script.dataset.kcpHub = "true";
     document.body.appendChild(script);
-  }, [amount, method.payType, orderId]);
+  }, [amount, failPath, method.payType, orderId, successPath]);
 
   return (
     <form ref={formRef} name="order_info" method="post" acceptCharset="euc-kr">

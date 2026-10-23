@@ -23,6 +23,8 @@ import {
   lessonFitsOperatingHours,
   RESORT_HOURS,
 } from "./hours";
+import { quoteLessonPrice } from "./pricing";
+import { EXTRAS_COPY, kcpSiteCd } from "./kcp-public";
 import { SKI_RESORTS } from "./site";
 
 function sample(overrides: Partial<BookingInput> = {}): BookingInput {
@@ -73,7 +75,26 @@ assert.equal(payload.lesson_duration_hours, 2);
 assert.equal(payload.lesson_time, "09:00~11:00");
 assert.equal(payload.payment_status, "pending");
 assert.equal(payload.reservation_status, "pending");
-assert.equal(payload.payment_method, "etc");
+assert.equal(payload.payment_method, "kcp");
+assert.equal(payload.amount, 170_000);
+assert.equal(EXTRAS_COPY, "장비·리프트·숙소는 별도입니다.");
+assert.equal(kcpSiteCd(), "T0000");
+assert.doesNotMatch(payload.notes, /패찰비/);
+assert.match(validateBookingInput(sample({ participants: 4 })) || "", /인원/);
+
+const jisanQuote = quoteLessonPrice({
+  durationHours: 2,
+  participants: 2,
+  lessonDate: "2099-01-15",
+  skiResort: "지산포레스트",
+});
+assert.ok(jisanQuote);
+const jisanPayload = toAdminPayload(sample({ skiResort: "지산포레스트" }), "WEB_JISAN");
+assert.equal(jisanPayload.amount, jisanQuote.payableAmount);
+assert.equal(jisanPayload.amount, jisanQuote.lessonAmount + jisanQuote.badgeFee);
+assert.equal(jisanQuote.badgeFee, 70_000);
+assert.equal(jisanPayload.amount, 240_000);
+assert.match(jisanPayload.notes, /패찰비/);
 assert.match(payload.notes, /홈페이지 예약/);
 assert.match(payload.notes, /강습 2시간/);
 assert.match(payload.notes, /09:00~11:00/);

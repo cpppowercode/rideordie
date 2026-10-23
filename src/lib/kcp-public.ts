@@ -1,6 +1,7 @@
 import { PRODUCT_DATA } from "@/lib/mockData";
 
 export const KCP_SHOP_NAME = "라이드올다이";
+export const EXTRAS_COPY = "장비·리프트·숙소는 별도입니다.";
 
 export const KCP_PAY_METHODS = {
   card: { pc: "100000000000", mobile: "CARD", payType: "PACA", label: "신용카드" },

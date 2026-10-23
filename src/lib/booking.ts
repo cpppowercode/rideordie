@@ -6,6 +6,8 @@ import {
   normalizeHalfHour,
 } from "@/lib/hours";
 import { slotsOverlap } from "@/lib/overlap";
+import type { AdminBadgeRates } from "@/lib/admin-badge-fees";
+import { quoteLessonPrice, MAX_PARTICIPANTS_PER_INSTRUCTOR } from "@/lib/pricing";
 import { bookingSlotCapacity, SKI_RESORTS } from "@/lib/site";
 
 export { slotsOverlap };
@@ -34,11 +36,17 @@ export type ExistingReservation = {
   reservation_status?: string | null;
   payment_status?: string | null;
   participants?: number | null;
+  amount?: number | null;
+  created_at?: string | null;
+  order_no?: string | null;
 };
 
 const PHONE_RE = /^01[016789]\d{7,8}$/;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const BLOCKING_STATUSES = new Set(["cancelled", "canceled", "refunded"]);
+const PAID_STATUSES = new Set(["completed", "paid", "done"]);
+/** Unpaid pending rows hold the slot this long, then availability ignores them. */
+export const PAYMENT_HOLD_MS = 30 * 60 * 1000;
 
 export function normalizePhone(raw: string): string {
   return raw.replace(/[^\d]/g, "");
@@ -81,10 +89,19 @@ export function parseLessonDuration(reservation: ExistingReservation): number {
   return duration > 0 ? duration : 2;
 }
 
+export function isPaidStatus(value: string | null | undefined): boolean {
+  return PAID_STATUSES.has((value || "").toLowerCase());
+}
+
 export function isBlockingReservation(reservation: ExistingReservation): boolean {
   const status = (reservation.reservation_status || "").toLowerCase();
   const payment = (reservation.payment_status || "").toLowerCase();
-  return !BLOCKING_STATUSES.has(status) && !BLOCKING_STATUSES.has(payment);
+  if (BLOCKING_STATUSES.has(status) || BLOCKING_STATUSES.has(payment)) return false;
+  if (!isPaidStatus(payment)) {
+    const created = reservation.created_at ? Date.parse(reservation.created_at) : NaN;
+    if (Number.isFinite(created) && Date.now() - created > PAYMENT_HOLD_MS) return false;
+  }
+  return true;
 }
 
 export function sameResort(a: string, b: string | null | undefined): boolean {
@@ -141,8 +158,12 @@ export function validateBookingInput(input: BookingInput): string | null {
   const phone = normalizePhone(input.customerPhone);
   if (!PHONE_RE.test(phone)) return "휴대폰 번호를 확인해 주세요. 예: 010-1234-5678";
 
-  if (!Number.isInteger(input.participants) || input.participants < 1 || input.participants > 8) {
-    return "인원은 1명에서 8명까지 선택할 수 있습니다.";
+  if (
+    !Number.isInteger(input.participants) ||
+    input.participants < 1 ||
+    input.participants > MAX_PARTICIPANTS_PER_INSTRUCTOR
+  ) {
+    return `인원은 강사 1명당 최대 ${MAX_PARTICIPANTS_PER_INSTRUCTOR}명까지 선택할 수 있습니다.`;
   }
   if (!Number.isInteger(input.childCount) || input.childCount < 0 || input.childCount > input.participants) {
     return "아이 인원은 총 인원 이하로 입력해 주세요.";
@@ -165,21 +186,37 @@ export function validateBookingInput(input: BookingInput): string | null {
   if (!lessonFitsOperatingHours(input.skiResort, input.startHour, input.durationHours)) {
     return "운영 시간 안에서 시작 시간을 선택해 주세요.";
   }
+  if (!quoteLessonPrice(input)) {
+    return "강습 요금을 계산할 수 없습니다. 시간과 인원을 확인해 주세요.";
+  }
   if ((input.notes || "").length > 1000) {
     return "메모는 1000자 이내로 작성해 주세요.";
   }
   return null;
 }
 
-export function buildNotes(input: BookingInput): string {
+export function buildNotes(
+  input: BookingInput,
+  quoteAmount?: number,
+  rates?: AdminBadgeRates
+): string {
   const range = formatLessonRange(input.startHour, input.durationHours);
+  const quote = quoteLessonPrice({ ...input, rates });
   const parts = [
     "[홈페이지 예약]",
     `총 ${input.participants}명`,
+    quote ? `${quote.ratio}` : "",
     `아이 ${input.childCount}명`,
     `강습 ${input.durationHours}시간`,
     range,
-  ];
+  ].filter(Boolean);
+  if (quoteAmount != null) parts.push(`${quoteAmount.toLocaleString("ko-KR")}원`);
+  if (quote && quote.badgeFee > 0) {
+    parts.push(`패찰비 ${quote.badgeFee.toLocaleString("ko-KR")}원`);
+  }
+  if (quote?.earlyBird) {
+    parts.push(quote.earlyBirdReasonLabel ? `얼리버드(${quote.earlyBirdReasonLabel})` : "얼리버드");
+  }
   const extra = (input.notes || "").trim();
   if (extra) parts.push(extra);
   return parts.join(" / ").slice(0, 1000);
@@ -190,7 +227,11 @@ export function buildOrderNo(): string {
   return `WEB_${Date.now()}_${rand}`.slice(0, 50);
 }
 
-export function toAdminPayload(input: BookingInput, orderNo: string) {
+export function toAdminPayload(
+  input: BookingInput,
+  orderNo: string,
+  rates?: AdminBadgeRates
+) {
   if (!isLessonDuration(input.durationHours)) {
     throw new Error("강습 시간을 선택해 주세요.");
   }
@@ -200,6 +241,10 @@ export function toAdminPayload(input: BookingInput, orderNo: string) {
   const slot = findLessonStart(input.skiResort, durationHours, startHour);
   if (!slot && !lessonFitsOperatingHours(input.skiResort, startHour, durationHours)) {
     throw new Error("시작 시간을 선택해 주세요.");
+  }
+  const quote = quoteLessonPrice({ ...input, rates });
+  if (!quote) {
+    throw new Error("강습 요금을 계산할 수 없습니다.");
   }
 
   return {
@@ -213,10 +258,10 @@ export function toAdminPayload(input: BookingInput, orderNo: string) {
     lesson_time: timeLabel,
     participants: input.participants,
     insurance_count: 0,
-    amount: 0,
-    payment_method: "etc",
+    amount: quote.payableAmount,
+    payment_method: "kcp",
     order_no: orderNo,
-    notes: buildNotes(input),
+    notes: buildNotes(input, quote.payableAmount, rates),
     instructor_id: null,
     payment_status: "pending",
     reservation_status: "pending",

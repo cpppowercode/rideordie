@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { loadBookingPayContext } from "@/lib/kcp-booking";
 import {
   expectedPayAmount,
   kcpRegisterUrl,
@@ -25,7 +26,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "지원하지 않는 결제 수단입니다." }, { status: 400 });
     }
 
-    const amount = expectedPayAmount();
+    const booking = await loadBookingPayContext(orderId);
+    const amount = booking?.amount ?? expectedPayAmount();
+    if (!Number.isFinite(amount) || amount <= 0) {
+      return NextResponse.json({ error: "결제 금액이 없습니다." }, { status: 400 });
+    }
+
     const response = await fetch(kcpRegisterUrl(), {
       method: "POST",
       headers: { "Content-Type": "application/json; charset=utf-8" },

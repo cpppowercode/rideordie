@@ -9,8 +9,10 @@ import {
   type BookingInput,
 } from "@/lib/booking";
 import { GROOMING_BOOKING_ERROR, slotOverlapsGrooming } from "@/lib/grooming";
-import { findLessonStart, formatLessonRange, isLessonDuration, normalizeHalfHour } from "@/lib/hours";
-import { notifyOwner } from "@/lib/notify";
+import { findLessonStart, isLessonDuration, normalizeHalfHour } from "@/lib/hours";
+import { loadAdminBadgeRates } from "@/lib/admin-badge-fees";
+import { quoteLessonPrice } from "@/lib/pricing";
+import { isKcpProduction, kcpSiteCd } from "@/lib/kcp-public";
 
 export async function POST(request: NextRequest) {
   try {
@@ -69,30 +71,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const orderNo = buildOrderNo();
-    const payload = toAdminPayload({ ...input, startHour: start, durationHours: duration }, orderNo);
-    const created = await createAdminReservation(payload);
+    const rates = await loadAdminBadgeRates();
+    const quote = quoteLessonPrice({ ...input, rates });
+    if (!quote) {
+      return NextResponse.json({ error: "강습 요금을 계산할 수 없습니다." }, { status: 400 });
+    }
 
-    const notice = await notifyOwner({
+    const orderNo = buildOrderNo();
+    const payload = toAdminPayload(
+      { ...input, startHour: start, durationHours: duration },
       orderNo,
-      customerName: input.customerName.trim(),
-      customerPhone: payload.customer_phone,
-      skiResort: input.skiResort,
-      lessonType: input.lessonType,
-      lessonDate: input.lessonDate,
-      timeLabel: formatLessonRange(start, duration),
-      participants: input.participants,
-      childCount: input.childCount,
-      notes: payload.notes,
-    });
+      rates
+    );
+    const created = await createAdminReservation(payload);
 
     return NextResponse.json({
       success: true,
       orderNo,
       reservationId: created.id,
-      noticeSent: notice.sent,
-      noticeSkipped: notice.skipped,
-      noticeFailed: notice.failed,
+      amount: quote.payableAmount,
+      regularAmount: quote.regularAmount,
+      lessonAmount: quote.lessonAmount,
+      badgeFee: quote.badgeFee,
+      earlyBird: quote.earlyBird,
+      earlyBirdReason: quote.earlyBirdReasonLabel,
+      ratio: quote.ratio,
+      siteCd: kcpSiteCd(),
+      testMode: !isKcpProduction(),
+      payPath: `/book/pay?orderNo=${encodeURIComponent(orderNo)}`,
     });
   } catch (error) {
     console.error("booking create error", error);

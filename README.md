@@ -70,10 +70,12 @@ SOLAPI_TO=
 SOLAPI_KAKAO_PFID=
 SOLAPI_KAKAO_TEMPLATE_ID=
 
-# 결제 (기존)
-NEXT_PUBLIC_KCP_SITE_CD=
+# NHN KCP (/book 결제하기 → 승인 시에만 예약 확정)
+# 테스트 기본값: T0000. 라이브는 사이트코드·인증서만 바꾸면 됩니다.
+NEXT_PUBLIC_KCP_SITE_CD=T0000
 NEXT_PUBLIC_KCP_SITE_NAME=라이드올다이
 NEXT_PUBLIC_KCP_ENV=test
+KCP_ENV=test
 KCP_CERT_INFO=
 ```
 
@@ -88,7 +90,9 @@ KCP_CERT_INFO=
 - 관리자 코드는 이 레포에 없습니다. Vercel 프로젝트 이름은 `admin` 입니다. GitHub 후보는 `cpppowercode/ski` 였으나 이 토큰으로는 private 레포에 접근하지 못했습니다.
 - 새 마이그레이션을 이 DB에 적용할 필요는 없습니다. 이미 있는 `payments` 행 형식에 맞춰 씁니다.
 
-저장 필드: `customer_name`, `customer_phone`, `lesson_type`, `ski_resort`, `lesson_date`, `lesson_start_hour`, `lesson_duration_hours`, `lesson_time`(예: `10:00~13:00`), `participants`, `notes`(강습 시간과 구간 포함), `order_no`, `amount`, `payment_method=etc`, `payment_status=pending`, `reservation_status=pending`, `tenant_id=rideordie`.
+저장 필드: `customer_name`, `customer_phone`, `lesson_type`, `ski_resort`, `lesson_date`, `lesson_start_hour`, `lesson_duration_hours`, `lesson_time`(예: `10:00~13:00`), `participants`, `notes`(강습 시간과 구간 포함), `order_no`, `amount`(서버가 계산한 강습비·패찰비), `payment_method=kcp`, `payment_status=pending` → KCP 승인 후 `completed`, `reservation_status=pending` → 승인 후 `confirmed`, `tenant_id=rideordie`. 실패·취소는 미확정(`pending`)으로 남습니다.
+
+강습비는 `src/lib/pricing.ts`에서 서버가 계산합니다. 얼리버드는 개장 후 첫 2주 안에 예약하거나 2월 중순 이후 강습이면 적용됩니다. 지산·비발디 패찰비는 관리자 계산기 요율입니다.
 
 시작 시간은 스키장 영업시간 안에서 30분 단위로 만들고, `src/lib/grooming.ts` 정설 구간과 겹치거나 영업 종료를 넘는 시간은 숨깁니다.
 
