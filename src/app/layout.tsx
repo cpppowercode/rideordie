@@ -4,15 +4,14 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { organizationJsonLd } from "@/lib/jsonld";
+import { DEFAULT_OG_ALT, DEFAULT_OG_IMAGE } from "@/lib/seo";
 import {
-  LESSON_PHOTOS,
   SITE_URL,
   TEACHING_RESORTS_COPY,
 } from "@/lib/site";
 
 const SITE_TITLE = `라이드올다이 | ${TEACHING_RESORTS_COPY} 스키·보드 강습`;
 const SITE_DESCRIPTION = `${TEACHING_RESORTS_COPY}에서 진행하는 어린이 스키강습·보드강습. 1:1 2시간 정가 15만원. 숙소·리프트권·장비 별도. 카톡 상담과 온라인 예약.`;
-const OG_IMAGE = `${SITE_URL}${LESSON_PHOTOS.hero}`;
 
 const googleVerification =
   process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ||
@@ -43,13 +42,13 @@ export const metadata: Metadata = {
     siteName: "라이드올다이",
     locale: "ko_KR",
     type: "website",
-    images: [{ url: OG_IMAGE, alt: "라이드올다이 스키·보드 강습" }],
+    images: [{ url: DEFAULT_OG_IMAGE, alt: DEFAULT_OG_ALT }],
   },
   twitter: {
     card: "summary_large_image",
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    images: [OG_IMAGE],
+    images: [DEFAULT_OG_IMAGE],
   },
   verification: {
     google: googleVerification,

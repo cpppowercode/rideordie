@@ -1,11 +1,10 @@
-import type { Metadata } from "next";
-import { SITE_URL } from "@/lib/site";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "이용약관 · 개인정보 처리방침",
   description: "라이드올다이 서비스 이용약관과 개인정보 처리방침. 환불은 제9조를 따릅니다.",
-  alternates: { canonical: `${SITE_URL}/service-policy` },
-};
+  path: "/service-policy",
+});
 
 export default function ServicePolicy() {
   return (

@@ -1,5 +1,3 @@
-'use client';
-
 import Link from "next/link";
 import Image from "next/image";
 import { ChevronRight, MapPin, CalendarCheck, MountainSnow, Info } from "lucide-react";
@@ -9,7 +7,6 @@ import { KakaoConsultLink } from "@/components/seo/KakaoConsultLink";
 import { TrustBadges } from "@/components/seo/TrustBadges";
 import { TERMS_REFUND_HREF } from "@/lib/resort-landings";
 import { ProductImageGallery } from "@/components/product/ProductImageGallery";
-import { useRouter } from "next/navigation";
 
 const FACTS = [
     { icon: MountainSnow, label: "형태", value: "현장 강습 (선택한 스키장)" },
@@ -18,20 +15,14 @@ const FACTS = [
 ];
 
 export default function ProductPage() {
-    const router = useRouter();
-
-    const handleCheckout = () => {
-        router.push('/book');
-    };
-
     const actions = (
         <>
-            <Link href="/book" className="btn-ghost flex-1">
-                강습 안내 후 문의
-            </Link>
-            <button onClick={handleCheckout} className="btn-primary flex-1">
+            <KakaoConsultLink className="btn-ghost flex-1">
+                카톡 상담
+            </KakaoConsultLink>
+            <Link href="/book" className="btn-primary flex-1">
                 예약하기
-            </button>
+            </Link>
         </>
     );
 
@@ -53,9 +44,8 @@ export default function ProductPage() {
                         <p className="mt-4 text-[17px] leading-7 text-muted">{PRODUCT_DATA.description}</p>
                         <TrustBadges className="mt-5" />
 
-                        <p className="mt-6">
-                            <span className="text-[40px] font-extrabold tracking-tight">{PRODUCT_DATA.price.toLocaleString()}</span>
-                            <span className="ml-1 text-xl text-muted">원</span>
+                        <p className="mt-6 text-[28px] font-extrabold tracking-tight md:text-[32px]">
+                            1:1 2시간 정가 15만원
                         </p>
 
                         <ul className="mt-8 divide-y divide-line rounded-[24px] border border-line">
@@ -86,7 +76,7 @@ export default function ProductPage() {
                             <div>
                                 <p className="font-bold">날짜와 시간을 고르면 바로 접수됩니다</p>
                                 <p className="mt-1 text-[15px] leading-relaxed text-ink/75">
-                                    마감된 시간대는 선택할 수 없습니다. 접수 후 사장님이 확인 전화를 드립니다.
+                                    마감된 시간대는 선택할 수 없습니다. 접수 후 확인 안내를 드립니다.
                                 </p>
                             </div>
                         </div>

@@ -1,14 +1,13 @@
-import type { Metadata } from "next";
 import { BookingForm } from "@/components/booking/BookingForm";
 import { bookingValueFromResortQuery } from "@/lib/resort-landings";
-import { SITE_URL } from "@/lib/site";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "강습 예약",
   description:
     "라이드올다이 스키·보드 강습 예약. 1:1·2:1·3:1, 1:1 2시간 정가 15만원. 숙소·리프트권·장비 별도. 카톡 상담도 가능합니다.",
-  alternates: { canonical: `${SITE_URL}/book` },
-};
+  path: "/book",
+});
 
 export default async function BookPage({
   searchParams,

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import {
   bookingValueFromResortQuery,
   bookHref,
+  EARLY_BIRD_COPY,
   REGULAR_PRICE_TABLE,
   RESORT_LANDINGS,
   resortCanonical,
@@ -19,6 +20,8 @@ assert.equal(bookHref("high1"), "/book?resort=high1");
 assert.equal(resortCanonical("high1"), "https://rideordie.kr/resorts/high1");
 assert.equal(resortLandingBySlug("missing"), undefined);
 assert.equal(REGULAR_PRICE_TABLE.amounts["1:1"][2], 150_000);
+assert.equal(EARLY_BIRD_COPY, "얼리버드 할인 기간 있음");
+assert.equal(EARLY_BIRD_COPY.includes("2월"), false);
 
 const titles = new Set(RESORT_LANDINGS.map((row) => row.title));
 const descriptions = new Set(RESORT_LANDINGS.map((row) => row.description));

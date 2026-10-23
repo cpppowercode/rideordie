@@ -1,6 +1,7 @@
 import {
   INSTAGRAM_URL,
   KAKAO_CONSULT_URL,
+  NAVER_BLOG_URL,
   SITE_URL,
 } from "@/lib/site";
 import {
@@ -17,12 +18,12 @@ export const ORGANIZATION_LOGO = `${SITE_URL}/logo.svg`;
 export function organizationJsonLd() {
   return {
     "@context": "https://schema.org",
-    "@type": "Organization",
+    "@type": ["LocalBusiness", "SportsActivityLocation"],
     name: ORGANIZATION_NAME,
     alternateName: ORGANIZATION_ALTERNATE_NAME,
     url: SITE_URL,
     logo: ORGANIZATION_LOGO,
-    sameAs: [INSTAGRAM_URL, KAKAO_CONSULT_URL],
+    sameAs: [INSTAGRAM_URL, NAVER_BLOG_URL, KAKAO_CONSULT_URL],
   };
 }
 
