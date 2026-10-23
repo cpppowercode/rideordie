@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { MessageCircle } from 'lucide-react';
-import { CHANNEL_URL, PRODUCT_DATA } from '@/lib/mockData';
+import Link from 'next/link';
+import { CalendarCheck } from 'lucide-react';
+import { PRODUCT_DATA } from '@/lib/mockData';
 import { executeKcpPay, KcpPayForm } from '@/components/checkout/KcpPayForm';
 import {
     expectedPayAmount,
@@ -19,7 +20,7 @@ type KcpLaunch = {
 
 export default function CheckoutPage() {
     const [isProcessing, setIsProcessing] = useState(false);
-    const [hasConsulted, setHasConsulted] = useState(false);
+    const [hasBooked, setHasBooked] = useState(false);
     const [payMethod, setPayMethod] = useState<KcpPayMethod>('card');
     const [kcpLaunch, setKcpLaunch] = useState<KcpLaunch | null>(null);
     const [formData, setFormData] = useState({
@@ -68,8 +69,8 @@ export default function CheckoutPage() {
     const handlePayment = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!hasConsulted) {
-            alert('결제 전 채널톡으로 상담을 완료해 주세요.');
+        if (!hasBooked) {
+            alert('결제 전 강습 예약을 먼저 접수해 주세요.');
             return;
         }
 
@@ -137,12 +138,13 @@ export default function CheckoutPage() {
         }
     };
 
-    const inputClass = 'w-full rounded-xl border border-line bg-white px-4 py-3.5 text-lg outline-none focus:border-brand focus:ring-2 focus:ring-brand/20';
+    const inputClass = 'w-full rounded-2xl border border-line bg-white px-4 py-4 text-[17px] outline-none focus:border-brand focus:ring-4 focus:ring-brand/15';
 
     return (
         <div className="bg-snow">
         <div className="mx-auto max-w-5xl px-4 py-10 md:py-14">
-            <h1 className="mb-8 text-3xl font-bold">결제하기</h1>
+            <p className="eyebrow">CHECKOUT</p>
+            <h1 className="mb-8 mt-2 text-[32px] font-bold tracking-tight">결제하기</h1>
 
             <KcpPayForm
                 key={kcpLaunch?.orderId || 'idle'}
@@ -159,16 +161,16 @@ export default function CheckoutPage() {
 
             <form onSubmit={handlePayment} className="grid grid-cols-1 gap-6 md:grid-cols-3">
                 <div className="space-y-6 md:col-span-2">
-                    <section className="flex gap-4 rounded-xl bg-ink p-6 text-white md:p-7">
-                        <MessageCircle className="mt-0.5 h-6 w-6 shrink-0 text-[#9db4ff]" />
+                    <section className="flex gap-4 rounded-[24px] bg-ink p-6 text-white md:p-7">
+                        <CalendarCheck className="mt-0.5 h-6 w-6 shrink-0 text-[#9db4ff]" />
                         <div>
-                            <h2 className="text-lg font-bold">먼저 상담을 마쳐주세요</h2>
+                            <h2 className="text-lg font-bold">먼저 강습을 예약해 주세요</h2>
                             <p className="mt-2 text-[15px] leading-relaxed text-white/75">
-                                상담 없이 결제하면 일정 조율·환불이 어려울 수 있습니다. 채널톡으로 일정·레벨·시간을 확인한 뒤에만 결제가 가능합니다.
+                                날짜와 시간대를 고르지 않고 결제하면 일정 조율·환불이 어려울 수 있습니다. 홈페이지에서 예약을 접수한 뒤에만 결제가 가능합니다.
                             </p>
-                            <a href={CHANNEL_URL} target="_blank" rel="noopener noreferrer" className="btn mt-4 bg-white px-5 py-2.5 text-[15px] text-ink hover:bg-ice">
-                                채널톡 상담하기
-                            </a>
+                            <Link href="/book" className="btn mt-4 bg-white px-5 py-2.5 text-[15px] text-ink hover:bg-ice">
+                                강습 예약하기
+                            </Link>
                         </div>
                     </section>
 
@@ -192,7 +194,7 @@ export default function CheckoutPage() {
                             {([['card', '신용카드'], ['bank', '계좌이체']] as const).map(([value, label]) => (
                                 <label
                                     key={value}
-                                    className={`flex cursor-pointer items-center justify-center rounded-lg border-2 py-4 text-lg font-semibold transition-colors ${payMethod === value ? 'border-brand bg-ice text-brand' : 'border-line hover:bg-snow'}`}
+                                    className={`flex min-h-14 cursor-pointer items-center justify-center rounded-2xl border-2 py-4 text-lg font-semibold transition-colors ${payMethod === value ? 'border-brand bg-ice text-brand' : 'border-line hover:bg-snow'}`}
                                 >
                                     <input type="radio" name="payment" checked={payMethod === value} onChange={() => setPayMethod(value)} className="sr-only" />
                                     {label}
@@ -218,18 +220,18 @@ export default function CheckoutPage() {
                         <label className="mb-4 flex cursor-pointer items-start gap-3 rounded-lg bg-snow p-4">
                             <input
                                 type="checkbox"
-                                checked={hasConsulted}
-                                onChange={(e) => setHasConsulted(e.target.checked)}
+                                checked={hasBooked}
+                                onChange={(e) => setHasBooked(e.target.checked)}
                                 className="mt-0.5 h-5 w-5 shrink-0 accent-brand"
                             />
-                            <span className="text-[15px] font-medium leading-snug">채널톡으로 상담을 완료했어요</span>
+                            <span className="text-[15px] font-medium leading-snug">강습 예약을 접수했어요</span>
                         </label>
 
-                        <button type="submit" disabled={isProcessing || !hasConsulted} className="btn-primary w-full py-4 text-lg">
+                        <button type="submit" disabled={isProcessing || !hasBooked} className="btn-primary w-full py-4 text-lg">
                             {isProcessing ? '처리 중...' : `${amount.toLocaleString()}원 결제하기`}
                         </button>
-                        {!hasConsulted && (
-                            <p className="mt-3 text-center text-sm text-muted">상담 완료에 체크하면 결제할 수 있어요.</p>
+                        {!hasBooked && (
+                            <p className="mt-3 text-center text-sm text-muted">예약 접수에 체크하면 결제할 수 있어요.</p>
                         )}
                     </div>
                 </div>
