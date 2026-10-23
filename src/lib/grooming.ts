@@ -107,19 +107,6 @@ export const GROOMING_BREAKS: Record<ResortValue, GroomingWindow[]> = {
       confirmed: true,
     },
   ],
-
-  // 곤지암: 무정지 정설 17:00–19:00, rotating by slope (not a full close).
-  // Lessons still cannot overlap this window — some slopes are closed throughout.
-  // Source: https://m.konjiamresort.co.kr/contact/noticeView.dev?idx=1441
-  곤지암리조트: [
-    {
-      startHour: 17,
-      durationHours: 2,
-      source: "https://m.konjiamresort.co.kr/contact/noticeView.dev?idx=1441",
-      confirmed: true,
-      note: "Rotating 무정지 정설 by slope 17:00–19:00, not a full-resort close. Lessons are still blocked for the whole window.",
-    },
-  ],
 };
 
 export function formatGroomingHour(hour: number): string {

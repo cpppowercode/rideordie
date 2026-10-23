@@ -22,10 +22,9 @@ export const SKI_RESORTS = [
   { value: "웰리힐리파크", label: "웰리힐리파크" },
   { value: "용평리조트", label: "용평" },
   { value: "지산포레스트", label: "지산" },
-  { value: "곤지암리조트", label: "곤지암" },
 ] as const;
 
-/** Customer-facing teaching resorts. Booking picker stays SKI_RESORTS. */
+/** Short names for marketing copy. Booking picker labels stay SKI_RESORTS. */
 export const TEACHING_RESORTS = [
   "하이원",
   "비발디",
