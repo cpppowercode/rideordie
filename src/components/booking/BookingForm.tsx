@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Minus, Plus } from 'lucide-react';
 import { LESSON_SLOTS, LESSON_TYPES, SKI_RESORTS } from '@/lib/site';
 import { formatPhoneDisplay, todayYmd } from '@/lib/booking';
+import { GROOMING_LABEL, slotOverlapsGrooming } from '@/lib/grooming';
 
 type Step = 1 | 2 | 3;
 
@@ -311,7 +312,16 @@ export function BookingForm() {
                       key={resort.value}
                       type="button"
                       data-testid={`resort-${resort.value}`}
-                      onClick={() => setSkiResort(resort.value)}
+                      onClick={() => {
+                        setSkiResort(resort.value);
+                        setSlotId((current) => {
+                          const slot = LESSON_SLOTS.find((item) => item.id === current);
+                          if (!slot) return current;
+                          return slotOverlapsGrooming(resort.value, slot.startHour, slot.durationHours)
+                            ? ''
+                            : current;
+                        });
+                      }}
                       className={`min-h-12 rounded-full px-4 text-[15px] font-semibold transition-colors ${
                         selected ? 'bg-ink text-white' : 'bg-white text-ink ring-1 ring-line hover:bg-snow'
                       }`}
@@ -328,7 +338,19 @@ export function BookingForm() {
               <div className="grid gap-2">
                 {slots.map((slot) => {
                   const selected = slotId === slot.id;
-                  const disabled = loadingSlots || !slot.available;
+                  const slotDef = LESSON_SLOTS.find((item) => item.id === slot.id);
+                  const isGrooming = Boolean(
+                    slotDef &&
+                      slotOverlapsGrooming(skiResort, slotDef.startHour, slotDef.durationHours)
+                  );
+                  const disabled = isGrooming || loadingSlots || !slot.available;
+                  const badge = isGrooming
+                    ? GROOMING_LABEL
+                    : loadingSlots
+                      ? '확인 중'
+                      : slot.available
+                        ? `잔여 ${slot.remaining}팀`
+                        : '마감';
                   return (
                     <button
                       key={slot.id}
@@ -348,8 +370,13 @@ export function BookingForm() {
                         <span className="block text-[17px] font-bold">{slot.label}</span>
                         <span className="mt-0.5 block text-[14px] text-muted">{slot.timeLabel}</span>
                       </span>
-                      <span className={`text-[13px] font-semibold ${slot.available ? 'text-brand' : 'text-muted'}`}>
-                        {loadingSlots ? '확인 중' : slot.available ? `잔여 ${slot.remaining}팀` : '마감'}
+                      <span
+                        data-testid={`slot-badge-${slot.id}`}
+                        className={`text-[13px] font-semibold ${
+                          isGrooming || !slot.available ? 'text-muted' : 'text-brand'
+                        }`}
+                      >
+                        {badge}
                       </span>
                     </button>
                   );

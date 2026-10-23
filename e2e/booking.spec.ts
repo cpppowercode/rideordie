@@ -7,7 +7,7 @@ const STATE_FILE = "/tmp/rideordie-e2e-booking.json";
 const TEST_NAME = "테스트 예약 (삭제 예정)";
 const TEST_PHONE = "010-0000-0000";
 const LESSON_DATE = process.env.E2E_LESSON_DATE || "2026-12-20";
-const SKI_RESORT = "오투리조트";
+const SKI_RESORT = "하이원리조트";
 const SLOT_ID = "night2";
 const ADMIN_URL = "https://admin.rideordie.kr/api/reservations";
 
@@ -125,7 +125,7 @@ test.describe("desktop booking", () => {
     expect(row, `admin row missing for ${body.orderNo}`).toBeTruthy();
     expect(row.customer_name).toBe(TEST_NAME);
     expect(String(row.customer_phone).replace(/\D/g, "")).toBe("01000000000");
-    expect(row.ski_resort).toContain("오투");
+    expect(row.ski_resort).toContain("하이원");
     expect(row.reservation_status).toBe("pending");
     expect(row.payment_status).toBe("pending");
     expect(String(row.order_no)).toMatch(/^WEB_/);
@@ -236,7 +236,7 @@ test.describe("mobile layout", () => {
     const state = readState();
     const successUrl = state.orderNo
       ? `/book/success?orderNo=${encodeURIComponent(state.orderNo)}&date=${LESSON_DATE}&resort=${encodeURIComponent(SKI_RESORT)}&time=${encodeURIComponent("18:00–20:00")}&name=${encodeURIComponent(TEST_NAME)}&people=1`
-      : "/book/success?orderNo=WEB_PREVIEW&date=2026-12-20&resort=오투리조트";
+      : "/book/success?orderNo=WEB_PREVIEW&date=2026-12-20&resort=하이원리조트";
     await page.goto(successUrl);
     await expect(page.getByTestId("booking-success")).toBeVisible();
     await shot(page, "booking_confirmation_mobile");

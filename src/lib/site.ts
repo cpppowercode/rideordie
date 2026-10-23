@@ -23,7 +23,6 @@ export const SKI_RESORTS = [
   { value: "용평리조트", label: "용평" },
   { value: "지산포레스트", label: "지산" },
   { value: "곤지암리조트", label: "곤지암" },
-  { value: "오투리조트", label: "오투" },
 ] as const;
 
 export const LESSON_TYPES = [

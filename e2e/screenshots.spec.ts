@@ -6,7 +6,7 @@ const ARTIFACT_DIR = "/opt/cursor/artifacts/screenshots";
 const TEST_NAME = "테스트 예약 (삭제 예정)";
 const TEST_PHONE = "010-0000-0000";
 const LESSON_DATE = "2026-12-20";
-const SKI_RESORT = "오투리조트";
+const SKI_RESORT = "하이원리조트";
 const SLOT_ID = "night2";
 
 async function shot(page: import("@playwright/test").Page, name: string, fullPage = true) {
