@@ -120,18 +120,6 @@ export const GROOMING_BREAKS: Record<ResortValue, GroomingWindow[]> = {
       note: "Rotating 무정지 정설 by slope 17:00–19:00, not a full-resort close. Lessons are still blocked for the whole window.",
     },
   ],
-
-  // 오투: 주간 09:00–16:30, 정설 16:30–18:00, 야간 18:00–21:30.
-  // night2 18:00–20:00 starts when grooming ends → not blocked.
-  // Source: https://www.o2resort.com/GDE/totalPrice_skiLift.jsp
-  오투리조트: [
-    {
-      startHour: 16.5,
-      durationHours: 1.5,
-      source: "https://www.o2resort.com/GDE/totalPrice_skiLift.jsp",
-      confirmed: true,
-    },
-  ],
 };
 
 export function formatGroomingHour(hour: number): string {

@@ -47,6 +47,8 @@ assert.match(validateBookingInput(sample({ customerName: "김" })) || "", /이�
 assert.match(validateBookingInput(sample({ customerPhone: "123" })) || "", /휴대폰/);
 assert.match(validateBookingInput(sample({ childCount: 3, participants: 2 })) || "", /아이/);
 assert.match(validateBookingInput(sample({ lessonDate: "2001-01-01" })) || "", /날짜/);
+assert.match(validateBookingInput(sample({ skiResort: "오투리조트" })) || "", /스키장/);
+assert.equal(SKI_RESORTS.some((resort) => resort.value === "오투리조트"), false);
 
 const payload = toAdminPayload(sample(), "WEB_TEST");
 assert.equal(payload.customer_phone, "01012345678");
@@ -95,8 +97,6 @@ assert.equal(slotOverlapsGrooming("비발디파크", 13, 4), false);
 assert.equal(slotOverlapsGrooming("용평리조트", 18, 2), true);
 assert.equal(slotOverlapsGrooming("용평리조트", 13, 4), false); // pm4 ends at 17:00
 assert.equal(slotOverlapsGrooming("지산포레스트", 18, 2), true);
-assert.equal(slotOverlapsGrooming("오투리조트", 13, 4), true); // 16:30–18:00 vs 13–17
-assert.equal(slotOverlapsGrooming("오투리조트", 18, 2), false);
 assert.equal(slotOverlapsGrooming("웰리힐리파크", 18, 2), true);
 assert.equal(slotOverlapsGrooming("웰리힐리파크", 13, 4), true);
 assert.equal(slotOverlapsGrooming("곤지암리조트", 18, 2), true);

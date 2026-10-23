@@ -37,6 +37,8 @@ test.describe("grooming blocks", () => {
     await goToDecember(page);
     await page.getByTestId(`day-${LESSON_DATE}`).click();
 
+    await expect(page.getByTestId("resort-오투리조트")).toHaveCount(0);
+
     await page.getByTestId("resort-하이원리조트").click();
     await expect(page.getByTestId("slot-pm4")).toBeDisabled();
     await expect(page.getByTestId("slot-badge-pm4")).toHaveText("정설 시간");
@@ -95,5 +97,29 @@ test.describe("grooming blocks", () => {
     const high1Body = await high1.json();
     expect(high1.status(), JSON.stringify(high1Body)).toBe(409);
     expect(String(high1Body.error)).toMatch(/정설 시간에는 강습을 예약할 수 없습니다/);
+
+    const o2Avail = await request.get(
+      `/api/bookings/availability?date=${LESSON_DATE}&skiResort=${encodeURIComponent("오투리조트")}`
+    );
+    const o2AvailBody = await o2Avail.json();
+    expect(o2Avail.status(), JSON.stringify(o2AvailBody)).toBe(400);
+    expect(String(o2AvailBody.error)).toMatch(/스키장/);
+
+    const o2 = await request.post("/api/bookings", {
+      data: {
+        customerName: "오투 테스트",
+        customerPhone: "010-0000-0000",
+        participants: 1,
+        childCount: 0,
+        skiResort: "오투리조트",
+        lessonType: "ski",
+        lessonDate: LESSON_DATE,
+        slotId: "am2",
+        notes: "o2 reject probe",
+      },
+    });
+    const o2Body = await o2.json();
+    expect(o2.status(), JSON.stringify(o2Body)).toBe(400);
+    expect(String(o2Body.error)).toMatch(/스키장/);
   });
 });
