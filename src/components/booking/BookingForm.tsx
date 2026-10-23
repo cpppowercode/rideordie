@@ -548,8 +548,15 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
                         {formatWon(price.lessonAmount)}
                       </span>
                       {price.earlyBird && (
-                        <span className="ml-2 text-[13px] font-semibold text-brand" data-testid="price-early-bird">
-                          얼리버드
+                        <span className="ml-2 inline-flex flex-col items-end gap-0.5">
+                          <span className="text-[13px] font-semibold text-brand" data-testid="price-early-bird">
+                            얼리버드
+                          </span>
+                          {price.earlyBirdReasonLabel && (
+                            <span className="text-[12px] font-medium text-muted" data-testid="price-early-bird-reason">
+                              {price.earlyBirdReasonLabel}
+                            </span>
+                          )}
                         </span>
                       )}
                     </dd>
@@ -580,7 +587,7 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
           <div className="flex items-baseline justify-between">
             <p className="text-[14px] font-semibold text-muted">
               {durationHours}시간 · {price.ratio}
-              {price.earlyBird ? ' · 얼리버드' : ''}
+              {price.earlyBird ? ` · 얼리버드${price.earlyBirdReasonLabel ? ` · ${price.earlyBirdReasonLabel}` : ''}` : ''}
             </p>
             <p className="text-right">
               {price.earlyBird && (

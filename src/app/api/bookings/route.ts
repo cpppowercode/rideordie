@@ -88,6 +88,7 @@ export async function POST(request: NextRequest) {
       lessonAmount: quote.lessonAmount,
       badgeFee: quote.badgeFee,
       earlyBird: quote.earlyBird,
+      earlyBirdReason: quote.earlyBirdReasonLabel,
       ratio: quote.ratio,
       clientKey: tossClientKey(),
       customerKey: tossCustomerKey(orderNo),
