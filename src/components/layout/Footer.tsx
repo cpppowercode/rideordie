@@ -1,7 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Instagram } from "lucide-react";
-import { INSTAGRAM_URL, TEACHING_RESORTS_COPY } from "@/lib/site";
+import { INSTAGRAM_URL, KAKAO_CONSULT_URL, NAVER_BLOG_URL, TEACHING_RESORTS_COPY } from "@/lib/site";
+import { RESORT_LANDINGS } from "@/lib/resort-landings";
+import { KakaoConsultLink } from "@/components/seo/KakaoConsultLink";
 
 export function Footer() {
   return (
@@ -15,29 +16,62 @@ export function Footer() {
               <br />
               스키를 가르치는 게 아니라, 라이딩을 가르칩니다.
             </p>
-            <a
-              href={INSTAGRAM_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-5 inline-flex items-center gap-2 text-[15px] font-semibold text-ink transition-colors hover:text-brand"
-            >
-              <Instagram className="h-4 w-4" />
-              @ski.rideordie
-            </a>
+            <ul className="mt-5 flex flex-wrap gap-4 text-[15px] font-semibold">
+              <li>
+                <a
+                  href={INSTAGRAM_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-ink transition-colors hover:text-brand"
+                >
+                  인스타그램
+                </a>
+              </li>
+              <li>
+                <a
+                  href={NAVER_BLOG_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-ink transition-colors hover:text-brand"
+                >
+                  네이버 블로그
+                </a>
+              </li>
+              <li>
+                <a
+                  href={KAKAO_CONSULT_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-ink transition-colors hover:text-brand"
+                >
+                  카톡 상담
+                </a>
+              </li>
+            </ul>
           </div>
 
           <div>
             <h3 className="mb-4 text-[13px] font-semibold tracking-[0.04em] text-muted">고객센터</h3>
             <ul className="space-y-2 text-[15px] text-muted">
               <li>
-                <a href="tel:010-2028-2744" className="text-[22px] font-bold tracking-tight text-ink hover:text-brand">
-                  010-2028-2744
-                </a>
+                <KakaoConsultLink className="text-[22px] font-bold tracking-tight text-ink hover:text-brand">
+                  카톡 상담
+                </KakaoConsultLink>
               </li>
               <li>연중 무휴</li>
               <li>
                 <a href="mailto:contact@rideordie.kr" className="hover:text-ink">contact@rideordie.kr</a>
               </li>
+            </ul>
+            <h3 className="mb-3 mt-8 text-[13px] font-semibold tracking-[0.04em] text-muted">강습 스키장</h3>
+            <ul className="space-y-2 text-[15px] text-muted">
+              {RESORT_LANDINGS.map((row) => (
+                <li key={row.slug}>
+                  <Link href={`/resorts/${row.slug}`} className="hover:text-ink">
+                    {row.shortName} 어린이 강습
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 

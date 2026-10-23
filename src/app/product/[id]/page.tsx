@@ -5,6 +5,9 @@ import Image from "next/image";
 import { ChevronRight, MapPin, CalendarCheck, MountainSnow, Info } from "lucide-react";
 import { PRODUCT_DATA } from "@/lib/mockData";
 import { TEACHING_RESORTS_INLINE } from "@/lib/site";
+import { KakaoConsultLink } from "@/components/seo/KakaoConsultLink";
+import { TrustBadges } from "@/components/seo/TrustBadges";
+import { TERMS_REFUND_HREF } from "@/lib/resort-landings";
 import { ProductImageGallery } from "@/components/product/ProductImageGallery";
 import { useRouter } from "next/navigation";
 
@@ -48,6 +51,7 @@ export default function ProductPage() {
                         <p className="eyebrow">스키·보드 강습</p>
                         <h1 className="mt-2 text-[32px] font-bold leading-tight tracking-tight md:text-[40px]">{PRODUCT_DATA.title}</h1>
                         <p className="mt-4 text-[17px] leading-7 text-muted">{PRODUCT_DATA.description}</p>
+                        <TrustBadges className="mt-5" />
 
                         <p className="mt-6">
                             <span className="text-[40px] font-extrabold tracking-tight">{PRODUCT_DATA.price.toLocaleString()}</span>
@@ -112,9 +116,8 @@ export default function ProductPage() {
 
                     <div className="rounded-xl bg-snow p-8 text-[17px] leading-relaxed text-muted">
                         <h3 className="mb-4 text-xl font-bold text-ink">예약 변경 및 취소 안내</h3>
-                        <p>· 예약일 3일 전까지 날짜/시간 변경 시 위약금 없이 변경 가능합니다.</p>
-                        <p>· 강습 당일 취소 시 환불되지 않습니다.</p>
-                        <p>· 기상 악화 등 긴급 변경이 필요하시면 고객센터(<a href="tel:010-2028-2744" className="font-semibold text-ink underline">010-2028-2744</a>)로 연락해 주세요.</p>
+                        <p>· 환불·변경은 <Link href={TERMS_REFUND_HREF} className="font-semibold text-ink underline">이용약관 제9조</Link>를 따릅니다.</p>
+                        <p>· 기상 악화 등 긴급 변경이 필요하시면 <KakaoConsultLink className="font-semibold text-ink underline">카톡 상담</KakaoConsultLink>으로 연락해 주세요.</p>
                     </div>
                 </div>
 

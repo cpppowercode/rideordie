@@ -3,9 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Instagram, Menu, X } from "lucide-react";
+import { Instagram, Menu, MessageCircle, X } from "lucide-react";
 import { PRODUCT_DATA } from "@/lib/mockData";
-import { INSTAGRAM_URL } from "@/lib/site";
+import { INSTAGRAM_URL, KAKAO_CONSULT_URL } from "@/lib/site";
 
 const NAV = [
   { href: `/product/${PRODUCT_DATA.id}`, label: "강습 안내" },
@@ -33,6 +33,17 @@ export function Header() {
         </nav>
 
         <div className="ml-auto flex items-center gap-1.5">
+          <a
+            href={KAKAO_CONSULT_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="카톡 상담"
+            data-testid="header-kakao"
+            className="inline-flex h-11 items-center gap-1.5 rounded-full px-3 text-[14px] font-semibold text-ink transition-colors hover:bg-snow"
+          >
+            <MessageCircle className="h-5 w-5" />
+            <span className="hidden sm:inline">카톡 상담</span>
+          </a>
           <a
             href={INSTAGRAM_URL}
             target="_blank"
@@ -74,6 +85,15 @@ export function Header() {
                 {item.label}
               </Link>
             ))}
+            <a
+              href={KAKAO_CONSULT_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setOpen(false)}
+              className="btn-ghost mt-2"
+            >
+              카톡 상담
+            </a>
             <Link
               href="/book"
               onClick={() => setOpen(false)}

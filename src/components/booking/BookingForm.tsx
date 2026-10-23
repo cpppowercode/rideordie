@@ -78,7 +78,7 @@ function Stepper({ value, min, max, onChange, testId }: {
   );
 }
 
-export function BookingForm() {
+export function BookingForm({ initialResort }: { initialResort?: string }) {
   const router = useRouter();
   const today = todayYmd();
   const initial = new Date();
@@ -86,7 +86,9 @@ export function BookingForm() {
   const [viewYear, setViewYear] = useState(initial.getFullYear());
   const [viewMonth, setViewMonth] = useState(initial.getMonth());
   const [lessonDate, setLessonDate] = useState(today);
-  const [skiResort, setSkiResort] = useState<string>(SKI_RESORTS[0].value);
+  const [skiResort, setSkiResort] = useState<string>(
+    initialResort || SKI_RESORTS[0].value
+  );
   const [durationHours, setDurationHours] = useState<LessonDurationHours>(2);
   const [startHour, setStartHour] = useState<number | null>(null);
   const [lessonType, setLessonType] = useState<string>('ski');

@@ -29,7 +29,7 @@ export const PRODUCT_DATA = {
         {
             id: "opt-course",
             name: "강습 유형",
-            values: ["1:1 프라이빗 강습", "2:1 파트너 강습", "그룹 강습 (최대 4명)"],
+            values: ["1:1 강습", "2:1 강습", "3:1 강습"],
         },
         {
             id: "opt-duration",

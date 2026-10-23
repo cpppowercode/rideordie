@@ -3,8 +3,8 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { Check, Loader2, Phone } from 'lucide-react';
-import { OWNER_PHONE } from '@/lib/site';
+import { Check, Loader2 } from 'lucide-react';
+import { KakaoConsultLink } from '@/components/seo/KakaoConsultLink';
 
 function SuccessContent() {
   const params = useSearchParams();
@@ -67,10 +67,9 @@ function SuccessContent() {
         </dl>
 
         <div className="mt-8 flex w-full flex-col gap-3">
-          <a href={`tel:${OWNER_PHONE}`} className="btn-ghost min-h-14">
-            <Phone className="h-4 w-4" />
-            전화하기 {OWNER_PHONE}
-          </a>
+          <KakaoConsultLink className="btn-ghost min-h-14">
+            카톡 상담
+          </KakaoConsultLink>
           <Link href="/" className="btn-primary min-h-14">홈으로</Link>
         </div>
       </div>

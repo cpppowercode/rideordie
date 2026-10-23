@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { KakaoConsultLink } from '@/components/seo/KakaoConsultLink';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 
 interface PaymentInfo {
@@ -86,7 +87,9 @@ function SuccessContent() {
             <div className="bg-ice p-6 rounded-xl text-left mb-8 max-w-md">
                 <h3 className="font-bold text-ink mb-2">다음 단계</h3>
                 <p className="text-sm text-ink/75">
-                    예약한 일정으로 강습을 진행합니다. 변경이 필요하면 고객센터(010-2028-2744)로 연락해 주세요.
+                    예약한 일정으로 강습을 진행합니다. 변경이 필요하면{" "}
+                    <KakaoConsultLink className="font-semibold text-ink underline">카톡 상담</KakaoConsultLink>
+                    으로 연락해 주세요.
                 </p>
                 <Link href="/book" className="btn-primary mt-4 w-full">
                     예약 내역 확인하러 가기
