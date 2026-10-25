@@ -36,6 +36,26 @@ export type ResortLanding = {
   faqs: ResortFaq[];
 };
 
+export type FamilyGuidePost = { title: string; url: string };
+
+/**
+ * 스키장별 '가족 가이드' 블로그 글.
+ * 글이 발행되면 해당 슬러그 배열에 { title, url }을 추가한다.
+ * 빈 배열이면 링크 블록을 렌더링하지 않는다(없는 글로 링크하지 않음).
+ */
+export const FAMILY_GUIDE_POSTS: Record<ResortLandingSlug, FamilyGuidePost[]> = {
+  high1: [
+    {
+      title: "하이원 아이 스키강습 가족 가이드",
+      url: "https://blog.naver.com/rideordieski/224452187481",
+    },
+  ],
+  vivaldi: [],
+  "welli-hilli": [],
+  yongpyong: [],
+  jisan: [],
+};
+
 export const TERMS_REFUND_HREF = "/service-policy#article-9";
 
 export const EARLY_BIRD_LABEL = "시즌 전 얼리버드";

@@ -6,6 +6,7 @@ import {
   bookHref,
   EARLY_BIRD_COPY,
   EARLY_BIRD_LABEL,
+  FAMILY_GUIDE_POSTS,
   formatManwon,
   REGULAR_PRICE_TABLE,
   RESORT_LANDINGS,
@@ -37,7 +38,7 @@ function PriceTable() {
   return (
     <div className="overflow-x-auto rounded-[24px] border border-line bg-white">
       <table className="w-full min-w-[320px] text-left text-[15px]">
-        <caption className="sr-only">1:1·2:1·3:1 정가 요금표</caption>
+        <caption className="sr-only">1:1·2:1·3:1 일반 요금표</caption>
         <thead>
           <tr className="border-b border-line bg-snow text-muted">
             <th className="px-4 py-3 font-semibold">구성</th>
@@ -62,6 +63,34 @@ function PriceTable() {
         </tbody>
       </table>
     </div>
+  );
+}
+
+function FamilyGuideLinks({ landing }: { landing: ResortLanding }) {
+  const posts = FAMILY_GUIDE_POSTS[landing.slug] ?? [];
+  if (posts.length === 0) return null;
+  return (
+    <section
+      className="mt-12 rounded-[24px] bg-ice px-5 py-6"
+      aria-label={`${landing.shortName} 가족 가이드`}
+      data-testid={`resort-guide-${landing.slug}`}
+    >
+      <h2 className="text-[20px] font-bold tracking-tight">가족 가이드 읽기</h2>
+      <ul className="mt-3 space-y-2 text-[16px]">
+        {posts.map((post) => (
+          <li key={post.url}>
+            <a
+              href={post.url}
+              target="_blank"
+              rel="noopener"
+              className="font-semibold text-brand hover:underline"
+            >
+              {post.title} →
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 
@@ -135,7 +164,7 @@ export function ResortLandingView({ landing }: { landing: ResortLanding }) {
           <section className="mt-12">
             <h2 className="text-[24px] font-bold tracking-tight">가격표</h2>
             <p className="mt-3 text-[16px] leading-7 text-muted">
-              1:1 2시간 정가 15만원. 아래는 정가입니다.
+              1:1 2시간 15만원부터. 아래는 일반 요금입니다.
             </p>
             <div className="mt-5">
               <PriceTable />
@@ -191,6 +220,8 @@ export function ResortLandingView({ landing }: { landing: ResortLanding }) {
             </div>
           </section>
         ) : null}
+
+        <FamilyGuideLinks landing={landing} />
 
         <Ctas landing={landing} />
 

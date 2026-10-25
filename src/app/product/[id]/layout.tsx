@@ -4,7 +4,7 @@ import { pageMetadata } from "@/lib/seo";
 
 export const metadata = pageMetadata({
   title: PRODUCT_DATA.title,
-  description: `${PRODUCT_DATA.description} 1:1 2시간 정가 15만원.`,
+  description: `${PRODUCT_DATA.description} 1:1 2시간 15만원부터.`,
   path: `/product/${PRODUCT_DATA.id}`,
   absoluteTitle: true,
 });

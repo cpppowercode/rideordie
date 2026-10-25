@@ -140,7 +140,7 @@ export default function Home() {
             ))}
             <div className="flex gap-8 py-5">
               <dt className="w-16 shrink-0 text-muted">강습비</dt>
-              <dd className="text-[22px] font-bold tracking-tight">1:1 2시간 정가 15만원</dd>
+              <dd className="text-[22px] font-bold tracking-tight">1:1 2시간 15만원부터</dd>
             </div>
           </dl>
           <div className="mt-8 flex flex-wrap gap-3">
