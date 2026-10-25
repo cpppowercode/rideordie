@@ -52,8 +52,12 @@ assert.equal(yongpyong.layout, "minimal");
 
 const vivaldi = resortLandingBySlug("vivaldi");
 const jisan = resortLandingBySlug("jisan");
-assert.ok(vivaldi?.intro.some((p) => p.includes("패찰비")));
-assert.ok(jisan?.intro.some((p) => p.includes("패찰비")));
+const welli = resortLandingBySlug("welli-hilli");
+assert.ok(vivaldi?.mentionBadgeFee && vivaldi.intro.some((p) => p.includes("패찰비")));
+assert.ok(vivaldi?.faqs.some((f) => f.q === "패찰비가 따로 있나요?"));
+assert.ok(jisan?.mentionBadgeFee && jisan.intro.some((p) => p.includes("패찰비")));
+assert.ok(jisan?.faqs.some((f) => f.q === "패찰비가 따로 있나요?"));
+assert.ok(welli && !welli.mentionBadgeFee && !JSON.stringify(welli).includes("패찰비"));
 assert.equal(REGULAR_PRICE_TABLE.amounts["3:1"][4], 400_000);
 assert.ok(
   RESORT_LANDINGS.every((row) =>

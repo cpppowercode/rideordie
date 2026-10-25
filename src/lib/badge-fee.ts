@@ -8,8 +8,9 @@
  * 어드민 계산기 값을 바꾸면 이 파일도 같이 바꾼다(ADMIN_SOURCE 참고). 다른 곳에 금액을 따로 적지 않는다.
  *
  * - 비발디파크: 인원 × 시간 × 12,500원 (어드민 현재 값)
- * - 웰리힐리파크: 어드민 최초 버전(bc4c6f0)의 웰리힐리 구간표 — 2시간 35,000 / 4시간 50,000 / 6시간 85,000 (1인),
- *   홀수 시간은 다음 짝수 시간 요금. 현재 어드민 코드는 이 구간표를 '지산'에만 적용하고 있어 사장님 확인 필요.
+ * - 지산포레스트: 어드민 최초 버전(bc4c6f0)의 구간표 — 2시간 35,000 / 4시간 50,000 / 6시간 85,000 (1인),
+ *   홀수 시간은 다음 짝수 시간 요금.
+ * - 웰리힐리파크: 패찰비 없음 (0원)
  * - 그 외 리조트: 0원(패찰비 줄 없음)
  */
 export const ADMIN_SOURCE = {
@@ -24,7 +25,7 @@ export const LESSON_FEE = PRODUCT_DATA.price;
 
 const VIVALDI_PER_PERSON_HOUR = 12500;
 
-function welliTierPerPerson(hours: number): number {
+function jisanTierPerPerson(hours: number): number {
   const even = hours % 2 === 0 ? hours : hours + 1;
   if (even === 2) return 35000;
   if (even === 4) return 50000;
@@ -32,12 +33,12 @@ function welliTierPerPerson(hours: number): number {
   return 50000 + ((even - 4) / 2) * 12500;
 }
 
-export type BadgeFeeResort = "vivaldi" | "welli" | null;
+export type BadgeFeeResort = "vivaldi" | "jisan" | null;
 
 export function badgeFeeResort(skiResort: string): BadgeFeeResort {
   const r = String(skiResort || "").replace(/\s/g, "");
   if (r.includes("비발디")) return "vivaldi";
-  if (r.includes("웰리힐리")) return "welli";
+  if (r.includes("지산")) return "jisan";
   return null;
 }
 
@@ -55,7 +56,7 @@ export function computeBadgeFee(skiResort: string, participants: number, duratio
   }
   const fee = kind === "vivaldi"
     ? participants * durationHours * VIVALDI_PER_PERSON_HOUR
-    : participants * welliTierPerPerson(durationHours);
+    : participants * jisanTierPerPerson(durationHours);
   if (!Number.isFinite(fee) || fee <= 0) throw new BadgeFeeError("패찰비를 계산할 수 없습니다.");
   return fee;
 }
