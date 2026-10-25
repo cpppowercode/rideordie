@@ -182,7 +182,7 @@ assert.equal(
 const channels = notifyChannelStatus();
 assert.deepEqual(
   channels.map((c) => c.name),
-  ["email(Resend)", "slack", "discord", "solapi"]
+  ["email(Resend)", "slack", "discord", "grokbot-webhook", "solapi"]
 );
 assert.ok(channels.every((c) => typeof c.configured === "boolean"));
 
