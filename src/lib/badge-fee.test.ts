@@ -22,4 +22,8 @@ assert.deepEqual(payBreakdown({ skiResort: "지산포레스트", participants: 1
 assert.deepEqual(payBreakdown({ skiResort: "웰리힐리파크", participants: 2, durationHours: 2, lessonDate: D }), { lessonFee: 180000, badgeFee: 0, total: 180000, period: "regular" });
 assert.deepEqual(payBreakdown({ skiResort: "하이원리조트", participants: 2, durationHours: 2, lessonDate: D }), { lessonFee: 180000, badgeFee: 0, total: 180000, period: "regular" });
 assert.throws(() => payBreakdown({ skiResort: "비발디파크", participants: 4, durationHours: 2, lessonDate: D }), BadgeFeeError);
+// 사장님 결정 10/26: 용평은 3:1 불가(1:1·2:1만). 금액 계산(=예약 생성·KCP 등록·최종 확정 공통)에서 거절.
+assert.throws(() => payBreakdown({ skiResort: "용평리조트", participants: 3, durationHours: 2, lessonDate: D }), BadgeFeeError);
+assert.equal(payBreakdown({ skiResort: "용평리조트", participants: 2, durationHours: 2, lessonDate: D }).total, 180000);
+assert.equal(payBreakdown({ skiResort: "하이원리조트", participants: 3, durationHours: 2, lessonDate: D }).badgeFee, 0);
 console.log("badge-fee tests passed");

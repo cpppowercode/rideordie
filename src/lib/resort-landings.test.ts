@@ -45,7 +45,7 @@ assert.equal(JSON.stringify(RESORT_LANDINGS).includes("오전에 출발해 오�
 const yongpyong = resortLandingBySlug("yongpyong");
 assert.ok(yongpyong);
 assert.deepEqual(yongpyong.intro, [
-  "평창 용평에서 어린이 스키·보드 강습을 진행합니다. 1:1·2:1·3:1, 공인 강사, 응급처치 교육 이수, 강습보험 적용.",
+  "평창 용평에서 어린이 스키·보드 강습을 진행합니다. 1:1·2:1(용평은 3:1 강습이 없습니다), 공인 강사, 응급처치 교육 이수, 강습보험 적용.",
   "1:1 2시간 일반 요금은 15만원입니다. 환불은 약관 제9조를 따릅니다.",
 ]);
 assert.equal(yongpyong.layout, "minimal");
@@ -92,3 +92,12 @@ import { priceCopy as __pc } from "./resort-landings";
 assert.equal(__pc("A. 1:1 2시간 15만원부터. B", "early"), "A. 얼리버드 14만원부터. B");
 assert.equal(__pc("1:1 2시간 15만원부터", "late"), "시즌말 특가 14만원부터");
 assert.equal(__pc("1:1 2시간 15만원부터", "regular"), "1:1 2시간 15만원부터");
+
+// 용평: 3:1 문구 없음(SEO·JSON-LD 원문)
+{
+  const y = resortLandingBySlug("yongpyong")!;
+  const txt = [y.description, ...y.intro, ...y.faqs.map((f) => f.a)].join(" ");
+  assert.ok(!/1:1·2:1·3:1/.test(txt), "용평에 3:1 구성 안내 금지");
+  assert.ok(/3:1 없음|3:1 강습이 없습니다/.test(txt));
+  console.log("yongpyong landing tests passed");
+}

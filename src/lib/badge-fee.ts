@@ -19,7 +19,7 @@ export const ADMIN_SOURCE = {
   commit: "f2bd5f3",
 } as const;
 
-import { lessonPrice, PriceError, UNSET_SETTINGS, type PricePeriod, type SeasonSettings } from "@/lib/pricing";
+import { assertResortRatio, lessonPrice, PriceError, UNSET_SETTINGS, type PricePeriod, type SeasonSettings } from "@/lib/pricing";
 
 const VIVALDI_PER_PERSON_HOUR = 12500;
 
@@ -71,6 +71,7 @@ export function payBreakdown(
 ): PayBreakdown {
   let price;
   try {
+    assertResortRatio(input.skiResort, Number(input.participants));
     price = lessonPrice(String(input.lessonDate), Number(input.participants), Number(input.durationHours), settings);
   } catch (error) {
     if (error instanceof PriceError) throw new BadgeFeeError(error.message);

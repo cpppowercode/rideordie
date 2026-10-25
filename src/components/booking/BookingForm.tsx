@@ -1,6 +1,6 @@
 'use client';
 
-import { PERIOD_LABEL, RATIOS, UNSET_SETTINGS, type SeasonSettings } from '@/lib/pricing';
+import { PERIOD_LABEL, RATIOS, allowedRatios, UNSET_SETTINGS, type SeasonSettings } from '@/lib/pricing';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -98,6 +98,11 @@ export function BookingForm({ initialResort, seasonSettings = UNSET_SETTINGS }: 
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [participants, setParticipants] = useState(1);
+  // 용평 등 3:1 불가 리조트로 바꾸면 가능한 최대 구성으로 낮춘다.
+  useEffect(() => {
+    const max = allowedRatios(skiResort).length;
+    if (participants > max) setParticipants(max);
+  }, [skiResort, participants]);
   const [childCount, setChildCount] = useState(1);
   const [notes, setNotes] = useState('');
   const [liveSlots, setLiveSlots] = useState<SlotAvailability[]>([]);
@@ -498,9 +503,9 @@ export function BookingForm({ initialResort, seasonSettings = UNSET_SETTINGS }: 
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <span className="mb-2 block text-[14px] font-semibold text-muted">강습 구성</span>
-                <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="강습 구성" data-testid="input-participants">
-                  {RATIOS.map((ratio, idx) => {
-                    const n = idx + 1;
+                <div className={`grid gap-2 ${allowedRatios(skiResort).length === 3 ? 'grid-cols-3' : 'grid-cols-2'}`} role="radiogroup" aria-label="강습 구성" data-testid="input-participants">
+                  {RATIOS.filter((ratio) => allowedRatios(skiResort).includes(ratio)).map((ratio) => {
+                    const n = RATIOS.indexOf(ratio) + 1;
                     const on = participants === n;
                     return (
                       <button key={ratio} type="button" role="radio" aria-checked={on}

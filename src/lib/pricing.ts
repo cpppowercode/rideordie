@@ -90,6 +90,16 @@ export function ratioForParticipants(n: number): Ratio | null {
 
 export class PriceError extends Error {}
 
+/** 리조트별 가능한 구성. 용평은 3:1 불가(1:1·2:1만, 사장님 결정 10/26). */
+export function allowedRatios(skiResort: string): Ratio[] {
+  const r = String(skiResort || "").replace(/\s/g, "");
+  return r.includes("용평") ? ["1:1", "2:1"] : [...RATIOS];
+}
+export function assertResortRatio(skiResort: string, participants: number): void {
+  const ratio = ratioForParticipants(participants);
+  if (ratio && !allowedRatios(skiResort).includes(ratio)) throw new PriceError(`${String(skiResort).includes("용평") ? "용평은" : "이 스키장은"} ${allowedRatios(skiResort).join("·")} 강습만 가능합니다.`);
+}
+
 export function lessonPrice(dateYmd: string, participants: number, hours: number, s: SeasonSettings): { period: PricePeriod; amount: number } {
   const ratio = ratioForParticipants(participants);
   if (!ratio) throw new PriceError("인원은 1:1, 2:1, 3:1 중에서 선택해 주세요.");

@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { TrustBadges } from "@/components/seo/TrustBadges";
 import { KakaoConsultLink } from "@/components/seo/KakaoConsultLink";
-import { PERIOD_LABEL, tableFor, type PricePeriod } from "@/lib/pricing";
+import { PERIOD_LABEL, allowedRatios, tableFor, type PricePeriod } from "@/lib/pricing";
 import {
   bookHref,
   EARLY_BIRD_COPY,
@@ -36,12 +36,12 @@ function Ctas({ landing }: { landing: ResortLanding }) {
   );
 }
 
-function PriceTable({ period }: { period: PricePeriod }) {
+function PriceTable({ period, ratios = REGULAR_PRICE_TABLE.ratios }: { period: PricePeriod; ratios?: readonly string[] }) {
   const table = tableFor(period);
   return (
     <div className="overflow-x-auto rounded-[24px] border border-line bg-white">
       <table className="w-full min-w-[320px] text-left text-[15px]">
-        <caption className="sr-only">1:1·2:1·3:1 {PERIOD_LABEL[period]} 요금표</caption>
+        <caption className="sr-only">{ratios.join('·')} {PERIOD_LABEL[period]} 요금표</caption>
         <thead>
           <tr className="border-b border-line bg-snow text-muted">
             <th className="px-4 py-3 font-semibold">구성</th>
@@ -53,7 +53,7 @@ function PriceTable({ period }: { period: PricePeriod }) {
           </tr>
         </thead>
         <tbody>
-          {REGULAR_PRICE_TABLE.ratios.map((ratio) => (
+          {(ratios as typeof REGULAR_PRICE_TABLE.ratios[number][]).map((ratio) => (
             <tr key={ratio} className="border-b border-line last:border-0">
               <th className="px-4 py-3 font-semibold text-ink">{ratio}</th>
               {REGULAR_PRICE_TABLE.hours.map((hour) => (
@@ -170,7 +170,7 @@ export function ResortLandingView({ landing, period = "regular" }: { landing: Re
               {priceCopy("1:1 2시간 15만원부터", period)}. 아래는 {PERIOD_LABEL[period]} 요금입니다.
             </p>
             <div className="mt-5" data-testid="price-table" data-period={period}>
-              <PriceTable period={period} />
+              <PriceTable period={period} ratios={allowedRatios(landing.bookingValue)} />
             </div>
           </section>
           <section className="mt-12">

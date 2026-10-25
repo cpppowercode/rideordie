@@ -51,3 +51,11 @@ assert.equal(periodFor("2026-12-10", normalizeSettings({ seasonStart: "2026-12-1
 assert.throws(() => lessonPrice("2026-12-10", 4, 2, S), PriceError);
 assert.throws(() => lessonPrice("2026-12-10", 1, 5, S), PriceError);
 console.log("pricing tests passed");
+
+// 용평 3:1 불가
+import { allowedRatios, assertResortRatio } from "./pricing";
+assert.deepEqual(allowedRatios("용평리조트"), ["1:1", "2:1"]);
+assert.deepEqual(allowedRatios("하이원리조트"), ["1:1", "2:1", "3:1"]);
+assert.throws(() => assertResortRatio("용평리조트", 3), /용평은 1:1·2:1/);
+assert.doesNotThrow(() => assertResortRatio("용평리조트", 2));
+console.log("yongpyong ratio tests passed");
