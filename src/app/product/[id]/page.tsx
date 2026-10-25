@@ -11,7 +11,7 @@ import { ProductImageGallery } from "@/components/product/ProductImageGallery";
 const FACTS = [
     { icon: MountainSnow, label: "형태", value: "현장 강습 (선택한 스키장)" },
     { icon: MapPin, label: "장소", value: TEACHING_RESORTS_INLINE },
-    { icon: CalendarCheck, label: "진행", value: "날짜·시간대를 고르면 바로 접수" },
+    { icon: CalendarCheck, label: "진행", value: "날짜·시간대를 고르고 결제하면 접수" },
 ];
 
 export default function ProductPage() {
@@ -74,9 +74,9 @@ export default function ProductPage() {
                         <div className="mt-8 flex gap-3 rounded-[20px] bg-ice p-5">
                             <Info className="mt-0.5 h-5 w-5 shrink-0 text-brand" />
                             <div>
-                                <p className="font-bold">날짜와 시간을 고르면 바로 접수됩니다</p>
+                                <p className="font-bold">날짜와 시간을 고르고 결제하면 접수됩니다</p>
                                 <p className="mt-1 text-[15px] leading-relaxed text-ink/75">
-                                    마감된 시간대는 선택할 수 없습니다. 접수 후 확인 안내를 드립니다.
+                                    마감된 시간대는 선택할 수 없습니다. 결제가 끝나면 접수되고 확인 안내를 드립니다.
                                 </p>
                             </div>
                         </div>

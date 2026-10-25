@@ -19,13 +19,14 @@ function FailContent() {
             <div className="text-muted text-lg mb-8 max-w-md space-y-2">
                 <p className="font-semibold text-red-600">{message}</p>
                 <p className="text-sm text-muted">오류 코드: {code}</p>
+                <p className="text-[15px] text-ink">예약은 접수되지 않았어요. 입력하신 정보는 그대로 있으니 다시 결제할 수 있어요.</p>
             </div>
             <div className="flex gap-4">
                 <Link 
                     href="/checkout" 
                     className="btn-ghost"
                 >
-                    다시 시도
+                    다시 결제하기
                 </Link>
                 <Link 
                     href="/" 

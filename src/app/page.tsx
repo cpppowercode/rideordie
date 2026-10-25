@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 
 const STEPS = [
   { title: "날짜와 시간", body: "원하는 스키장과 강습 시간(2·3·4시간)을 고릅니다. 정설·마감된 시간은 바로 보이지 않아요." },
-  { title: "연락처만", body: "이름과 휴대폰 번호, 인원을 남기면 접수가 끝납니다." },
+  { title: "연락처만", body: "이름과 휴대폰 번호, 인원을 남기고 결제하면 접수가 끝납니다." },
   { title: "확인 안내", body: "사장님이 일정을 확인하고, 당일 스키장에서 만납니다." },
 ];
 
@@ -224,7 +224,7 @@ export default function Home() {
         <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-8 px-5 md:flex-row md:items-center">
           <div>
             <h2 className="text-[28px] font-bold tracking-tight md:text-[36px]">이번 시즌, 슬로프에서 만나요</h2>
-            <p className="mt-3 text-[16px] text-white/70">날짜만 고르면 바로 접수됩니다. 확인 안내는 사장님이 드려요.</p>
+            <p className="mt-3 text-[16px] text-white/70">날짜를 고르고 결제하면 접수됩니다. 확인 안내는 사장님이 드려요.</p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
             <KakaoConsultLink className="btn border border-white/30 bg-white/10 px-8 py-4 text-[18px] text-white hover:bg-white/20">

@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Minus, Plus } from 'lucide-react';
 import { LESSON_TYPES, SKI_RESORTS } from '@/lib/site';
 import { formatPhoneDisplay, todayYmd } from '@/lib/booking';
+import { PENDING_BOOKING_KEY } from '@/lib/pending-booking';
 import {
   generateLessonStarts,
   LESSON_DURATIONS,
@@ -228,19 +229,28 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
-        throw new Error(data.error || '예약 접수에 실패했습니다.');
+        throw new Error(data.error || '예약 정보를 확인하지 못했습니다.');
       }
-      const params = new URLSearchParams({
-        orderNo: data.orderNo,
-        date: lessonDate,
-        resort: skiResort,
-        time: selectedStart?.timeLabel || '',
-        name: customerName.trim(),
-        people: String(participants),
-      });
-      router.push(`/book/success?${params.toString()}`);
+      // 아직 접수 전이다. 입력한 정보만 이 탭에 보관하고 결제 화면으로 넘어간다.
+      sessionStorage.setItem(
+        PENDING_BOOKING_KEY,
+        JSON.stringify({
+          customerName,
+          customerPhone,
+          participants,
+          childCount,
+          skiResort,
+          lessonType,
+          lessonDate,
+          durationHours,
+          startHour,
+          notes,
+          timeLabel: selectedStart?.timeLabel || '',
+        })
+      );
+      router.push('/checkout');
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : '예약 접수에 실패했습니다.');
+      setError(err instanceof Error ? err.message : '예약 정보를 확인하지 못했습니다.');
       setSubmitting(false);
     }
   };
@@ -522,7 +532,7 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
             data-testid="step-confirm"
           >
             <h2 className="text-[22px] font-bold tracking-tight">이 내용으로 예약할까요?</h2>
-            <p className="mt-2 text-[15px] text-muted">접수 후 사장님이 확인 전화를 드립니다. 강습비는 별도입니다.</p>
+            <p className="mt-2 text-[15px] text-muted">다음 화면에서 결제를 마치면 예약이 접수됩니다.</p>
             <dl className="mt-6 overflow-hidden rounded-[24px] bg-white shadow-[0_8px_30px_rgba(25,31,40,0.04)]" data-testid="booking-summary">
               {[
                 ['날짜', lessonDate],
@@ -580,7 +590,7 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
             onClick={handleSubmit}
             className="btn-primary min-h-14 flex-[2] text-[18px]"
           >
-            {submitting ? '접수 중…' : '예약 접수하기'}
+            {submitting ? '확인 중…' : '결제하고 예약하기'}
           </button>
         )}
       </div>
