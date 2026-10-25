@@ -58,12 +58,16 @@ assert.match(validateBookingInput(sample({ customerName: "김" })) || "", /이�
 assert.match(validateBookingInput(sample({ customerPhone: "123" })) || "", /휴대폰/);
 assert.match(validateBookingInput(sample({ childCount: 3, participants: 2 })) || "", /아이/);
 assert.match(validateBookingInput(sample({ lessonDate: "2001-01-01" })) || "", /날짜/);
-assert.match(validateBookingInput(sample({ skiResort: "오투리조트" })) || "", /스키장/);
-assert.match(validateBookingInput(sample({ skiResort: "곤지암리조트" })) || "", /스키장/);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+assert.match(validateBookingInput(sample({ skiResort: "오투리조트" as any })) || "", /스키장/);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+assert.match(validateBookingInput(sample({ skiResort: "곤지암리조트" as any })) || "", /스키장/);
 assert.match(validateBookingInput(sample({ durationHours: 5 })) || "", /강습 시간/);
 assert.match(validateBookingInput(sample({ startHour: 20.5 })) || "", /운영 시간/);
-assert.equal(SKI_RESORTS.some((resort) => resort.value === "오투리조트"), false);
-assert.equal(SKI_RESORTS.some((resort) => resort.value === "곤지암리조트"), false);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+assert.equal(SKI_RESORTS.some((resort) => resort.value === ("오투리조트" as any)), false);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+assert.equal(SKI_RESORTS.some((resort) => resort.value === ("곤지암리조트" as any)), false);
 
 const payload = toAdminPayload(sample(), "WEB_TEST");
 assert.equal(payload.customer_phone, "01012345678");
