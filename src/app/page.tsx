@@ -155,6 +155,7 @@ export default function Home() {
           </dl>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link href="/book" className="btn-primary">예약하기</Link>
+            <Link href="/season" className="btn-ghost" data-testid="home-cta-season">시즌강습 결제하기</Link>
             <Link href={`/product/${PRODUCT_DATA.id}`} className="btn-ghost">자세히 보기</Link>
           </div>
         </div>
