@@ -1,13 +1,19 @@
 import { BookingForm } from "@/components/booking/BookingForm";
 import { bookingValueFromResortQuery } from "@/lib/resort-landings";
 import { pageMetadata } from "@/lib/seo";
+import { getSeasonSettings } from "@/lib/season-settings";
+import { headlineCopy, kstToday, periodFor } from "@/lib/pricing";
 
-export const metadata = pageMetadata({
-  title: "강습 예약",
-  description:
-    "라이드올다이 스키·보드 강습 예약. 1:1·2:1·3:1, 1:1 2시간 15만원부터. 카톡 상담도 가능합니다.",
-  path: "/book",
-});
+export const revalidate = 300;
+
+export async function generateMetadata() {
+  const period = periodFor(kstToday(), await getSeasonSettings());
+  return pageMetadata({
+    title: "강습 예약",
+    description: `라이드올다이 스키·보드 강습 예약. 1:1·2:1·3:1, ${headlineCopy(period)}. 카톡 상담도 가능합니다.`,
+    path: "/book",
+  });
+}
 
 export default async function BookPage({
   searchParams,
@@ -16,6 +22,7 @@ export default async function BookPage({
 }) {
   const { resort } = await searchParams;
   const initialResort = bookingValueFromResortQuery(resort);
+  const seasonSettings = await getSeasonSettings();
 
   return (
     <div className="bg-snow" data-testid="book-page">
@@ -26,7 +33,7 @@ export default async function BookPage({
           강습 시간과 시작 시간을 고르고 연락처만 남기면 끝나요. 결제가 끝나면 예약이 접수되고, 확인 후 연락드립니다.
         </p>
         <div className="mt-10">
-          <BookingForm initialResort={initialResort} />
+          <BookingForm initialResort={initialResort} seasonSettings={seasonSettings} />
         </div>
       </div>
     </div>

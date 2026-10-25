@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { TrustBadges } from "@/components/seo/TrustBadges";
 import { KakaoConsultLink } from "@/components/seo/KakaoConsultLink";
+import { PERIOD_LABEL, tableFor, type PricePeriod } from "@/lib/pricing";
 import {
   bookHref,
   EARLY_BIRD_COPY,
@@ -9,6 +10,7 @@ import {
   FAMILY_GUIDE_POSTS,
   formatManwon,
   REGULAR_PRICE_TABLE,
+  priceCopy,
   RESORT_LANDINGS,
   TERMS_REFUND_HREF,
   type ResortLanding,
@@ -34,11 +36,12 @@ function Ctas({ landing }: { landing: ResortLanding }) {
   );
 }
 
-function PriceTable() {
+function PriceTable({ period }: { period: PricePeriod }) {
+  const table = tableFor(period);
   return (
     <div className="overflow-x-auto rounded-[24px] border border-line bg-white">
       <table className="w-full min-w-[320px] text-left text-[15px]">
-        <caption className="sr-only">1:1·2:1·3:1 일반 요금표</caption>
+        <caption className="sr-only">1:1·2:1·3:1 {PERIOD_LABEL[period]} 요금표</caption>
         <thead>
           <tr className="border-b border-line bg-snow text-muted">
             <th className="px-4 py-3 font-semibold">구성</th>
@@ -55,7 +58,7 @@ function PriceTable() {
               <th className="px-4 py-3 font-semibold text-ink">{ratio}</th>
               {REGULAR_PRICE_TABLE.hours.map((hour) => (
                 <td key={hour} className="px-4 py-3">
-                  {formatManwon(REGULAR_PRICE_TABLE.amounts[ratio][hour])}
+                  {formatManwon(table[ratio][hour])}
                 </td>
               ))}
             </tr>
@@ -94,7 +97,7 @@ function FamilyGuideLinks({ landing }: { landing: ResortLanding }) {
   );
 }
 
-export function ResortLandingView({ landing }: { landing: ResortLanding }) {
+export function ResortLandingView({ landing, period = "regular" }: { landing: ResortLanding; period?: PricePeriod }) {
   const showPrice = landing.layout === "full";
   const showImage = landing.layout !== "minimal";
 
@@ -164,10 +167,10 @@ export function ResortLandingView({ landing }: { landing: ResortLanding }) {
           <section className="mt-12">
             <h2 className="text-[24px] font-bold tracking-tight">가격표</h2>
             <p className="mt-3 text-[16px] leading-7 text-muted">
-              1:1 2시간 15만원부터. 아래는 일반 요금입니다.
+              {priceCopy("1:1 2시간 15만원부터", period)}. 아래는 {PERIOD_LABEL[period]} 요금입니다.
             </p>
-            <div className="mt-5">
-              <PriceTable />
+            <div className="mt-5" data-testid="price-table" data-period={period}>
+              <PriceTable period={period} />
             </div>
           </section>
           <section className="mt-12">

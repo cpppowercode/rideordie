@@ -1,5 +1,6 @@
 'use client';
 
+import { PERIOD_LABEL, RATIOS, UNSET_SETTINGS, type SeasonSettings } from '@/lib/pricing';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -80,7 +81,7 @@ function Stepper({ value, min, max, onChange, testId }: {
   );
 }
 
-export function BookingForm({ initialResort }: { initialResort?: string }) {
+export function BookingForm({ initialResort, seasonSettings = UNSET_SETTINGS }: { initialResort?: string; seasonSettings?: SeasonSettings }) {
   const router = useRouter();
   const today = todayYmd();
   const initial = new Date();
@@ -116,8 +117,9 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
   // 결제 금액 미리보기(표시용). 서버가 같은 규칙으로 다시 계산해 결제한다.
   let feeRows: [string, string][] = [];
   try {
-    const fee = payBreakdown({ skiResort, participants, durationHours });
+    const fee = payBreakdown({ skiResort, participants, durationHours, lessonDate }, seasonSettings);
     feeRows = [
+      ['요금 기간', PERIOD_LABEL[fee.period]],
       ['강습비', `${fee.lessonFee.toLocaleString('ko-KR')}원`],
       ...(fee.badgeFee > 0 ? [['패찰비', `${fee.badgeFee.toLocaleString('ko-KR')}원`] as [string, string]] : []),
       ['합계', `${fee.total.toLocaleString('ko-KR')}원`],
@@ -261,6 +263,7 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
           startHour,
           notes,
           timeLabel: selectedStart?.timeLabel || '',
+          serverFee: { lessonFee: data.lessonFee, badgeFee: data.badgeFee, total: data.amount, period: data.period },
         })
       );
       router.push('/checkout');
@@ -494,11 +497,19 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
             </label>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <span className="mb-2 block text-[14px] font-semibold text-muted">총 인원</span>
-                <Stepper value={participants} min={1} max={8} onChange={(n) => {
-                  setParticipants(n);
-                  if (childCount > n) setChildCount(n);
-                }} testId="input-participants" />
+                <span className="mb-2 block text-[14px] font-semibold text-muted">강습 구성</span>
+                <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="강습 구성" data-testid="input-participants">
+                  {RATIOS.map((ratio, idx) => {
+                    const n = idx + 1;
+                    const on = participants === n;
+                    return (
+                      <button key={ratio} type="button" role="radio" aria-checked={on}
+                        onClick={() => { setParticipants(n); if (childCount > n) setChildCount(n); }}
+                        className={`rounded-2xl border py-3 text-[16px] font-bold ${on ? 'border-brand bg-brand text-white' : 'border-line bg-white'}`}
+                        data-testid={`ratio-${n}`}>{ratio}</button>
+                    );
+                  })}
+                </div>
               </div>
               <div>
                 <span className="mb-2 block text-[14px] font-semibold text-muted">아이 인원</span>
@@ -557,7 +568,7 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
                 ['종목', typeLabel],
                 ['이름', customerName.trim()],
                 ['연락처', customerPhone],
-                ['인원', `${participants}명 · 아이 ${childCount}명`],
+                ['구성', `${participants}:1 · 아이 ${childCount}명`],
                 ['요청', notes.trim() || '없음'],
                 ...feeRows,
               ].map(([k, v]) => (

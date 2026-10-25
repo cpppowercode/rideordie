@@ -141,8 +141,8 @@ export function validateBookingInput(input: BookingInput): string | null {
   const phone = normalizePhone(input.customerPhone);
   if (!PHONE_RE.test(phone)) return "휴대폰 번호를 확인해 주세요. 예: 010-1234-5678";
 
-  if (!Number.isInteger(input.participants) || input.participants < 1 || input.participants > 8) {
-    return "인원은 1명에서 8명까지 선택할 수 있습니다.";
+  if (!Number.isInteger(input.participants) || input.participants < 1 || input.participants > 3) {
+    return "인원은 1:1, 2:1, 3:1(1~3명) 중에서 선택해 주세요.";
   }
   if (!Number.isInteger(input.childCount) || input.childCount < 0 || input.childCount > input.participants) {
     return "아이 인원은 총 인원 이하로 입력해 주세요.";

@@ -1,14 +1,16 @@
+import { headlineCopy, REGULAR_TABLE, type PricePeriod } from "@/lib/pricing";
 import { KAKAO_CONSULT_URL, LESSON_PHOTOS, SITE_URL, SKI_RESORTS } from "@/lib/site";
 
 export const REGULAR_PRICE_TABLE = {
   ratios: ["1:1", "2:1", "3:1"] as const,
   hours: [2, 3, 4] as const,
-  amounts: {
-    "1:1": { 2: 150_000, 3: 220_000, 4: 290_000 },
-    "2:1": { 2: 180_000, 3: 270_000, 4: 350_000 },
-    "3:1": { 2: 210_000, 3: 310_000, 4: 400_000 },
-  },
+  amounts: REGULAR_TABLE,
 } as const;
+
+/** 정적 문구의 '1:1 2시간 15만원부터'를 현재 요금 기간 문구로 바꾼다. */
+export function priceCopy(text: string, period: PricePeriod): string {
+  return text.split("1:1 2시간 15만원부터").join(headlineCopy(period));
+}
 
 export type ResortLandingSlug = "high1" | "welli-hilli" | "vivaldi" | "jisan" | "yongpyong";
 
@@ -60,7 +62,7 @@ export const TERMS_REFUND_HREF = "/service-policy#article-9";
 
 export const EARLY_BIRD_LABEL = "시즌 전 얼리버드";
 export const EARLY_BIRD_COPY =
-  "시즌 전 얼리버드: 개장 후 첫 2주 안에 예약 또는 2월 중순 이후 예약 시 14만원";
+  "시즌 전 얼리버드·2월 15일 이후 시즌말 특가는 1:1 2시간 14만원, 시즌 중 일반 요금은 1:1 2시간 15만원";
 
 const SHARED_FACTS_FAQ: ResortFaq[] = [
   {

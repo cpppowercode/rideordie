@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { payBreakdown } from "@/lib/badge-fee";
+import { getSeasonSettings } from "@/lib/season-settings";
 import { INTENT_COOKIE, readBookingIntent } from "@/lib/booking-intent";
 import {
   kcpRegisterUrl,
@@ -32,7 +33,7 @@ export async function POST(request: NextRequest) {
     if (!intent || intent.orderNo !== orderId) {
       return NextResponse.json({ error: "예약 정보를 확인할 수 없습니다. 처음부터 다시 진행해 주세요." }, { status: 400 });
     }
-    const amount = payBreakdown(intent.input).total;
+    const amount = payBreakdown(intent.input, await getSeasonSettings()).total;
     if (intent.amount !== amount) {
       return NextResponse.json({ error: "결제 금액이 주문 금액과 다릅니다." }, { status: 400 });
     }

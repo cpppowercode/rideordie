@@ -19,9 +19,7 @@ export const ADMIN_SOURCE = {
   commit: "f2bd5f3",
 } as const;
 
-import { PRODUCT_DATA } from "@/lib/mockData";
-
-export const LESSON_FEE = PRODUCT_DATA.price;
+import { lessonPrice, PriceError, UNSET_SETTINGS, type PricePeriod, type SeasonSettings } from "@/lib/pricing";
 
 const VIVALDI_PER_PERSON_HOUR = 12500;
 
@@ -61,9 +59,23 @@ export function computeBadgeFee(skiResort: string, participants: number, duratio
   return fee;
 }
 
-export type PayBreakdown = { lessonFee: number; badgeFee: number; total: number };
+export type PayBreakdown = { lessonFee: number; badgeFee: number; total: number; period: PricePeriod };
 
-export function payBreakdown(input: { skiResort: string; participants: number; durationHours: number }): PayBreakdown {
+/**
+ * 결제 금액 = 강습비(강습 날짜 KST 기준 요금표, 인원=1:1/2:1/3:1) + 패찰비.
+ * 계산할 수 없으면 BadgeFeeError(결제 진행 금지).
+ */
+export function payBreakdown(
+  input: { skiResort: string; participants: number; durationHours: number; lessonDate: string },
+  settings: SeasonSettings = UNSET_SETTINGS,
+): PayBreakdown {
+  let price;
+  try {
+    price = lessonPrice(String(input.lessonDate), Number(input.participants), Number(input.durationHours), settings);
+  } catch (error) {
+    if (error instanceof PriceError) throw new BadgeFeeError(error.message);
+    throw error;
+  }
   const badgeFee = computeBadgeFee(input.skiResort, Number(input.participants), Number(input.durationHours));
-  return { lessonFee: LESSON_FEE, badgeFee, total: LESSON_FEE + badgeFee };
+  return { lessonFee: price.amount, badgeFee, total: price.amount + badgeFee, period: price.period };
 }

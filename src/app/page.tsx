@@ -11,10 +11,24 @@ import { KakaoConsultLink } from "@/components/seo/KakaoConsultLink";
 import { faqPageJsonLd } from "@/lib/jsonld";
 import { SITE_FAQ } from "@/lib/resort-landings";
 import { ResortCards } from "@/components/seo/ResortCards";
+import { headlineCopy, kstToday, periodFor } from "@/lib/pricing";
+import { getSeasonSettings } from "@/lib/season-settings";
 
-export const metadata: Metadata = {
-  alternates: pageAlternates(SITE_URL),
-};
+export const revalidate = 300;
+
+async function currentPeriod() {
+  return periodFor(kstToday(), await getSeasonSettings());
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const description = `전국 5개 스키장(하이원·비발디·웰리힐리·용평·지산) 어린이 스키·보드 강습. ${headlineCopy(await currentPeriod())}. 카카오톡 상담과 온라인 예약.`;
+  return {
+    alternates: pageAlternates(SITE_URL),
+    description,
+    openGraph: { description },
+    twitter: { description },
+  };
+}
 
 const STEPS = [
   { title: "날짜와 시간", body: "원하는 스키장과 강습 시간(2·3·4시간)을 고릅니다. 정설·마감된 시간은 바로 보이지 않아요." },
@@ -29,7 +43,8 @@ const HIGHLIGHTS = [
   { k: "상담", v: "카톡 상담 · 연중무휴" },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const period = await currentPeriod();
   return (
     <div className="flex flex-col" data-testid="home-page">
       <JsonLd data={faqPageJsonLd(SITE_FAQ)} />
@@ -150,7 +165,7 @@ export default function Home() {
             ))}
             <div className="flex gap-8 py-5">
               <dt className="w-16 shrink-0 text-muted">강습비</dt>
-              <dd className="text-[22px] font-bold tracking-tight">1:1 2시간 15만원부터</dd>
+              <dd className="text-[22px] font-bold tracking-tight" data-testid="home-headline-price">{headlineCopy(period)}</dd>
             </div>
           </dl>
           <div className="mt-8 flex flex-wrap gap-3">

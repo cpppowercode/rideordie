@@ -1,5 +1,6 @@
 'use client';
 
+import { PERIOD_LABEL } from '@/lib/pricing';
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { CalendarCheck } from 'lucide-react';
@@ -39,7 +40,7 @@ export default function CheckoutPage() {
     let feeError = '';
     if (pending) {
         try {
-            breakdown = payBreakdown(pending);
+            breakdown = pending.serverFee && Number.isFinite(pending.serverFee.total) ? pending.serverFee : payBreakdown(pending);
         } catch (error) {
             feeError = error instanceof Error ? error.message : '패찰비를 계산할 수 없습니다.';
         }
@@ -259,6 +260,7 @@ export default function CheckoutPage() {
 
                         {breakdown ? (
                             <dl className="mb-4 space-y-2 border-b border-line pb-4 text-[15px]" data-testid="checkout-breakdown">
+                                <div className="flex justify-between"><dt className="text-muted">요금 기간 · 구성</dt><dd className="font-semibold" data-testid="checkout-period">{PERIOD_LABEL[breakdown.period]} · {pending?.participants}:1 {pending?.durationHours}시간</dd></div>
                                 <div className="flex justify-between"><dt className="text-muted">강습비</dt><dd className="font-semibold" data-testid="checkout-lesson-fee">{breakdown.lessonFee.toLocaleString()}원</dd></div>
                                 {breakdown.badgeFee > 0 ? (
                                     <div className="flex justify-between"><dt className="text-muted">패찰비</dt><dd className="font-semibold" data-testid="checkout-badge-fee">{breakdown.badgeFee.toLocaleString()}원</dd></div>

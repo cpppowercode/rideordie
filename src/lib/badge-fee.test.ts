@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
-import { BadgeFeeError, computeBadgeFee, LESSON_FEE, payBreakdown } from "./badge-fee";
-
-assert.equal(LESSON_FEE, 150000);
+import { BadgeFeeError, computeBadgeFee, payBreakdown } from "./badge-fee";
+const D = "2026-12-20"; // 일반 요금 기간
 // 비발디: 인원 × 시간 × 12,500 (어드민 계산기)
 assert.equal(computeBadgeFee("비발디파크", 1, 2), 25000);
 assert.equal(computeBadgeFee("비발디파크", 2, 3), 75000);
@@ -18,8 +17,9 @@ assert.throws(() => computeBadgeFee("비발디파크", 0, 2), BadgeFeeError);
 assert.throws(() => computeBadgeFee("지산포레스트", 1, Number.NaN), BadgeFeeError);
 assert.throws(() => computeBadgeFee("비발디파크", 1.5, 2), BadgeFeeError);
 // 합계
-assert.deepEqual(payBreakdown({ skiResort: "비발디파크", participants: 1, durationHours: 2 }), { lessonFee: 150000, badgeFee: 25000, total: 175000 });
-assert.deepEqual(payBreakdown({ skiResort: "지산포레스트", participants: 1, durationHours: 2 }), { lessonFee: 150000, badgeFee: 35000, total: 185000 });
-assert.deepEqual(payBreakdown({ skiResort: "웰리힐리파크", participants: 2, durationHours: 2 }), { lessonFee: 150000, badgeFee: 0, total: 150000 });
-assert.deepEqual(payBreakdown({ skiResort: "하이원리조트", participants: 2, durationHours: 2 }), { lessonFee: 150000, badgeFee: 0, total: 150000 });
+assert.deepEqual(payBreakdown({ skiResort: "비발디파크", participants: 1, durationHours: 2, lessonDate: D }), { lessonFee: 150000, badgeFee: 25000, total: 175000, period: "regular" });
+assert.deepEqual(payBreakdown({ skiResort: "지산포레스트", participants: 1, durationHours: 2, lessonDate: D }), { lessonFee: 150000, badgeFee: 35000, total: 185000, period: "regular" });
+assert.deepEqual(payBreakdown({ skiResort: "웰리힐리파크", participants: 2, durationHours: 2, lessonDate: D }), { lessonFee: 180000, badgeFee: 0, total: 180000, period: "regular" });
+assert.deepEqual(payBreakdown({ skiResort: "하이원리조트", participants: 2, durationHours: 2, lessonDate: D }), { lessonFee: 180000, badgeFee: 0, total: 180000, period: "regular" });
+assert.throws(() => payBreakdown({ skiResort: "비발디파크", participants: 4, durationHours: 2, lessonDate: D }), BadgeFeeError);
 console.log("badge-fee tests passed");

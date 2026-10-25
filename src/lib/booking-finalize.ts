@@ -7,6 +7,7 @@ import { checkBookingAvailability } from "@/lib/booking-checks";
 import { createBookingReceipt, type BookingIntent } from "@/lib/booking-intent";
 import { formatLessonRange } from "@/lib/hours";
 import { payBreakdown } from "@/lib/badge-fee";
+import { getSeasonSettings } from "@/lib/season-settings";
 import { approveKcpPayment, toKcpPayType } from "@/lib/kcp";
 import { notifyOwner } from "@/lib/notify";
 
@@ -37,7 +38,7 @@ export async function approveAndFinalizeBooking(
   kcp: KcpApprovalRequest,
 ): Promise<FinalizeResult> {
   // 강습비 + 패찰비를 서명된 예약 정보로 다시 계산한다. 계산할 수 없으면 승인 요청 전에 멈춘다.
-  const breakdown = payBreakdown(intent.input);
+  const breakdown = payBreakdown(intent.input, await getSeasonSettings());
   const amount = breakdown.total;
   if (intent.amount !== amount) {
     throw new Error("결제 금액이 주문 금액과 다릅니다.");

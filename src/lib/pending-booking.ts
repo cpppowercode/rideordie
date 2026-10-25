@@ -13,6 +13,8 @@ export type PendingBooking = {
   startHour: number;
   notes: string;
   timeLabel: string;
+  /** /api/bookings 가 계산한 금액(표시용). 결제 금액은 서버가 다시 계산한다. */
+  serverFee?: { lessonFee: number; badgeFee: number; total: number; period: 'early' | 'regular' | 'late' };
 };
 
 export function readPendingBooking(): PendingBooking | null {
