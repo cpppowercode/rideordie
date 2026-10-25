@@ -1,8 +1,9 @@
+import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 import { PRODUCT_DATA } from "@/lib/mockData";
-import { INSTAGRAM_URL, SITE_URL, TEACHING_RESORTS_COPY, TEACHING_RESORTS_INLINE } from "@/lib/site";
+import { INSTAGRAM_URL, SITE_URL, TEACHING_RESORTS, TEACHING_RESORTS_COPY, TEACHING_RESORTS_INLINE } from "@/lib/site";
 import { pageAlternates } from "@/lib/seo";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { TrustBadges } from "@/components/seo/TrustBadges";
@@ -82,11 +83,20 @@ export default function Home() {
       </section>
 
       <section className="border-b border-line bg-white">
-        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-px bg-line md:grid-cols-4">
+        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-px bg-line md:grid-cols-4 lg:grid-cols-[1fr_1fr_1.5fr_1fr]">
           {HIGHLIGHTS.map((item) => (
             <div key={item.k} className="bg-white px-5 py-7 md:px-8 md:py-9">
               <p className="text-[13px] font-semibold text-muted">{item.k}</p>
-              <p className="mt-1.5 text-[16px] font-semibold tracking-tight md:text-[18px]">{item.v}</p>
+              <p className="mt-1.5 text-[16px] font-semibold tracking-tight md:text-[18px] lg:whitespace-nowrap">
+                {item.k === "장소"
+                  ? TEACHING_RESORTS.map((name, i) => (
+                      <React.Fragment key={name}>
+                        {i > 0 ? " " : null}
+                        <span className="inline-block whitespace-nowrap">{i < TEACHING_RESORTS.length - 1 ? `${name} ·` : name}</span>
+                      </React.Fragment>
+                    ))
+                  : item.v}
+              </p>
             </div>
           ))}
         </div>
