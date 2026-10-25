@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
 
 type Preset = { id: string; label: string };
 type Msg = { role: 'user' | 'assistant'; content: string };
@@ -14,6 +15,9 @@ export function ChatWidget() {
   const [busy, setBusy] = useState(false);
   const sid = useRef('');
   const end = useRef<HTMLDivElement>(null);
+  const pathname = usePathname() || '';
+  // 예약·결제 화면에서는 하단 버튼('다음'·결제)을 가리지 않도록 숨긴다.
+  const hidden = /^\/(book|checkout)(\/|$)/.test(pathname);
 
   useEffect(() => {
     sid.current = sessionStorage.getItem('rd_chat_sid') || Math.random().toString(36).slice(2);
@@ -21,7 +25,7 @@ export function ChatWidget() {
     fetch('/api/chat').then((r) => r.json()).then((r) => { setEnabled(!!r.enabled); setPresets(r.presets || []); }).catch(() => {});
   }, []);
   useEffect(() => { end.current?.scrollIntoView({ block: 'end' }); }, [msgs, open]);
-  if (!enabled) return null;
+  if (!enabled || hidden) return null;
 
   const ask = async (payload: { question?: string; presetId?: string }, shown: string) => {
     if (busy) return;
