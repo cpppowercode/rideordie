@@ -11,6 +11,7 @@ import {
     isMobileUserAgent,
     type KcpPayMethod,
 } from '@/lib/kcp-public';
+import { payBreakdown, type PayBreakdown } from '@/lib/badge-fee';
 import { PENDING_BOOKING_KEY, readPendingBooking, type PendingBooking } from '@/lib/pending-booking';
 
 type KcpLaunch = {
@@ -33,7 +34,18 @@ export default function CheckoutPage() {
         phone: ''
     });
 
-    const amount = expectedPayAmount();
+    // 화면 표시용. 실제 결제 금액은 서버가 서명된 예약 정보로 다시 계산한다.
+    let breakdown: PayBreakdown | null = null;
+    let feeError = '';
+    if (pending) {
+        try {
+            breakdown = payBreakdown(pending);
+        } catch (error) {
+            feeError = error instanceof Error ? error.message : '패찰비를 계산할 수 없습니다.';
+        }
+    }
+    const amount = breakdown ? breakdown.total : expectedPayAmount();
+    const [serverAmount, setServerAmount] = useState<number | null>(null);
 
     useEffect(() => {
         const saved = readPendingBooking();
@@ -114,7 +126,8 @@ export default function CheckoutPage() {
                 throw new Error(intentData.error || '예약 정보를 확인하지 못했습니다.');
             }
 
-            const { orderNo: orderId, intent } = intentData as { orderNo: string; intent: string };
+            const { orderNo: orderId, intent, amount: payAmount } = intentData as { orderNo: string; intent: string; amount: number };
+            setServerAmount(payAmount);
             const mobile = isMobileUserAgent(navigator.userAgent);
 
             if (mobile) {
@@ -124,6 +137,7 @@ export default function CheckoutPage() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         orderId,
+                        intent,
                         goodName: PRODUCT_DATA.title,
                         payMethod,
                         retUrl,
@@ -163,7 +177,7 @@ export default function CheckoutPage() {
                 key={kcpLaunch?.orderId || 'idle'}
                 orderId={kcpLaunch?.orderId || ''}
                 goodName={PRODUCT_DATA.title}
-                amount={amount}
+                amount={serverAmount ?? amount}
                 buyerName={formData.name}
                 buyerPhone={formData.phone}
                 payMethod={payMethod}
@@ -243,8 +257,20 @@ export default function CheckoutPage() {
                             <p className="mt-1 text-sm text-muted">{TEACHING_RESORTS_COPY} 현장 강습</p>
                         </div>
 
+                        {breakdown ? (
+                            <dl className="mb-4 space-y-2 border-b border-line pb-4 text-[15px]" data-testid="checkout-breakdown">
+                                <div className="flex justify-between"><dt className="text-muted">강습비</dt><dd className="font-semibold" data-testid="checkout-lesson-fee">{breakdown.lessonFee.toLocaleString()}원</dd></div>
+                                {breakdown.badgeFee > 0 ? (
+                                    <div className="flex justify-between"><dt className="text-muted">패찰비</dt><dd className="font-semibold" data-testid="checkout-badge-fee">{breakdown.badgeFee.toLocaleString()}원</dd></div>
+                                ) : null}
+                            </dl>
+                        ) : null}
+                        {feeError ? (
+                            <p className="mb-4 rounded-lg bg-red-50 p-4 text-[15px] font-medium text-red-600" role="alert" data-testid="checkout-fee-error">{feeError}</p>
+                        ) : null}
+
                         <div className="mb-6 flex items-end justify-between">
-                            <span className="font-medium">총 결제금액</span>
+                            <span className="font-medium">합계</span>
                             <span className="text-2xl font-extrabold">{amount.toLocaleString()}원</span>
                         </div>
 
@@ -255,7 +281,7 @@ export default function CheckoutPage() {
                             </p>
                         ) : null}
 
-                        <button type="submit" disabled={isProcessing || !pending} className="btn-primary w-full py-4 text-lg" data-testid="checkout-pay">
+                        <button type="submit" disabled={isProcessing || !pending || !breakdown} className="btn-primary w-full py-4 text-lg" data-testid="checkout-pay">
                             {isProcessing ? '처리 중...' : `${amount.toLocaleString()}원 결제하기`}
                         </button>
                         <p className="mt-3 text-center text-sm text-muted">결제가 끝나면 예약이 접수됩니다.</p>

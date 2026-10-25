@@ -6,7 +6,8 @@ import { toAdminPayload } from "@/lib/booking";
 import { checkBookingAvailability } from "@/lib/booking-checks";
 import { createBookingReceipt, type BookingIntent } from "@/lib/booking-intent";
 import { formatLessonRange } from "@/lib/hours";
-import { approveKcpPayment, expectedPayAmount, toKcpPayType } from "@/lib/kcp";
+import { payBreakdown } from "@/lib/badge-fee";
+import { approveKcpPayment, toKcpPayType } from "@/lib/kcp";
 import { notifyOwner } from "@/lib/notify";
 
 export type KcpApprovalRequest = {
@@ -35,7 +36,9 @@ export async function approveAndFinalizeBooking(
   intent: BookingIntent,
   kcp: KcpApprovalRequest,
 ): Promise<FinalizeResult> {
-  const amount = expectedPayAmount();
+  // 강습비 + 패찰비를 서명된 예약 정보로 다시 계산한다. 계산할 수 없으면 승인 요청 전에 멈춘다.
+  const breakdown = payBreakdown(intent.input);
+  const amount = breakdown.total;
   if (intent.amount !== amount) {
     throw new Error("결제 금액이 주문 금액과 다릅니다.");
   }
@@ -93,8 +96,11 @@ export async function approveAndFinalizeBooking(
   const base = toAdminPayload(input, intent.orderNo);
   const payMethodLabel = toKcpPayType(kcp.payMethod || "PACA") === "PABK" ? "bank" : "card";
   const notes = [
-    base.notes,
     `KCP 결제완료 ${amount.toLocaleString("ko-KR")}원 (거래번호 ${tno})`,
+    breakdown.badgeFee > 0
+      ? `[결제내역] 강습비 ${breakdown.lessonFee.toLocaleString("ko-KR")}원 + 패찰비 ${breakdown.badgeFee.toLocaleString("ko-KR")}원`
+      : "",
+    base.notes,
     needsReview ? `[확인 필요] ${needsReview}` : "",
   ]
     .filter(Boolean)

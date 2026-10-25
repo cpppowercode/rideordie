@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight, Minus, Plus } from 'lucide-react';
 import { LESSON_TYPES, SKI_RESORTS } from '@/lib/site';
 import { formatPhoneDisplay, todayYmd } from '@/lib/booking';
 import { PENDING_BOOKING_KEY } from '@/lib/pending-booking';
+import { payBreakdown } from '@/lib/badge-fee';
 import {
   generateLessonStarts,
   LESSON_DURATIONS,
@@ -111,6 +112,20 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
   );
   const selectedStart = generatedStarts.find((slot) => slot.startHour === startHour) || null;
   const resortLabel = SKI_RESORTS.find((r) => r.value === skiResort)?.label;
+
+  // 결제 금액 미리보기(표시용). 서버가 같은 규칙으로 다시 계산해 결제한다.
+  let feeRows: [string, string][] = [];
+  try {
+    const fee = payBreakdown({ skiResort, participants, durationHours });
+    feeRows = [
+      ['강습비', `${fee.lessonFee.toLocaleString('ko-KR')}원`],
+      ...(fee.badgeFee > 0 ? [['패찰비', `${fee.badgeFee.toLocaleString('ko-KR')}원`] as [string, string]] : []),
+      ['합계', `${fee.total.toLocaleString('ko-KR')}원`],
+    ];
+  } catch {
+    feeRows = [['결제 금액', '확인 불가 — 다시 선택해 주세요']];
+  }
+
   const typeLabel = LESSON_TYPES.find((t) => t.value === lessonType)?.label;
 
   const slots = useMemo(() => {
@@ -544,6 +559,7 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
                 ['연락처', customerPhone],
                 ['인원', `${participants}명 · 아이 ${childCount}명`],
                 ['요청', notes.trim() || '없음'],
+                ...feeRows,
               ].map(([k, v]) => (
                 <div key={k} className="flex items-start justify-between gap-6 border-b border-line px-5 py-4 last:border-0">
                   <dt className="shrink-0 text-[15px] text-muted">{k}</dt>

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { buildOrderNo, type BookingInput } from "@/lib/booking";
 import { checkBookingAvailability, parseBookingBody } from "@/lib/booking-checks";
 import { createBookingIntent, INTENT_COOKIE } from "@/lib/booking-intent";
-import { expectedPayAmount } from "@/lib/kcp";
+import { BadgeFeeError, payBreakdown } from "@/lib/badge-fee";
 
 /**
  * 결제 전 단계: 예약 정보를 확인만 하고 저장·알림은 하지 않는다.
@@ -17,7 +17,16 @@ export async function POST(request: NextRequest) {
     }
 
     const orderNo = buildOrderNo();
-    const amount = expectedPayAmount();
+    let breakdown;
+    try {
+      breakdown = payBreakdown(checked.input);
+    } catch (error) {
+      if (error instanceof BadgeFeeError) {
+        return NextResponse.json({ error: error.message }, { status: 400 });
+      }
+      throw error;
+    }
+    const amount = breakdown.total;
     const intent = createBookingIntent(orderNo, amount, checked.input);
 
     const response = NextResponse.json({
@@ -25,6 +34,8 @@ export async function POST(request: NextRequest) {
       status: "awaiting_payment",
       orderNo,
       amount,
+      lessonFee: breakdown.lessonFee,
+      badgeFee: breakdown.badgeFee,
       intent,
     });
     // 모바일 결제는 KCP가 Ret_URL로 POST 하므로 서명 토큰을 쿠키로도 실어 둔다(내용은 서버 서명으로 검증).
