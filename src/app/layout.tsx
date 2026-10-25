@@ -3,6 +3,7 @@ import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { ChatWidget } from "@/components/chat/ChatWidget";
 import { organizationJsonLd } from "@/lib/jsonld";
 import { DEFAULT_OG_ALT, DEFAULT_OG_IMAGE, pageAlternates } from "@/lib/seo";
 import {
@@ -84,7 +85,8 @@ export default function RootLayout({
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
-      </body>
+      <ChatWidget />
+        </body>
     </html>
   );
 }

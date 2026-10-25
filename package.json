@@ -7,13 +7,14 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "npx tsx src/lib/booking.test.ts && npx tsx src/lib/resort-landings.test.ts && npx tsx src/lib/badge-fee.test.ts && npx tsx src/lib/pricing.test.ts && npx tsx src/lib/season.test.ts",
+    "test": "npx tsx src/lib/booking.test.ts && npx tsx src/lib/resort-landings.test.ts && npx tsx src/lib/badge-fee.test.ts && npx tsx src/lib/pricing.test.ts && npx tsx src/lib/season.test.ts && npx tsx src/lib/chatbot/chatbot.test.ts",
     "test:booking": "npx tsx src/lib/booking.test.ts",
     "test:e2e": "playwright test"
   },
   "dependencies": {
     "@react-spring/parallax": "^10.0.1",
     "@supabase/supabase-js": "^2.95.3",
+    "ai": "^7.0.153",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.0",
     "iconv-lite": "^0.7.3",
