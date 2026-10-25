@@ -59,8 +59,8 @@ export function ChatWidget() {
             ))}
           </div>
           <form className="flex gap-2 border-t border-line p-2" onSubmit={(e) => { e.preventDefault(); const q = text.trim(); if (q) { setText(''); ask({ question: q }, q); } }}>
-            <input value={text} onChange={(e) => setText(e.target.value)} maxLength={300} placeholder="궁금한 점을 적어 주세요" className="flex-1 rounded-full border border-line px-3 py-2 text-[14px]" data-testid="chat-input" />
-            <button disabled={busy} className="rounded-full bg-brand px-4 text-[14px] font-bold text-white disabled:opacity-50">보내기</button>
+            <input value={text} onChange={(e) => setText(e.target.value)} maxLength={300} placeholder="궁금한 점을 적어 주세요" className="min-w-0 flex-1 rounded-full border border-line px-3 py-2 text-[14px]" data-testid="chat-input" />
+            <button disabled={busy} className="shrink-0 rounded-full bg-brand px-4 text-[14px] font-bold text-white disabled:opacity-50">보내기</button>
           </form>
           <p className="px-3 pb-2 text-[11px] text-muted">자동 상담은 참고용이에요. 예약·결제 확인은 카카오톡 채널로 문의해 주세요.</p>
         </div>
