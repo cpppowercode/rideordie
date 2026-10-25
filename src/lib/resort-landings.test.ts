@@ -46,7 +46,7 @@ const yongpyong = resortLandingBySlug("yongpyong");
 assert.ok(yongpyong);
 assert.deepEqual(yongpyong.intro, [
   "평창 용평에서 어린이 스키·보드 강습을 진행합니다. 1:1·2:1·3:1, 공인 강사, 응급처치 교육 이수, 강습보험 적용.",
-  "1:1 2시간 정가는 15만원입니다. 숙소·리프트권·장비는 별도입니다. 환불은 약관 제9조를 따릅니다.",
+  "1:1 2시간 일반 요금은 15만원입니다. 환불은 약관 제9조를 따릅니다.",
 ]);
 assert.equal(yongpyong.layout, "minimal");
 

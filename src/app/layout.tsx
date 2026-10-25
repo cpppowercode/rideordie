@@ -11,7 +11,7 @@ import {
 } from "@/lib/site";
 
 const SITE_TITLE = `라이드올다이 | ${TEACHING_RESORTS_COPY} 스키·보드 강습`;
-const SITE_DESCRIPTION = `${TEACHING_RESORTS_COPY}에서 진행하는 어린이 스키강습·보드강습. 1:1 2시간 정가 15만원. 숙소·리프트권·장비 별도. 카톡 상담과 온라인 예약.`;
+const SITE_DESCRIPTION = `${TEACHING_RESORTS_COPY}에서 진행하는 어린이 스키강습·보드강습. 1:1 2시간 정가 15만원. 카톡 상담과 온라인 예약.`;
 
 const googleVerification =
   process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ||

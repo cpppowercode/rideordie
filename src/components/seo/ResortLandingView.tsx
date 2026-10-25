@@ -107,7 +107,7 @@ export function ResortLandingView({ landing }: { landing: ResortLanding }) {
 
         {landing.mentionBadgeFee ? (
           <p className="mt-6 rounded-[20px] bg-ice px-5 py-4 text-[16px] leading-7 text-ink">
-            이 스키장은 패찰비가 별도입니다. 숙소·리프트권·장비도 강습비에 포함되지 않습니다.
+            이 스키장은 패찰비가 별도입니다.
           </p>
         ) : null}
 
@@ -135,7 +135,7 @@ export function ResortLandingView({ landing }: { landing: ResortLanding }) {
           <section className="mt-12">
             <h2 className="text-[24px] font-bold tracking-tight">가격표</h2>
             <p className="mt-3 text-[16px] leading-7 text-muted">
-              1:1 2시간 정가 15만원. 아래는 정가입니다. 숙소·리프트권·장비는 별도입니다.
+              1:1 2시간 정가 15만원. 아래는 정가입니다.
             </p>
             <div className="mt-5">
               <PriceTable />
@@ -152,7 +152,7 @@ export function ResortLandingView({ landing }: { landing: ResortLanding }) {
           <section className="mt-12">
             <h2 className="text-[24px] font-bold tracking-tight">강습비</h2>
             <p className="mt-3 text-[17px] leading-8 text-muted">
-              {EARLY_BIRD_COPY}. 숙소·리프트권·장비는 별도입니다.
+              {EARLY_BIRD_COPY}.
               {landing.mentionBadgeFee ? " 패찰비도 별도입니다." : ""}
             </p>
             {landing.layout !== "minimal" ? (

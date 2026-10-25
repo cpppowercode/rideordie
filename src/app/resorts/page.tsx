@@ -7,7 +7,7 @@ import { pageMetadata } from "@/lib/seo";
 import { TEACHING_RESORTS_COPY } from "@/lib/site";
 
 const TITLE = "강습 스키장 | 라이드올다이";
-const DESCRIPTION = `${TEACHING_RESORTS_COPY}에서 진행하는 어린이 스키강습·보드강습. 1:1 2시간 정가 15만원. 숙소·리프트권·장비 별도. 카톡 상담과 온라인 예약.`;
+const DESCRIPTION = `${TEACHING_RESORTS_COPY}에서 진행하는 어린이 스키강습·보드강습. 1:1 2시간 정가 15만원. 카톡 상담과 온라인 예약.`;
 
 export const metadata: Metadata = pageMetadata({
   title: TITLE,
