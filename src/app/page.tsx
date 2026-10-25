@@ -114,8 +114,8 @@ export default function Home() {
       <section className="mx-auto grid w-full max-w-6xl items-center gap-12 px-5 py-20 md:grid-cols-2 md:gap-16 md:py-28">
         <div className="relative aspect-[4/5] overflow-hidden rounded-[32px] bg-snow">
           <Image
-            src={PRODUCT_DATA.images.main}
-            alt={PRODUCT_DATA.title}
+            src="/images/lessons/lesson-home.webp"
+            alt="눈 덮인 슬로프에서 강사가 스키를 타는 아이들 곁에서 자세를 봐 주는 강습 장면"
             fill
             sizes="(min-width: 768px) 50vw, 100vw"
             className="object-cover object-center"
