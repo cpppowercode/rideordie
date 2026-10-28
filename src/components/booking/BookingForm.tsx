@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Minus, Plus } from 'lucide-react';
 import { LESSON_TYPES, SKI_RESORTS } from '@/lib/site';
-import { formatPhoneDisplay, todayYmd } from '@/lib/booking';
+import { formatPhoneDisplay, maxBookingDateExclusive, maxBookingDateInclusive, todayYmd } from '@/lib/booking';
 import { PENDING_BOOKING_KEY } from '@/lib/pending-booking';
 import { payBreakdown } from '@/lib/badge-fee';
 import {
@@ -84,10 +84,12 @@ function Stepper({ value, min, max, onChange, testId }: {
 export function BookingForm({ initialResort, seasonSettings = UNSET_SETTINGS }: { initialResort?: string; seasonSettings?: SeasonSettings }) {
   const router = useRouter();
   const today = todayYmd();
-  const initial = new Date();
+  const maxDate = maxBookingDateInclusive();
+  const maxExclusive = maxBookingDateExclusive();
+  const [initialYear, initialMonth] = today.split('-').map(Number);
   const [step, setStep] = useState<Step>(1);
-  const [viewYear, setViewYear] = useState(initial.getFullYear());
-  const [viewMonth, setViewMonth] = useState(initial.getMonth());
+  const [viewYear, setViewYear] = useState(initialYear);
+  const [viewMonth, setViewMonth] = useState(initialMonth - 1);
   const [lessonDate, setLessonDate] = useState(today);
   const [skiResort, setSkiResort] = useState<string>(
     initialResort || SKI_RESORTS[0].value
@@ -190,6 +192,10 @@ export function BookingForm({ initialResort, seasonSettings = UNSET_SETTINGS }: 
 
   const shiftMonth = (delta: number) => {
     const next = new Date(viewYear, viewMonth + delta, 1);
+    const nextYmd = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}-01`;
+    const todayMonth = `${today.slice(0, 7)}-01`;
+    const maxMonth = `${maxDate.slice(0, 7)}-01`;
+    if (nextYmd < todayMonth || nextYmd > maxMonth) return;
     setViewYear(next.getFullYear());
     setViewMonth(next.getMonth());
   };
@@ -344,7 +350,7 @@ export function BookingForm({ initialResort, seasonSettings = UNSET_SETTINGS }: 
                   ))}
                   {weeks.flat().map((ymd, index) => {
                     if (!ymd) return <div key={`e-${index}`} className="h-12" />;
-                    const disabled = ymd < today;
+                    const disabled = ymd < today || ymd >= maxExclusive;
                     const selected = ymd === lessonDate;
                     return (
                       <button

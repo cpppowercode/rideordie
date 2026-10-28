@@ -52,10 +52,27 @@ export function formatPhoneDisplay(raw: string): string {
 }
 
 export function todayYmd(now = new Date()): string {
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, "0");
-  const d = String(now.getDate()).padStart(2, "0");
+  const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  const y = kst.getUTCFullYear();
+  const m = String(kst.getUTCMonth() + 1).padStart(2, "0");
+  const d = String(kst.getUTCDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
+}
+
+/** 사전예약 가능 상한(미포함): 오늘부터 정확히 3개월 뒤. 예약은 이 날짜 전날까지. */
+export function maxBookingDateExclusive(now = new Date()): string {
+  const [year, month, day] = todayYmd(now).split("-").map(Number);
+  const first = new Date(Date.UTC(year, month - 1 + 3, 1));
+  const lastDay = new Date(Date.UTC(first.getUTCFullYear(), first.getUTCMonth() + 1, 0)).getUTCDate();
+  first.setUTCDate(Math.min(day, lastDay));
+  return first.toISOString().slice(0, 10);
+}
+
+/** 선택 가능한 마지막 날짜 YYYY-MM-DD (오늘 + 3개월 − 1일). */
+export function maxBookingDateInclusive(now = new Date()): string {
+  const exclusive = maxBookingDateExclusive(now);
+  const [y, m, day] = exclusive.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, day - 1)).toISOString().slice(0, 10);
 }
 
 export function parseLessonStartHour(reservation: ExistingReservation): number | null {
@@ -155,6 +172,9 @@ export function validateBookingInput(input: BookingInput): string | null {
   }
   if (!DATE_RE.test(input.lessonDate) || input.lessonDate < todayYmd()) {
     return "예약 날짜를 오늘 이후로 선택해 주세요.";
+  }
+  if (input.lessonDate >= maxBookingDateExclusive()) {
+    return "사전예약은 3개월 미만만 가능합니다.";
   }
   if (!isLessonDuration(input.durationHours)) {
     return "강습 시간을 선택해 주세요.";
