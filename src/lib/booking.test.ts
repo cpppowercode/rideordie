@@ -3,10 +3,13 @@ import {
   buildNotes,
   formatPhoneDisplay,
   hasDuplicateBooking,
+  maxBookingDateExclusive,
+  maxBookingDateInclusive,
   normalizePhone,
   slotsOverlap,
   slotIsFull,
   toAdminPayload,
+  todayYmd,
   validateBookingInput,
   type BookingInput,
 } from "./booking";
@@ -33,7 +36,7 @@ function sample(overrides: Partial<BookingInput> = {}): BookingInput {
     childCount: 1,
     skiResort: "하이원리조트",
     lessonType: "ski",
-    lessonDate: "2099-01-15",
+    lessonDate: maxBookingDateInclusive(),
     durationHours: 2,
     startHour: 9,
     notes: "처음 타요",
@@ -58,6 +61,10 @@ assert.match(validateBookingInput(sample({ customerName: "김" })) || "", /이�
 assert.match(validateBookingInput(sample({ customerPhone: "123" })) || "", /휴대폰/);
 assert.match(validateBookingInput(sample({ childCount: 3, participants: 2 })) || "", /아이/);
 assert.match(validateBookingInput(sample({ lessonDate: "2001-01-01" })) || "", /날짜/);
+assert.match(validateBookingInput(sample({ lessonDate: maxBookingDateExclusive() })) || "", /3개월/);
+assert.match(validateBookingInput(sample({ lessonDate: "2099-01-15" })) || "", /3개월/);
+assert.equal(validateBookingInput(sample({ lessonDate: todayYmd() })), null);
+assert.equal(validateBookingInput(sample({ lessonDate: maxBookingDateInclusive() })), null);
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 assert.match(validateBookingInput(sample({ skiResort: "오투리조트" as any })) || "", /스키장/);
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
