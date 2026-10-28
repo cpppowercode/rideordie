@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { payBreakdown } from "@/lib/badge-fee";
+import { getSeasonSettings } from "@/lib/season-settings";
+import { INTENT_COOKIE, readBookingIntent } from "@/lib/booking-intent";
 import {
-  expectedPayAmount,
   kcpRegisterUrl,
   kcpSiteCd,
   KCP_PAY_METHODS,
@@ -9,7 +11,8 @@ import {
 
 export async function POST(request: NextRequest) {
   try {
-    const { orderId, goodName, payMethod, retUrl } = (await request.json()) as {
+    const { orderId, goodName, payMethod, retUrl, intent: intentToken } = (await request.json()) as {
+      intent?: string;
       orderId?: string;
       goodName?: string;
       payMethod?: KcpPayMethod;
@@ -25,7 +28,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "지원하지 않는 결제 수단입니다." }, { status: 400 });
     }
 
-    const amount = expectedPayAmount();
+    // 금액은 클라이언트 값을 쓰지 않는다. 서버가 서명한 예약 정보로 강습비 + 패찰비를 다시 계산한다.
+    const intent = readBookingIntent(intentToken || request.cookies.get(INTENT_COOKIE)?.value);
+    if (!intent || intent.orderNo !== orderId) {
+      return NextResponse.json({ error: "예약 정보를 확인할 수 없습니다. 처음부터 다시 진행해 주세요." }, { status: 400 });
+    }
+    const amount = payBreakdown(intent.input, await getSeasonSettings()).total;
+    if (intent.amount !== amount) {
+      return NextResponse.json({ error: "결제 금액이 주문 금액과 다릅니다." }, { status: 400 });
+    }
     const response = await fetch(kcpRegisterUrl(), {
       method: "POST",
       headers: { "Content-Type": "application/json; charset=utf-8" },

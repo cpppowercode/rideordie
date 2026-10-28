@@ -85,7 +85,6 @@ export function Footer() {
               <li>상호: 라이드올다이</li>
               <li>대표: 정동진</li>
               <li>사업자등록번호: 331-14-02684</li>
-              <li>주소: 서울 서대문구 모래내로 411</li>
               <li>개인정보 보호책임자: 정동진</li>
               <li>호스팅 제공자: Vercel Inc.</li>
               <li className="pt-3">

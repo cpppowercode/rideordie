@@ -1,11 +1,14 @@
 'use client';
 
+import { PERIOD_LABEL, RATIOS, allowedRatios, UNSET_SETTINGS, type SeasonSettings } from '@/lib/pricing';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Minus, Plus } from 'lucide-react';
 import { LESSON_TYPES, SKI_RESORTS } from '@/lib/site';
 import { formatPhoneDisplay, todayYmd } from '@/lib/booking';
+import { PENDING_BOOKING_KEY } from '@/lib/pending-booking';
+import { payBreakdown } from '@/lib/badge-fee';
 import {
   generateLessonStarts,
   LESSON_DURATIONS,
@@ -78,7 +81,7 @@ function Stepper({ value, min, max, onChange, testId }: {
   );
 }
 
-export function BookingForm({ initialResort }: { initialResort?: string }) {
+export function BookingForm({ initialResort, seasonSettings = UNSET_SETTINGS }: { initialResort?: string; seasonSettings?: SeasonSettings }) {
   const router = useRouter();
   const today = todayYmd();
   const initial = new Date();
@@ -95,6 +98,11 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [participants, setParticipants] = useState(1);
+  // 용평 등 3:1 불가 리조트로 바꾸면 가능한 최대 구성으로 낮춘다.
+  useEffect(() => {
+    const max = allowedRatios(skiResort).length;
+    if (participants > max) setParticipants(max);
+  }, [skiResort, participants]);
   const [childCount, setChildCount] = useState(1);
   const [notes, setNotes] = useState('');
   const [liveSlots, setLiveSlots] = useState<SlotAvailability[]>([]);
@@ -110,6 +118,21 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
   );
   const selectedStart = generatedStarts.find((slot) => slot.startHour === startHour) || null;
   const resortLabel = SKI_RESORTS.find((r) => r.value === skiResort)?.label;
+
+  // 결제 금액 미리보기(표시용). 서버가 같은 규칙으로 다시 계산해 결제한다.
+  let feeRows: [string, string][] = [];
+  try {
+    const fee = payBreakdown({ skiResort, participants, durationHours, lessonDate }, seasonSettings);
+    feeRows = [
+      ['요금 기간', PERIOD_LABEL[fee.period]],
+      ['강습비', `${fee.lessonFee.toLocaleString('ko-KR')}원`],
+      ...(fee.badgeFee > 0 ? [['패찰비', `${fee.badgeFee.toLocaleString('ko-KR')}원`] as [string, string]] : []),
+      ['합계', `${fee.total.toLocaleString('ko-KR')}원`],
+    ];
+  } catch {
+    feeRows = [['결제 금액', '확인 불가 — 다시 선택해 주세요']];
+  }
+
   const typeLabel = LESSON_TYPES.find((t) => t.value === lessonType)?.label;
 
   const slots = useMemo(() => {
@@ -228,19 +251,29 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
-        throw new Error(data.error || '예약 접수에 실패했습니다.');
+        throw new Error(data.error || '예약 정보를 확인하지 못했습니다.');
       }
-      const params = new URLSearchParams({
-        orderNo: data.orderNo,
-        date: lessonDate,
-        resort: skiResort,
-        time: selectedStart?.timeLabel || '',
-        name: customerName.trim(),
-        people: String(participants),
-      });
-      router.push(`/book/success?${params.toString()}`);
+      // 아직 접수 전이다. 입력한 정보만 이 탭에 보관하고 결제 화면으로 넘어간다.
+      sessionStorage.setItem(
+        PENDING_BOOKING_KEY,
+        JSON.stringify({
+          customerName,
+          customerPhone,
+          participants,
+          childCount,
+          skiResort,
+          lessonType,
+          lessonDate,
+          durationHours,
+          startHour,
+          notes,
+          timeLabel: selectedStart?.timeLabel || '',
+          serverFee: { lessonFee: data.lessonFee, badgeFee: data.badgeFee, total: data.amount, period: data.period },
+        })
+      );
+      router.push('/checkout');
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : '예약 접수에 실패했습니다.');
+      setError(err instanceof Error ? err.message : '예약 정보를 확인하지 못했습니다.');
       setSubmitting(false);
     }
   };
@@ -469,11 +502,19 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
             </label>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <span className="mb-2 block text-[14px] font-semibold text-muted">총 인원</span>
-                <Stepper value={participants} min={1} max={8} onChange={(n) => {
-                  setParticipants(n);
-                  if (childCount > n) setChildCount(n);
-                }} testId="input-participants" />
+                <span className="mb-2 block text-[14px] font-semibold text-muted">강습 구성</span>
+                <div className={`grid gap-2 ${allowedRatios(skiResort).length === 3 ? 'grid-cols-3' : 'grid-cols-2'}`} role="radiogroup" aria-label="강습 구성" data-testid="input-participants">
+                  {RATIOS.filter((ratio) => allowedRatios(skiResort).includes(ratio)).map((ratio) => {
+                    const n = RATIOS.indexOf(ratio) + 1;
+                    const on = participants === n;
+                    return (
+                      <button key={ratio} type="button" role="radio" aria-checked={on}
+                        onClick={() => { setParticipants(n); if (childCount > n) setChildCount(n); }}
+                        className={`rounded-2xl border py-3 text-[16px] font-bold ${on ? 'border-brand bg-brand text-white' : 'border-line bg-white'}`}
+                        data-testid={`ratio-${n}`}>{ratio}</button>
+                    );
+                  })}
+                </div>
               </div>
               <div>
                 <span className="mb-2 block text-[14px] font-semibold text-muted">아이 인원</span>
@@ -522,7 +563,7 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
             data-testid="step-confirm"
           >
             <h2 className="text-[22px] font-bold tracking-tight">이 내용으로 예약할까요?</h2>
-            <p className="mt-2 text-[15px] text-muted">접수 후 사장님이 확인 전화를 드립니다. 강습비는 별도입니다.</p>
+            <p className="mt-2 text-[15px] text-muted">다음 화면에서 결제를 마치면 예약이 접수됩니다.</p>
             <dl className="mt-6 overflow-hidden rounded-[24px] bg-white shadow-[0_8px_30px_rgba(25,31,40,0.04)]" data-testid="booking-summary">
               {[
                 ['날짜', lessonDate],
@@ -532,8 +573,9 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
                 ['종목', typeLabel],
                 ['이름', customerName.trim()],
                 ['연락처', customerPhone],
-                ['인원', `${participants}명 · 아이 ${childCount}명`],
+                ['구성', `${participants}:1 · 아이 ${childCount}명`],
                 ['요청', notes.trim() || '없음'],
+                ...feeRows,
               ].map(([k, v]) => (
                 <div key={k} className="flex items-start justify-between gap-6 border-b border-line px-5 py-4 last:border-0">
                   <dt className="shrink-0 text-[15px] text-muted">{k}</dt>
@@ -580,7 +622,7 @@ export function BookingForm({ initialResort }: { initialResort?: string }) {
             onClick={handleSubmit}
             className="btn-primary min-h-14 flex-[2] text-[18px]"
           >
-            {submitting ? '접수 중…' : '예약 접수하기'}
+            {submitting ? '확인 중…' : '결제하고 예약하기'}
           </button>
         )}
       </div>

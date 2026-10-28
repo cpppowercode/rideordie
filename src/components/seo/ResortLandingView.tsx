@@ -2,12 +2,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { TrustBadges } from "@/components/seo/TrustBadges";
 import { KakaoConsultLink } from "@/components/seo/KakaoConsultLink";
+import { PERIOD_LABEL, allowedRatios, tableFor, type PricePeriod } from "@/lib/pricing";
 import {
   bookHref,
   EARLY_BIRD_COPY,
   EARLY_BIRD_LABEL,
+  FAMILY_GUIDE_POSTS,
   formatManwon,
   REGULAR_PRICE_TABLE,
+  priceCopy,
   RESORT_LANDINGS,
   TERMS_REFUND_HREF,
   type ResortLanding,
@@ -33,11 +36,12 @@ function Ctas({ landing }: { landing: ResortLanding }) {
   );
 }
 
-function PriceTable() {
+function PriceTable({ period, ratios = REGULAR_PRICE_TABLE.ratios }: { period: PricePeriod; ratios?: readonly string[] }) {
+  const table = tableFor(period);
   return (
     <div className="overflow-x-auto rounded-[24px] border border-line bg-white">
       <table className="w-full min-w-[320px] text-left text-[15px]">
-        <caption className="sr-only">1:1·2:1·3:1 정가 요금표</caption>
+        <caption className="sr-only">{ratios.join('·')} {PERIOD_LABEL[period]} 요금표</caption>
         <thead>
           <tr className="border-b border-line bg-snow text-muted">
             <th className="px-4 py-3 font-semibold">구성</th>
@@ -49,12 +53,12 @@ function PriceTable() {
           </tr>
         </thead>
         <tbody>
-          {REGULAR_PRICE_TABLE.ratios.map((ratio) => (
+          {(ratios as typeof REGULAR_PRICE_TABLE.ratios[number][]).map((ratio) => (
             <tr key={ratio} className="border-b border-line last:border-0">
               <th className="px-4 py-3 font-semibold text-ink">{ratio}</th>
               {REGULAR_PRICE_TABLE.hours.map((hour) => (
                 <td key={hour} className="px-4 py-3">
-                  {formatManwon(REGULAR_PRICE_TABLE.amounts[ratio][hour])}
+                  {formatManwon(table[ratio][hour])}
                 </td>
               ))}
             </tr>
@@ -65,7 +69,35 @@ function PriceTable() {
   );
 }
 
-export function ResortLandingView({ landing }: { landing: ResortLanding }) {
+function FamilyGuideLinks({ landing }: { landing: ResortLanding }) {
+  const posts = FAMILY_GUIDE_POSTS[landing.slug] ?? [];
+  if (posts.length === 0) return null;
+  return (
+    <section
+      className="mt-12 rounded-[24px] bg-ice px-5 py-6"
+      aria-label={`${landing.shortName} 가족 가이드`}
+      data-testid={`resort-guide-${landing.slug}`}
+    >
+      <h2 className="text-[20px] font-bold tracking-tight">가족 가이드 읽기</h2>
+      <ul className="mt-3 space-y-2 text-[16px]">
+        {posts.map((post) => (
+          <li key={post.url}>
+            <a
+              href={post.url}
+              target="_blank"
+              rel="noopener"
+              className="font-semibold text-brand hover:underline"
+            >
+              {post.title} →
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+export function ResortLandingView({ landing, period = "regular" }: { landing: ResortLanding; period?: PricePeriod }) {
   const showPrice = landing.layout === "full";
   const showImage = landing.layout !== "minimal";
 
@@ -107,7 +139,7 @@ export function ResortLandingView({ landing }: { landing: ResortLanding }) {
 
         {landing.mentionBadgeFee ? (
           <p className="mt-6 rounded-[20px] bg-ice px-5 py-4 text-[16px] leading-7 text-ink">
-            이 스키장은 패찰비가 별도입니다. 숙소·리프트권·장비도 강습비에 포함되지 않습니다.
+            이 스키장은 패찰비가 별도입니다.
           </p>
         ) : null}
 
@@ -135,10 +167,10 @@ export function ResortLandingView({ landing }: { landing: ResortLanding }) {
           <section className="mt-12">
             <h2 className="text-[24px] font-bold tracking-tight">가격표</h2>
             <p className="mt-3 text-[16px] leading-7 text-muted">
-              1:1 2시간 정가 15만원. 아래는 정가입니다. 숙소·리프트권·장비는 별도입니다.
+              {priceCopy("1:1 2시간 15만원부터", period)}. 아래는 {PERIOD_LABEL[period]} 요금입니다.
             </p>
-            <div className="mt-5">
-              <PriceTable />
+            <div className="mt-5" data-testid="price-table" data-period={period}>
+              <PriceTable period={period} ratios={allowedRatios(landing.bookingValue)} />
             </div>
           </section>
           <section className="mt-12">
@@ -152,7 +184,7 @@ export function ResortLandingView({ landing }: { landing: ResortLanding }) {
           <section className="mt-12">
             <h2 className="text-[24px] font-bold tracking-tight">강습비</h2>
             <p className="mt-3 text-[17px] leading-8 text-muted">
-              {EARLY_BIRD_COPY}. 숙소·리프트권·장비는 별도입니다.
+              {EARLY_BIRD_COPY}.
               {landing.mentionBadgeFee ? " 패찰비도 별도입니다." : ""}
             </p>
             {landing.layout !== "minimal" ? (
@@ -191,6 +223,8 @@ export function ResortLandingView({ landing }: { landing: ResortLanding }) {
             </div>
           </section>
         ) : null}
+
+        <FamilyGuideLinks landing={landing} />
 
         <Ctas landing={landing} />
 

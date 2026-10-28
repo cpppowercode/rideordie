@@ -91,6 +91,36 @@ async function sendWebhook(url: string | undefined, notice: BookingNotice, kind:
   return true;
 }
 
+// Grok Bot 루틴 웹훅(또는 임의 웹훅)으로 예약 알림. 개인정보(이름·연락처)는 보내지 않는다.
+// BOOKING_WEBHOOK_URL: 루틴 패널에서 복사한 웹훅 URL
+// BOOKING_WEBHOOK_KEY: 루틴 패널의 발신자 키 (선택)
+// BOOKING_WEBHOOK_KEY_HEADER: 키를 담을 헤더 이름 (기본 "Authorization" → "Bearer <키>", 그 외 헤더는 키 원문)
+async function sendBookingWebhook(notice: BookingNotice): Promise<boolean> {
+  const url = process.env.BOOKING_WEBHOOK_URL;
+  if (!url) return false;
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const key = process.env.BOOKING_WEBHOOK_KEY;
+  if (key) {
+    const headerName = process.env.BOOKING_WEBHOOK_KEY_HEADER || "Authorization";
+    headers[headerName] = headerName.toLowerCase() === "authorization" ? `Bearer ${key}` : key;
+  }
+  const payload = {
+    event: "booking.created",
+    orderNo: notice.orderNo,
+    skiResort: notice.skiResort,
+    lessonType: lessonTypeLabel(notice.lessonType),
+    lessonDate: notice.lessonDate,
+    timeLabel: notice.timeLabel,
+    participants: notice.participants,
+    childCount: notice.childCount,
+    adminUrl: "https://admin.rideordie.kr",
+    text: `새 강습 예약: ${notice.lessonDate} ${notice.timeLabel} ${notice.skiResort} ${lessonTypeLabel(notice.lessonType)} ${notice.participants}명 (주문 ${notice.orderNo})`,
+  };
+  const response = await fetch(url, { method: "POST", headers, body: JSON.stringify(payload) });
+  if (!response.ok) throw new Error(`booking webhook ${response.status}`);
+  return true;
+}
+
 async function sendSolapi(notice: BookingNotice): Promise<boolean> {
   const apiKey = process.env.SOLAPI_API_KEY;
   const apiSecret = process.env.SOLAPI_API_SECRET;
@@ -145,6 +175,7 @@ export const NOTIFY_CHANNELS = [
   { name: "email(Resend)", configured: () => Boolean(process.env.RESEND_API_KEY) },
   { name: "slack", configured: () => Boolean(process.env.SLACK_WEBHOOK_URL) },
   { name: "discord", configured: () => Boolean(process.env.DISCORD_WEBHOOK_URL) },
+  { name: "grokbot-webhook", configured: () => Boolean(process.env.BOOKING_WEBHOOK_URL) },
   { name: "solapi", configured: () => Boolean(process.env.SOLAPI_API_KEY && process.env.SOLAPI_API_SECRET && process.env.SOLAPI_TO) },
 ] as const;
 
@@ -164,6 +195,7 @@ export async function notifyOwner(notice: BookingNotice): Promise<NotifyResult> 
     ["email(Resend)", Boolean(process.env.RESEND_API_KEY), () => sendResend(notice)],
     ["slack", Boolean(process.env.SLACK_WEBHOOK_URL), () => sendWebhook(process.env.SLACK_WEBHOOK_URL, notice, "slack")],
     ["discord", Boolean(process.env.DISCORD_WEBHOOK_URL), () => sendWebhook(process.env.DISCORD_WEBHOOK_URL, notice, "discord")],
+    ["grokbot-webhook", Boolean(process.env.BOOKING_WEBHOOK_URL), () => sendBookingWebhook(notice)],
     ["solapi", Boolean(process.env.SOLAPI_API_KEY && process.env.SOLAPI_API_SECRET && process.env.SOLAPI_TO), () => sendSolapi(notice)],
   ];
 

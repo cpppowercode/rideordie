@@ -1,102 +1,58 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminReservation, listReservationsForDate } from "@/lib/admin-reservations";
-import {
-  buildOrderNo,
-  hasDuplicateBooking,
-  slotIsFull,
-  toAdminPayload,
-  validateBookingInput,
-  type BookingInput,
-} from "@/lib/booking";
-import { GROOMING_BOOKING_ERROR, slotOverlapsGrooming } from "@/lib/grooming";
-import { findLessonStart, formatLessonRange, isLessonDuration, normalizeHalfHour } from "@/lib/hours";
-import { notifyOwner } from "@/lib/notify";
+import { buildOrderNo, type BookingInput } from "@/lib/booking";
+import { checkBookingAvailability, parseBookingBody } from "@/lib/booking-checks";
+import { createBookingIntent, INTENT_COOKIE } from "@/lib/booking-intent";
+import { BadgeFeeError, payBreakdown } from "@/lib/badge-fee";
+import { getSeasonSettings } from "@/lib/season-settings";
 
+/**
+ * 결제 전 단계: 예약 정보를 확인만 하고 저장·알림은 하지 않는다.
+ * 서버 서명 토큰(intent)을 돌려주고, KCP 결제 승인 뒤에만 예약이 접수된다.
+ */
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as Partial<BookingInput>;
-    const durationHours = Number(body.durationHours);
-    const startHour = Number(body.startHour);
-    const input: BookingInput = {
-      customerName: String(body.customerName || ""),
-      customerPhone: String(body.customerPhone || ""),
-      participants: Number(body.participants),
-      childCount: Number(body.childCount),
-      skiResort: String(body.skiResort || ""),
-      lessonType: String(body.lessonType || "ski"),
-      lessonDate: String(body.lessonDate || ""),
-      durationHours,
-      startHour,
-      notes: String(body.notes || ""),
-    };
-
-    const validationError = validateBookingInput(input);
-    if (validationError) {
-      return NextResponse.json({ error: validationError }, { status: 400 });
-    }
-
-    const duration = isLessonDuration(input.durationHours) ? input.durationHours : null;
-    const start = Number.isFinite(input.startHour) ? normalizeHalfHour(input.startHour) : NaN;
-    if (!duration || !Number.isFinite(start)) {
-      return NextResponse.json({ error: "시작 시간을 선택해 주세요." }, { status: 400 });
-    }
-
-    if (slotOverlapsGrooming(input.skiResort, start, duration)) {
-      return NextResponse.json({ error: GROOMING_BOOKING_ERROR }, { status: 409 });
-    }
-
-    const slot = findLessonStart(input.skiResort, duration, start);
-    if (!slot) {
-      return NextResponse.json({ error: "선택한 시간에는 강습을 예약할 수 없습니다." }, { status: 400 });
-    }
-
-    const existing = await listReservationsForDate({
-      date: input.lessonDate,
-      skiResort: input.skiResort,
-    });
-
-    if (hasDuplicateBooking(existing, input.customerPhone, start, duration)) {
-      return NextResponse.json(
-        { error: "같은 날짜·시간대에 이미 예약이 있습니다. 다른 시간을 선택하거나 고객센터로 문의해 주세요." },
-        { status: 409 }
-      );
-    }
-
-    if (slotIsFull(existing, input.skiResort, start, duration)) {
-      return NextResponse.json(
-        { error: "선택한 시간대는 예약이 마감되었습니다. 다른 시간을 선택해 주세요." },
-        { status: 409 }
-      );
+    const checked = await checkBookingAvailability(parseBookingBody(body));
+    if (!checked.ok) {
+      return NextResponse.json({ error: checked.error }, { status: checked.status });
     }
 
     const orderNo = buildOrderNo();
-    const payload = toAdminPayload({ ...input, startHour: start, durationHours: duration }, orderNo);
-    const created = await createAdminReservation(payload);
+    let breakdown;
+    try {
+      breakdown = payBreakdown(checked.input, await getSeasonSettings());
+    } catch (error) {
+      if (error instanceof BadgeFeeError) {
+        return NextResponse.json({ error: error.message }, { status: 400 });
+      }
+      throw error;
+    }
+    const amount = breakdown.total;
+    const intent = createBookingIntent(orderNo, amount, checked.input);
 
-    const notice = await notifyOwner({
-      orderNo,
-      customerName: input.customerName.trim(),
-      customerPhone: payload.customer_phone,
-      skiResort: input.skiResort,
-      lessonType: input.lessonType,
-      lessonDate: input.lessonDate,
-      timeLabel: formatLessonRange(start, duration),
-      participants: input.participants,
-      childCount: input.childCount,
-      notes: payload.notes,
-    });
-
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
+      status: "awaiting_payment",
       orderNo,
-      reservationId: created.id,
-      noticeSent: notice.sent,
-      noticeSkipped: notice.skipped,
-      noticeFailed: notice.failed,
+      amount,
+      lessonFee: breakdown.lessonFee,
+      badgeFee: breakdown.badgeFee,
+      period: breakdown.period,
+      intent,
     });
+    // 모바일 결제는 KCP가 Ret_URL로 POST 하므로 서명 토큰을 쿠키로도 실어 둔다(내용은 서버 서명으로 검증).
+    const secure = (request.headers.get("x-forwarded-proto") || request.nextUrl.protocol.replace(":", "")) === "https";
+    response.cookies.set(INTENT_COOKIE, intent, {
+      httpOnly: true,
+      path: "/api/payments",
+      maxAge: 60 * 60,
+      sameSite: secure ? "none" : "lax",
+      secure,
+    });
+    return response;
   } catch (error) {
-    console.error("booking create error", error);
-    const message = error instanceof Error ? error.message : "예약 접수에 실패했습니다.";
+    console.error("booking intent error", error);
+    const message = error instanceof Error ? error.message : "예약 확인에 실패했습니다.";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

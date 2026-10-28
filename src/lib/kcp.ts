@@ -90,8 +90,11 @@ export async function approveKcpPayment(input: {
     throw new Error(payment.res_msg || `KCP 결제 승인에 실패했습니다. (${payment.res_cd || "unknown"})`);
   }
 
+  if (!payment.tno) {
+    throw new Error("KCP 거래번호가 없어 결제를 확인할 수 없습니다.");
+  }
   const approvedAmount = Number(payment.amount);
-  if (Number.isFinite(approvedAmount) && approvedAmount !== input.amount) {
+  if (payment.amount === undefined || payment.amount === "" || !Number.isFinite(approvedAmount) || approvedAmount !== input.amount) {
     throw new Error("결제 금액이 주문 금액과 다릅니다.");
   }
 

@@ -1,8 +1,9 @@
+import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 import { PRODUCT_DATA } from "@/lib/mockData";
-import { INSTAGRAM_URL, SITE_URL, TEACHING_RESORTS_COPY, TEACHING_RESORTS_INLINE } from "@/lib/site";
+import { INSTAGRAM_URL, SITE_URL, TEACHING_RESORTS, TEACHING_RESORTS_COPY, TEACHING_RESORTS_INLINE } from "@/lib/site";
 import { pageAlternates } from "@/lib/seo";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { TrustBadges } from "@/components/seo/TrustBadges";
@@ -10,14 +11,28 @@ import { KakaoConsultLink } from "@/components/seo/KakaoConsultLink";
 import { faqPageJsonLd } from "@/lib/jsonld";
 import { SITE_FAQ } from "@/lib/resort-landings";
 import { ResortCards } from "@/components/seo/ResortCards";
+import { headlineCopy, kstToday, periodFor } from "@/lib/pricing";
+import { getSeasonSettings } from "@/lib/season-settings";
 
-export const metadata: Metadata = {
-  alternates: pageAlternates(SITE_URL),
-};
+export const revalidate = 300;
+
+async function currentPeriod() {
+  return periodFor(kstToday(), await getSeasonSettings());
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const description = `전국 5개 스키장(하이원·비발디·웰리힐리·용평·지산) 어린이 스키·보드 강습. ${headlineCopy(await currentPeriod())}. 카카오톡 상담과 온라인 예약.`;
+  return {
+    alternates: pageAlternates(SITE_URL),
+    description,
+    openGraph: { description },
+    twitter: { description },
+  };
+}
 
 const STEPS = [
   { title: "날짜와 시간", body: "원하는 스키장과 강습 시간(2·3·4시간)을 고릅니다. 정설·마감된 시간은 바로 보이지 않아요." },
-  { title: "연락처만", body: "이름과 휴대폰 번호, 인원을 남기면 접수가 끝납니다." },
+  { title: "연락처만", body: "이름과 휴대폰 번호, 인원을 남기고 결제하면 접수가 끝납니다." },
   { title: "확인 안내", body: "사장님이 일정을 확인하고, 당일 스키장에서 만납니다." },
 ];
 
@@ -28,7 +43,8 @@ const HIGHLIGHTS = [
   { k: "상담", v: "카톡 상담 · 연중무휴" },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const period = await currentPeriod();
   return (
     <div className="flex flex-col" data-testid="home-page">
       <JsonLd data={faqPageJsonLd(SITE_FAQ)} />
@@ -82,11 +98,20 @@ export default function Home() {
       </section>
 
       <section className="border-b border-line bg-white">
-        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-px bg-line md:grid-cols-4">
+        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-px bg-line md:grid-cols-4 lg:grid-cols-[1fr_1fr_1.5fr_1fr]">
           {HIGHLIGHTS.map((item) => (
             <div key={item.k} className="bg-white px-5 py-7 md:px-8 md:py-9">
               <p className="text-[13px] font-semibold text-muted">{item.k}</p>
-              <p className="mt-1.5 text-[16px] font-semibold tracking-tight md:text-[18px]">{item.v}</p>
+              <p className="mt-1.5 text-[16px] font-semibold tracking-tight md:text-[18px] lg:whitespace-nowrap">
+                {item.k === "장소"
+                  ? TEACHING_RESORTS.map((name, i) => (
+                      <React.Fragment key={name}>
+                        {i > 0 ? " " : null}
+                        <span className="inline-block whitespace-nowrap">{i < TEACHING_RESORTS.length - 1 ? `${name} ·` : name}</span>
+                      </React.Fragment>
+                    ))
+                  : item.v}
+              </p>
             </div>
           ))}
         </div>
@@ -114,8 +139,8 @@ export default function Home() {
       <section className="mx-auto grid w-full max-w-6xl items-center gap-12 px-5 py-20 md:grid-cols-2 md:gap-16 md:py-28">
         <div className="relative aspect-[4/5] overflow-hidden rounded-[32px] bg-snow">
           <Image
-            src={PRODUCT_DATA.images.main}
-            alt={PRODUCT_DATA.title}
+            src="/images/lessons/lesson-home.webp"
+            alt="눈 덮인 슬로프에서 강사가 스키를 타는 아이들 곁에서 자세를 봐 주는 강습 장면"
             fill
             sizes="(min-width: 768px) 50vw, 100vw"
             className="object-cover object-center"
@@ -140,11 +165,12 @@ export default function Home() {
             ))}
             <div className="flex gap-8 py-5">
               <dt className="w-16 shrink-0 text-muted">강습비</dt>
-              <dd className="text-[22px] font-bold tracking-tight">1:1 2시간 정가 15만원</dd>
+              <dd className="text-[22px] font-bold tracking-tight" data-testid="home-headline-price">{headlineCopy(period)}</dd>
             </div>
           </dl>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link href="/book" className="btn-primary">예약하기</Link>
+            <Link href="/season" className="btn-ghost" data-testid="home-cta-season">시즌강습 결제하기</Link>
             <Link href={`/product/${PRODUCT_DATA.id}`} className="btn-ghost">자세히 보기</Link>
           </div>
         </div>
@@ -224,7 +250,7 @@ export default function Home() {
         <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-8 px-5 md:flex-row md:items-center">
           <div>
             <h2 className="text-[28px] font-bold tracking-tight md:text-[36px]">이번 시즌, 슬로프에서 만나요</h2>
-            <p className="mt-3 text-[16px] text-white/70">날짜만 고르면 바로 접수됩니다. 확인 안내는 사장님이 드려요.</p>
+            <p className="mt-3 text-[16px] text-white/70">날짜를 고르고 결제하면 접수됩니다. 확인 안내는 사장님이 드려요.</p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
             <KakaoConsultLink className="btn border border-white/30 bg-white/10 px-8 py-4 text-[18px] text-white hover:bg-white/20">

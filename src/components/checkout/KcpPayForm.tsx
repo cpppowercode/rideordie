@@ -8,6 +8,7 @@ import {
   kcpSiteName,
   type KcpPayMethod,
 } from "@/lib/kcp-public";
+import { PENDING_BOOKING_KEY } from "@/lib/pending-booking";
 
 type Props = {
   orderId: string;
@@ -19,6 +20,10 @@ type Props = {
   approvalKey?: string;
   payUrl?: string;
   retUrl?: string;
+  /** 서버가 서명한 예약 정보. 결제 승인 때 함께 보내 서버가 검증한다. */
+  intent?: string;
+  /** 결제 실패·취소·승인 실패 때 호출. 예약은 접수되지 않는다. */
+  onFail?: (message: string) => void;
 };
 
 export function KcpPayForm({
@@ -31,6 +36,8 @@ export function KcpPayForm({
   approvalKey,
   payUrl,
   retUrl,
+  intent,
+  onFail,
 }: Props) {
   const formRef = useRef<HTMLFormElement>(null);
   const method = KCP_PAY_METHODS[payMethod];
@@ -55,8 +62,8 @@ export function KcpPayForm({
       const ordrId = (form.elements.namedItem("ordr_idxx") as HTMLInputElement | null)?.value;
 
       if (resCd !== "0000") {
-        alert(`[${resCd || "FAIL"}] ${resMsg || "결제가 취소되었거나 실패했습니다."}`);
         closeEvent?.();
+        onFail?.(`[${resCd || "FAIL"}] ${resMsg || "결제가 취소되었거나 실패했습니다."}`);
         return;
       }
 
@@ -69,19 +76,23 @@ export function KcpPayForm({
           tran_cd: tranCd,
           orderId: ordrId,
           payMethod: method.payType,
+          intent,
         }),
       })
         .then(async (res) => {
           const data = await res.json();
           if (!data.success) throw new Error(data.error || "결제 승인에 실패했습니다.");
-          const amountValue = data.payment?.totalAmount ?? amount;
-          const tno = data.payment?.tno || "";
-          window.location.href = `/checkout/success?orderId=${encodeURIComponent(ordrId || orderId)}&amount=${amountValue}&tno=${encodeURIComponent(tno)}`;
+          try {
+            window.sessionStorage.removeItem(PENDING_BOOKING_KEY);
+          } catch {
+            // ignore
+          }
+          window.location.href = `/book/success?r=${encodeURIComponent(data.receipt)}`;
         })
         .catch((error: unknown) => {
           const message = error instanceof Error ? error.message : "결제 승인에 실패했습니다.";
-          alert(message);
           closeEvent?.();
+          onFail?.(message);
         });
     };
 
@@ -92,7 +103,7 @@ export function KcpPayForm({
     script.async = true;
     script.dataset.kcpHub = "true";
     document.body.appendChild(script);
-  }, [amount, method.payType, orderId]);
+  }, [amount, method.payType, orderId, intent, onFail]);
 
   return (
     <form ref={formRef} name="order_info" method="post" acceptCharset="euc-kr">

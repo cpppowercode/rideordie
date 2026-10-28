@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import iconv from "iconv-lite";
-import {
-  approveKcpPayment,
-  expectedPayAmount,
-  toKcpPayType,
-} from "@/lib/kcp";
+import { INTENT_COOKIE, readBookingIntent } from "@/lib/booking-intent";
+import { approveAndFinalizeBooking } from "@/lib/booking-finalize";
 
 function originFrom(request: NextRequest) {
   const proto = request.headers.get("x-forwarded-proto") || "https";
@@ -44,21 +41,17 @@ async function handleReturn(request: NextRequest) {
     return failRedirect(request, "INVALID", "결제 정보가 올바르지 않습니다.");
   }
 
-  try {
-    const amount = expectedPayAmount();
-    const payment = await approveKcpPayment({
-      enc_data,
-      enc_info,
-      tran_cd,
-      orderId,
-      amount,
-      payType: toKcpPayType(payMethod),
-    });
+  const intent = readBookingIntent(
+    request.cookies.get(INTENT_COOKIE)?.value || request.nextUrl.searchParams.get("intent"),
+  );
+  if (!intent) {
+    return failRedirect(request, "INTENT", "예약 정보가 만료되었거나 올바르지 않습니다. 예약을 다시 진행해 주세요.");
+  }
 
-    const url = new URL("/checkout/success", originFrom(request));
-    url.searchParams.set("orderId", orderId);
-    url.searchParams.set("amount", String(amount));
-    url.searchParams.set("tno", payment.tno || "");
+  try {
+    const result = await approveAndFinalizeBooking(intent, { enc_data, enc_info, tran_cd, orderId, payMethod });
+    const url = new URL("/book/success", originFrom(request));
+    url.searchParams.set("r", result.receipt);
     return NextResponse.redirect(url, 303);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "결제 승인에 실패했습니다.";

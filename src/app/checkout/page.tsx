@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { PERIOD_LABEL } from '@/lib/pricing';
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { CalendarCheck } from 'lucide-react';
 import { PRODUCT_DATA } from '@/lib/mockData';
@@ -11,9 +12,12 @@ import {
     isMobileUserAgent,
     type KcpPayMethod,
 } from '@/lib/kcp-public';
+import { payBreakdown, type PayBreakdown } from '@/lib/badge-fee';
+import { PENDING_BOOKING_KEY, readPendingBooking, type PendingBooking } from '@/lib/pending-booking';
 
 type KcpLaunch = {
     orderId: string;
+    intent: string;
     approvalKey?: string;
     payUrl?: string;
     retUrl?: string;
@@ -21,7 +25,9 @@ type KcpLaunch = {
 
 export default function CheckoutPage() {
     const [isProcessing, setIsProcessing] = useState(false);
-    const [hasBooked, setHasBooked] = useState(false);
+    const [pending, setPending] = useState<PendingBooking | null>(null);
+    const [loaded, setLoaded] = useState(false);
+    const [payError, setPayError] = useState('');
     const [payMethod, setPayMethod] = useState<KcpPayMethod>('card');
     const [kcpLaunch, setKcpLaunch] = useState<KcpLaunch | null>(null);
     const [formData, setFormData] = useState({
@@ -29,7 +35,25 @@ export default function CheckoutPage() {
         phone: ''
     });
 
-    const amount = expectedPayAmount();
+    // 화면 표시용. 실제 결제 금액은 서버가 서명된 예약 정보로 다시 계산한다.
+    let breakdown: PayBreakdown | null = null;
+    let feeError = '';
+    if (pending) {
+        try {
+            breakdown = pending.serverFee && Number.isFinite(pending.serverFee.total) ? pending.serverFee : payBreakdown(pending);
+        } catch (error) {
+            feeError = error instanceof Error ? error.message : '패찰비를 계산할 수 없습니다.';
+        }
+    }
+    const amount = breakdown ? breakdown.total : expectedPayAmount();
+    const [serverAmount, setServerAmount] = useState<number | null>(null);
+
+    useEffect(() => {
+        const saved = readPendingBooking();
+        setPending(saved);
+        if (saved) setFormData({ name: saved.customerName, phone: saved.customerPhone });
+        setLoaded(true);
+    }, []);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData(prev => ({
@@ -37,6 +61,13 @@ export default function CheckoutPage() {
             [e.target.name]: e.target.value
         }));
     };
+
+    const handlePayFail = useCallback((message: string) => {
+        // 결제 실패·취소: 예약은 접수되지 않는다. 입력 정보는 그대로 두고 다시 결제할 수 있게 한다.
+        setPayError(message);
+        setIsProcessing(false);
+        setKcpLaunch(null);
+    }, []);
 
     useEffect(() => {
         if (!kcpLaunch) return;
@@ -57,52 +88,47 @@ export default function CheckoutPage() {
             executeKcpPay(form, kcpLaunch.payUrl);
         })().catch((error: unknown) => {
             const message = error instanceof Error ? error.message : '결제 요청 중 오류가 발생했습니다.';
-            alert(message);
-            setIsProcessing(false);
-            setKcpLaunch(null);
+            handlePayFail(message);
         });
 
         return () => {
             cancelled = true;
         };
-    }, [kcpLaunch]);
+    }, [kcpLaunch, handlePayFail]);
 
     const handlePayment = async (e: React.FormEvent) => {
         e.preventDefault();
+        setPayError('');
 
-        if (!hasBooked) {
-            alert('결제 전 강습 예약을 먼저 접수해 주세요.');
+        if (!pending) {
+            setPayError('먼저 강습 일정을 골라 주세요.');
             return;
         }
 
-        if (!formData.name || !formData.phone) {
-            alert('필수 정보를 모두 입력해주세요.');
+        if (!formData.name.trim() || !formData.phone.trim()) {
+            setPayError('이름과 연락처를 입력해 주세요.');
             return;
         }
 
         setIsProcessing(true);
 
         try {
-            const orderRes = await fetch('/api/orders/create', {
+            const updated: PendingBooking = { ...pending, customerName: formData.name, customerPhone: formData.phone };
+            sessionStorage.setItem(PENDING_BOOKING_KEY, JSON.stringify(updated));
+
+            // 서버가 일정·마감을 다시 확인하고 서명된 결제 대기 정보를 준다. 이 단계에서는 저장·알림이 없다.
+            const intentRes = await fetch('/api/bookings', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    customerName: formData.name,
-                    customerPhone: formData.phone,
-                    productId: PRODUCT_DATA.id,
-                    productName: PRODUCT_DATA.title,
-                    selectedOptions: {},
-                    amount
-                })
+                body: JSON.stringify(updated),
             });
-
-            const orderData = await orderRes.json();
-
-            if (!orderData.success) {
-                throw new Error(orderData.error || '주문 생성에 실패했습니다.');
+            const intentData = await intentRes.json();
+            if (!intentRes.ok || !intentData.success) {
+                throw new Error(intentData.error || '예약 정보를 확인하지 못했습니다.');
             }
 
-            const { orderId } = orderData as { orderId: string };
+            const { orderNo: orderId, intent, amount: payAmount } = intentData as { orderNo: string; intent: string; amount: number };
+            setServerAmount(payAmount);
             const mobile = isMobileUserAgent(navigator.userAgent);
 
             if (mobile) {
@@ -112,6 +138,7 @@ export default function CheckoutPage() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         orderId,
+                        intent,
                         goodName: PRODUCT_DATA.title,
                         payMethod,
                         retUrl,
@@ -123,6 +150,7 @@ export default function CheckoutPage() {
                 }
                 setKcpLaunch({
                     orderId,
+                    intent,
                     approvalKey: registerData.approvalKey,
                     payUrl: registerData.PayUrl,
                     retUrl,
@@ -130,12 +158,11 @@ export default function CheckoutPage() {
                 return;
             }
 
-            setKcpLaunch({ orderId });
+            setKcpLaunch({ orderId, intent });
         } catch (error: unknown) {
             console.error('Payment error:', error);
             const errorMessage = error instanceof Error ? error.message : '결제 요청 중 오류가 발생했습니다.';
-            alert(errorMessage);
-            setIsProcessing(false);
+            handlePayFail(errorMessage);
         }
     };
 
@@ -151,29 +178,47 @@ export default function CheckoutPage() {
                 key={kcpLaunch?.orderId || 'idle'}
                 orderId={kcpLaunch?.orderId || ''}
                 goodName={PRODUCT_DATA.title}
-                amount={amount}
+                amount={serverAmount ?? amount}
                 buyerName={formData.name}
                 buyerPhone={formData.phone}
                 payMethod={payMethod}
                 approvalKey={kcpLaunch?.approvalKey}
                 payUrl={kcpLaunch?.payUrl}
                 retUrl={kcpLaunch?.retUrl}
+                intent={kcpLaunch?.intent}
+                onFail={handlePayFail}
             />
 
             <form onSubmit={handlePayment} className="grid grid-cols-1 gap-6 md:grid-cols-3">
                 <div className="space-y-6 md:col-span-2">
-                    <section className="flex gap-4 rounded-[24px] bg-ink p-6 text-white md:p-7">
-                        <CalendarCheck className="mt-0.5 h-6 w-6 shrink-0 text-[#9db4ff]" />
-                        <div>
-                            <h2 className="text-lg font-bold">먼저 강습을 예약해 주세요</h2>
-                            <p className="mt-2 text-[15px] leading-relaxed text-white/75">
-                                날짜와 시간대를 고르지 않고 결제하면 일정 조율·환불이 어려울 수 있습니다. 홈페이지에서 예약을 접수한 뒤에만 결제가 가능합니다.
-                            </p>
-                            <Link href="/book" className="btn mt-4 bg-white px-5 py-2.5 text-[15px] text-ink hover:bg-ice">
-                                강습 예약하기
-                            </Link>
-                        </div>
-                    </section>
+                    {loaded && !pending ? (
+                        <section className="flex gap-4 rounded-[24px] bg-ink p-6 text-white md:p-7" data-testid="checkout-no-booking">
+                            <CalendarCheck className="mt-0.5 h-6 w-6 shrink-0 text-[#9db4ff]" />
+                            <div>
+                                <h2 className="text-lg font-bold">먼저 강습 일정을 골라 주세요</h2>
+                                <p className="mt-2 text-[15px] leading-relaxed text-white/75">
+                                    날짜와 시간을 고른 뒤 결제하면 예약이 접수됩니다.
+                                </p>
+                                <Link href="/book" className="btn mt-4 bg-white px-5 py-2.5 text-[15px] text-ink hover:bg-ice">
+                                    강습 일정 고르기
+                                </Link>
+                            </div>
+                        </section>
+                    ) : null}
+
+                    {pending ? (
+                        <section className="card p-6 md:p-7" data-testid="checkout-booking-summary">
+                            <h2 className="mb-4 text-xl font-bold">예약할 강습</h2>
+                            <dl className="grid grid-cols-2 gap-3 text-[15px]">
+                                <dt className="text-muted">스키장</dt><dd className="font-semibold">{pending.skiResort}</dd>
+                                <dt className="text-muted">날짜</dt><dd className="font-semibold">{pending.lessonDate}</dd>
+                                <dt className="text-muted">시간</dt><dd className="font-semibold">{pending.timeLabel}</dd>
+                                <dt className="text-muted">인원</dt><dd className="font-semibold">{pending.participants}명</dd>
+                            </dl>
+                            <p className="mt-4 text-sm text-muted">아직 접수 전이에요. 결제가 끝나야 예약이 접수됩니다.</p>
+                            <Link href="/book" className="mt-3 inline-block text-sm font-semibold text-brand underline">일정 바꾸기</Link>
+                        </section>
+                    ) : null}
 
                     <section className="card p-6 md:p-7">
                         <h2 className="mb-5 text-xl font-bold">주문자 정보</h2>
@@ -213,27 +258,35 @@ export default function CheckoutPage() {
                             <p className="mt-1 text-sm text-muted">{TEACHING_RESORTS_COPY} 현장 강습</p>
                         </div>
 
+                        {breakdown ? (
+                            <dl className="mb-4 space-y-2 border-b border-line pb-4 text-[15px]" data-testid="checkout-breakdown">
+                                <div className="flex justify-between"><dt className="text-muted">요금 기간 · 구성</dt><dd className="font-semibold" data-testid="checkout-period">{PERIOD_LABEL[breakdown.period]} · {pending?.participants}:1 {pending?.durationHours}시간</dd></div>
+                                <div className="flex justify-between"><dt className="text-muted">강습비</dt><dd className="font-semibold" data-testid="checkout-lesson-fee">{breakdown.lessonFee.toLocaleString()}원</dd></div>
+                                {breakdown.badgeFee > 0 ? (
+                                    <div className="flex justify-between"><dt className="text-muted">패찰비</dt><dd className="font-semibold" data-testid="checkout-badge-fee">{breakdown.badgeFee.toLocaleString()}원</dd></div>
+                                ) : null}
+                            </dl>
+                        ) : null}
+                        {feeError ? (
+                            <p className="mb-4 rounded-lg bg-red-50 p-4 text-[15px] font-medium text-red-600" role="alert" data-testid="checkout-fee-error">{feeError}</p>
+                        ) : null}
+
                         <div className="mb-6 flex items-end justify-between">
-                            <span className="font-medium">총 결제금액</span>
+                            <span className="font-medium">합계</span>
                             <span className="text-2xl font-extrabold">{amount.toLocaleString()}원</span>
                         </div>
 
-                        <label className="mb-4 flex cursor-pointer items-start gap-3 rounded-lg bg-snow p-4">
-                            <input
-                                type="checkbox"
-                                checked={hasBooked}
-                                onChange={(e) => setHasBooked(e.target.checked)}
-                                className="mt-0.5 h-5 w-5 shrink-0 accent-brand"
-                            />
-                            <span className="text-[15px] font-medium leading-snug">강습 예약을 접수했어요</span>
-                        </label>
+                        {payError ? (
+                            <p className="mb-4 rounded-lg bg-red-50 p-4 text-[15px] font-medium text-red-600" role="alert" data-testid="checkout-error">
+                                {payError}
+                                <span className="mt-1 block text-sm font-normal text-red-500">예약은 접수되지 않았어요. 다시 결제할 수 있어요.</span>
+                            </p>
+                        ) : null}
 
-                        <button type="submit" disabled={isProcessing || !hasBooked} className="btn-primary w-full py-4 text-lg">
+                        <button type="submit" disabled={isProcessing || !pending || !breakdown} className="btn-primary w-full py-4 text-lg" data-testid="checkout-pay">
                             {isProcessing ? '처리 중...' : `${amount.toLocaleString()}원 결제하기`}
                         </button>
-                        {!hasBooked && (
-                            <p className="mt-3 text-center text-sm text-muted">예약 접수에 체크하면 결제할 수 있어요.</p>
-                        )}
+                        <p className="mt-3 text-center text-sm text-muted">결제가 끝나면 예약이 접수됩니다.</p>
                     </div>
                 </div>
             </form>
