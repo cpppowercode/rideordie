@@ -86,10 +86,10 @@ export function BookingForm({ initialResort, seasonSettings = UNSET_SETTINGS }: 
   const today = todayYmd();
   const maxDate = maxBookingDateInclusive();
   const maxExclusive = maxBookingDateExclusive();
-  const initial = new Date();
+  const [initialYear, initialMonth] = today.split('-').map(Number);
   const [step, setStep] = useState<Step>(1);
-  const [viewYear, setViewYear] = useState(initial.getFullYear());
-  const [viewMonth, setViewMonth] = useState(initial.getMonth());
+  const [viewYear, setViewYear] = useState(initialYear);
+  const [viewMonth, setViewMonth] = useState(initialMonth - 1);
   const [lessonDate, setLessonDate] = useState(today);
   const [skiResort, setSkiResort] = useState<string>(
     initialResort || SKI_RESORTS[0].value

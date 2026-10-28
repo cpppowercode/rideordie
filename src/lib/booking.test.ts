@@ -65,6 +65,11 @@ assert.match(validateBookingInput(sample({ lessonDate: maxBookingDateExclusive()
 assert.match(validateBookingInput(sample({ lessonDate: "2099-01-15" })) || "", /3개월/);
 assert.equal(validateBookingInput(sample({ lessonDate: todayYmd() })), null);
 assert.equal(validateBookingInput(sample({ lessonDate: maxBookingDateInclusive() })), null);
+assert.equal(todayYmd(new Date("2026-10-28T15:00:00Z")), "2026-10-29");
+assert.equal(todayYmd(new Date("2026-10-28T14:59:59Z")), "2026-10-28");
+assert.equal(maxBookingDateExclusive(new Date("2027-01-31T03:00:00Z")), "2027-04-30");
+assert.equal(maxBookingDateInclusive(new Date("2027-01-31T03:00:00Z")), "2027-04-29");
+assert.equal(maxBookingDateExclusive(new Date("2027-11-30T03:00:00Z")), "2028-02-29");
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 assert.match(validateBookingInput(sample({ skiResort: "오투리조트" as any })) || "", /스키장/);
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
