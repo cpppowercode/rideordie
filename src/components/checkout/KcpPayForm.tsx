@@ -89,10 +89,9 @@ export function KcpPayForm({
           }
           window.location.href = `/book/success?r=${encodeURIComponent(data.receipt)}`;
         })
-        .catch((error: unknown) => {
-          const message = error instanceof Error ? error.message : "결제 승인에 실패했습니다.";
+        .catch(() => {
           closeEvent?.();
-          onFail?.(message);
+          window.location.href = `/checkout/fail?code=APPROVE_FAIL&order=${encodeURIComponent(orderId)}`;
         });
     };
 
