@@ -28,6 +28,7 @@ export default function CheckoutPage() {
     const [pending, setPending] = useState<PendingBooking | null>(null);
     const [loaded, setLoaded] = useState(false);
     const [payError, setPayError] = useState('');
+    const [paymentReview, setPaymentReview] = useState('');
     const [payMethod, setPayMethod] = useState<KcpPayMethod>('card');
     const [kcpLaunch, setKcpLaunch] = useState<KcpLaunch | null>(null);
     const [formData, setFormData] = useState({
@@ -50,6 +51,7 @@ export default function CheckoutPage() {
 
     useEffect(() => {
         const saved = readPendingBooking();
+        try { setPaymentReview(sessionStorage.getItem('rod_payment_review') || ''); } catch { /* 세션 저장소를 사용할 수 없는 환경 */ }
         setPending(saved);
         if (saved) setFormData({ name: saved.customerName, phone: saved.customerPhone });
         setLoaded(true);
@@ -99,6 +101,8 @@ export default function CheckoutPage() {
     const handlePayment = async (e: React.FormEvent) => {
         e.preventDefault();
         setPayError('');
+
+        if (paymentReview) return;
 
         if (!pending) {
             setPayError('먼저 강습 일정을 골라 주세요.');
@@ -283,7 +287,8 @@ export default function CheckoutPage() {
                             </p>
                         ) : null}
 
-                        <button type="submit" disabled={isProcessing || !pending || !breakdown} className="btn-primary w-full py-4 text-lg" data-testid="checkout-pay">
+                        {paymentReview && <p className="mb-4 rounded-lg bg-red-50 p-4 text-red-700" role="alert">이전 결제의 확인이 필요합니다. 다시 결제하지 말고 카톡 상담으로 문의해 주세요. 주문번호: {paymentReview}</p>}
+                        <button type="submit" disabled={isProcessing || !pending || !breakdown || Boolean(paymentReview)} className="btn-primary w-full py-4 text-lg" data-testid="checkout-pay">
                             {isProcessing ? '처리 중...' : `${amount.toLocaleString()}원 결제하기`}
                         </button>
                         <p className="mt-3 text-center text-sm text-muted">결제가 끝나면 예약이 접수됩니다.</p>

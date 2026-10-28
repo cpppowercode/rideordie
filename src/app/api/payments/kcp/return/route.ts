@@ -54,8 +54,11 @@ async function handleReturn(request: NextRequest) {
     url.searchParams.set("r", result.receipt);
     return NextResponse.redirect(url, 303);
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "결제 승인에 실패했습니다.";
-    return failRedirect(request, "APPROVE_FAIL", message);
+    console.error("KCP return processing failed", { orderId, error });
+    const url = new URL("/checkout/fail", originFrom(request));
+    url.searchParams.set("code", "APPROVE_FAIL");
+    url.searchParams.set("order", orderId);
+    return NextResponse.redirect(url, 303);
   }
 }
 
