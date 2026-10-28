@@ -10,6 +10,7 @@ import { payBreakdown } from "@/lib/badge-fee";
 import { getSeasonSettings } from "@/lib/season-settings";
 import { approveKcpPayment, toKcpPayType } from "@/lib/kcp";
 import { notifyOwner } from "@/lib/notify";
+import { beginPaymentAttempt, completePaymentAttempt, recordApprovedPayment } from "@/lib/payment-journal";
 
 export type KcpApprovalRequest = {
   enc_data: string;
@@ -47,6 +48,9 @@ export async function approveAndFinalizeBooking(
     throw new Error("주문번호가 예약 정보와 다릅니다.");
   }
 
+  // 승인 요청 전 별도 처리 기록을 만든다. 같은 주문의 중복 승인 요청은 DB가 거절한다.
+  await beginPaymentAttempt(intent.orderNo, amount, intent.input);
+
   // 1) KCP 서버에 직접 승인 요청. res_cd=0000, 금액 일치가 확인돼야 통과한다.
   const payment = await approveKcpPayment({
     enc_data: kcp.enc_data,
@@ -57,6 +61,10 @@ export async function approveAndFinalizeBooking(
     payType: toKcpPayType(kcp.payMethod || "PACA"),
   });
   const tno = String(payment.tno || "");
+  // 기록 갱신이 실패해도 승인된 결제의 예약 접수는 계속 시도한다.
+  await recordApprovedPayment(intent.orderNo, tno).catch((error) => {
+    console.error("Could not mark payment attempt approved", { orderNo: intent.orderNo, error });
+  });
 
   const input = intent.input;
   const receiptFor = () =>
@@ -117,6 +125,9 @@ export async function approveAndFinalizeBooking(
     notes,
   };
   const created = await createAdminReservation(payload);
+  await completePaymentAttempt(intent.orderNo, created.id).catch((error) => {
+    console.error("Could not mark payment attempt completed", { orderNo: intent.orderNo, error });
+  });
 
   await notifyOwner({
     orderNo: intent.orderNo,
