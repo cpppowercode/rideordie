@@ -16,7 +16,7 @@ export type PriceHours = (typeof PRICE_HOURS)[number];
 export type PriceTable = Record<Ratio, Record<PriceHours, number>>;
 
 export const EARLY_TABLE: PriceTable = {
-  "1:1": { 2: 140_000, 3: 200_000, 4: 270_000 },
+  "1:1": { 2: 140_000, 3: 210_000, 4: 270_000 },
   "2:1": { 2: 170_000, 3: 250_000, 4: 330_000 },
   "3:1": { 2: 210_000, 3: 300_000, 4: 390_000 },
 };
