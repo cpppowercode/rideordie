@@ -21,7 +21,7 @@ async function currentPeriod() {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const description = `전국 5개 스키장(하이원·비발디·웰리힐리·용평·지산) 어린이 스키·보드 강습. ${headlineCopy(await currentPeriod())}. 카카오톡 상담과 온라인 예약.`;
+  const description = `전국 6개 스키장(하이원·비발디·웰리힐리·용평·지산·알펜시아) 어린이 스키·보드 강습. ${headlineCopy(await currentPeriod())}. 카카오톡 상담과 온라인 예약.`;
   return {
     alternates: pageAlternates(SITE_URL),
     description,
@@ -131,7 +131,7 @@ export default async function Home() {
           </Link>
         </div>
         <p className="mt-3 max-w-2xl text-[16px] leading-7 text-muted">
-          하이원, 비발디, 웰리힐리, 용평, 지산에서 어린이 스키·보드강습을 진행합니다.
+          하이원, 비발디, 웰리힐리, 용평, 지산, 알펜시아에서 어린이 스키·보드강습을 진행합니다.
         </p>
         <ResortCards />
       </section>

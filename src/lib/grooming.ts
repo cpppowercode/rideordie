@@ -107,6 +107,17 @@ export const GROOMING_BREAKS: Record<ResortValue, GroomingWindow[]> = {
       confirmed: true,
     },
   ],
+
+  // 알펜시아: 공식 정설 시간 미확인. 흔한 주간~야간 간격 17:00–19:00을 임시 사용.
+  알펜시아리조트: [
+    {
+      startHour: 17,
+      durationHours: 2,
+      source: "default: typical 17:00–19:00 day-to-night slope grooming gap; not confirmed for Alpensia",
+      confirmed: false,
+      note: "Official Alpensia 정설 hours were not confirmed; using the common afternoon/night gap.",
+    },
+  ],
 };
 
 export function formatGroomingHour(hour: number): string {

@@ -21,7 +21,7 @@ for (const b of bad) { const r = filterAnswer(b); assert.equal(r.ok, false, b); 
 for (const g of ["1:1 2시간 15만원이에요.", "자세한 건 https://pf.kakao.com/_xfWMxaG 로", "예약은 rideordie.kr/book 에서 해요.", "결제하면 예약이 접수돼요."]) assert.equal(filterAnswer(g).ok, true, g);
 
 // 프리셋 10개, 고정 답변 전부 필터 통과
-assert.deepEqual(PRESETS.map((p) => p.label), ["가격", "예약·결제", "하이원", "비발디", "웰리힐리", "용평", "지산", "환불", "준비물·렌탈", "단체·가족"]);
+assert.deepEqual(PRESETS.map((p) => p.label), ["가격", "예약·결제", "하이원", "비발디", "웰리힐리", "용평", "지산", "알펜시아", "환불", "준비물·렌탈", "단체·가족"]);
 for (const p of PRESETS) for (const d of [EARLY, REG, LATE]) assert.equal(filterAnswer(presetAnswer(p.id, S, d)!).ok, true, p.id);
 
 // 가격은 날짜별 요금표(pricing.ts)에서

@@ -11,12 +11,13 @@ import {
   resortLandingBySlug,
 } from "./resort-landings";
 
-assert.equal(RESORT_LANDINGS.length, 5);
+assert.equal(RESORT_LANDINGS.length, 6);
 assert.equal(bookingValueFromResortQuery("high1"), "하이원리조트");
 assert.equal(bookingValueFromResortQuery("welli-hilli"), "웰리힐리파크");
 assert.equal(bookingValueFromResortQuery("vivaldi"), "비발디파크");
 assert.equal(bookingValueFromResortQuery("jisan"), "지산포레스트");
 assert.equal(bookingValueFromResortQuery("yongpyong"), "용평리조트");
+assert.equal(bookingValueFromResortQuery("alpensia"), "알펜시아리조트");
 assert.equal(bookingValueFromResortQuery("하이원리조트"), "하이원리조트");
 assert.equal(bookHref("high1"), "/book?resort=high1");
 assert.equal(resortCanonical("high1"), "https://rideordie.kr/resorts/high1");
@@ -53,11 +54,13 @@ assert.equal(yongpyong.layout, "minimal");
 const vivaldi = resortLandingBySlug("vivaldi");
 const jisan = resortLandingBySlug("jisan");
 const welli = resortLandingBySlug("welli-hilli");
+const alpensia = resortLandingBySlug("alpensia");
 assert.ok(vivaldi?.mentionBadgeFee && vivaldi.intro.some((p) => p.includes("패찰비")));
 assert.ok(vivaldi?.faqs.some((f) => f.q === "패찰비가 따로 있나요?"));
 assert.ok(jisan?.mentionBadgeFee && jisan.intro.some((p) => p.includes("패찰비")));
 assert.ok(jisan?.faqs.some((f) => f.q === "패찰비가 따로 있나요?"));
 assert.ok(welli && !welli.mentionBadgeFee && !JSON.stringify(welli).includes("패찰비"));
+assert.ok(alpensia && !alpensia.mentionBadgeFee && !JSON.stringify(alpensia).includes("패찰비"));
 assert.equal(REGULAR_PRICE_TABLE.amounts["3:1"][4], 400_000);
 assert.ok(
   RESORT_LANDINGS.every((row) =>
@@ -68,6 +71,7 @@ assert.ok(
 const sitemapUrls = sitemap().map((entry) => entry.url);
 assert.ok(sitemapUrls.includes("https://rideordie.kr/resorts"));
 assert.ok(sitemapUrls.includes("https://rideordie.kr/resorts/high1"));
+assert.ok(sitemapUrls.includes("https://rideordie.kr/resorts/alpensia"));
 
 assert.deepEqual(
   RESORT_LANDINGS.map((row) => [row.slug, row.title, row.h1]),
@@ -77,15 +81,16 @@ assert.deepEqual(
     ["vivaldi", "비발디 어린이 스키강습·보드강습 1:1 | 라이드올다이", "비발디파크 어린이 스키·보드강습"],
     ["jisan", "지산 어린이 스키강습·보드강습 1:1 | 라이드올다이", "지산 어린이 스키·보드강습"],
     ["yongpyong", "용평 어린이 스키강습·보드강습 1:1 | 라이드올다이", "용평 어린이 스키·보드강습"],
+    ["alpensia", "알펜시아 어린이 스키강습·보드강습 1:1 | 라이드올다이", "알펜시아 어린이 스키·보드강습"],
   ]
 );
 
 const titles = new Set(RESORT_LANDINGS.map((row) => row.title));
 const descriptions = new Set(RESORT_LANDINGS.map((row) => row.description));
 const intros = new Set(RESORT_LANDINGS.map((row) => row.intro.join("\n")));
-assert.equal(titles.size, 5);
-assert.equal(descriptions.size, 5);
-assert.equal(intros.size, 5);
+assert.equal(titles.size, 6);
+assert.equal(descriptions.size, 6);
+assert.equal(intros.size, 6);
 
 console.log("resort landing tests passed");
 import { priceCopy as __pc } from "./resort-landings";

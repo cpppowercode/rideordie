@@ -91,6 +91,15 @@ export const RESORT_HOURS: Record<ResortValue, ResortHours> = {
     confirmed: true,
     note: "Night skiing listed through 02:00 (26:00 in booking hours).",
   },
+
+  // 알펜시아: 공식 26/27 운영시간 미확인. 예약 창은 기본 09:00–22:00.
+  알펜시아리조트: {
+    openHour: 9,
+    closeHour: 22,
+    source: "default: typical 09:00–22:00; alpensia official hours not confirmed as of 2026-11-05",
+    confirmed: false,
+    note: "Official Alpensia operating hours were not confirmed; using 09:00–22:00.",
+  },
 };
 
 export function resortHoursFor(skiResort: string): ResortHours {
