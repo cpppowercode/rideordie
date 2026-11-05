@@ -13,7 +13,7 @@ import {
 } from "@/lib/site";
 
 const SITE_TITLE = `라이드올다이 | ${TEACHING_RESORTS_COPY} 스키·보드 강습`;
-const SITE_DESCRIPTION = "전국 5개 스키장(하이원·비발디·웰리힐리·용평·지산) 어린이 스키·보드 강습. 1:1 2시간 15만원부터. 카카오톡 상담과 온라인 예약.";
+const SITE_DESCRIPTION = "전국 6개 스키장(하이원·비발디·웰리힐리·용평·지산·알펜시아) 어린이 스키·보드 강습. 1:1 2시간 15만원부터. 카카오톡 상담과 온라인 예약.";
 
 const googleVerification =
   process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ||
@@ -36,6 +36,7 @@ export const metadata: Metadata = {
     "용평 스키강습 유아",
     "비발디 스키강습 비용",
     "웰리힐리 스키강습 가격",
+    "알펜시아 스키강습 어린이",
   ],
   alternates: pageAlternates(SITE_URL),
   openGraph: {

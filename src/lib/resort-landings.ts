@@ -12,7 +12,7 @@ export function priceCopy(text: string, period: PricePeriod): string {
   return text.split("1:1 2시간 15만원부터").join(headlineCopy(period));
 }
 
-export type ResortLandingSlug = "high1" | "welli-hilli" | "vivaldi" | "jisan" | "yongpyong";
+export type ResortLandingSlug = "high1" | "welli-hilli" | "vivaldi" | "jisan" | "yongpyong" | "alpensia";
 
 export type ResortFaq = { q: string; a: string };
 
@@ -56,6 +56,7 @@ export const FAMILY_GUIDE_POSTS: Record<ResortLandingSlug, FamilyGuidePost[]> = 
   "welli-hilli": [],
   yongpyong: [],
   jisan: [],
+  alpensia: [],
 };
 
 export const TERMS_REFUND_HREF = "/service-policy#article-9";
@@ -90,7 +91,7 @@ export const SITE_FAQ: ResortFaq[] = [
   },
   {
     q: "강습은 어디서 진행하나요?",
-    a: "하이원, 비발디, 웰리힐리, 용평, 지산에서 강습합니다. 예약할 때 스키장을 고릅니다.",
+    a: "하이원, 비발디, 웰리힐리, 용평, 지산, 알펜시아에서 강습합니다. 예약할 때 스키장을 고릅니다.",
   },
   {
     q: "강습비는 얼마인가요?",
@@ -304,6 +305,31 @@ export const RESORT_LANDINGS: ResortLanding[] = [
       "1:1 2시간 일반 요금은 15만원입니다. 환불은 약관 제9조를 따릅니다.",
     ],
     faqs: [{ q: "강습비는 얼마인가요?", a: "1:1 2시간 일반 요금은 15만원입니다. 용평은 1:1·2:1 구성만 있습니다(3:1 없음)." }, ...SHARED_FACTS_FAQ.slice(1, 3)],
+  },
+  {
+    slug: "alpensia",
+    bookingValue: "알펜시아리조트",
+    shortName: "알펜시아",
+    placeName: "알펜시아리조트",
+    title: "알펜시아 어린이 스키강습·보드강습 1:1 | 라이드올다이",
+    h1: "알펜시아 어린이 스키·보드강습",
+    description:
+      "알펜시아 어린이 스키강습·보드강습. 1:1·2:1·3:1 구성, 1:1 2시간 15만원부터. 카톡 상담과 온라인 예약(결제 완료 시 접수).",
+    ogTitle: "알펜시아 어린이 스키강습 1:1 | 라이드올다이",
+    keywords: "알펜시아 스키강습 어린이, 알펜시아 보드강습, 어린이 스키강습",
+    layout: "minimal",
+    mentionBadgeFee: false,
+    image: LESSON_PHOTOS.carve,
+    imageAlt: "알펜시아에서 진행하는 어린이 스키·보드 강습",
+    intro: [
+      "평창 알펜시아 슬로프에서 어린이 스키·보드 강습을 진행합니다. 1:1·2:1·3:1 구성, 응급처치 교육 이수, 강습보험 적용.",
+      "1:1 2시간 일반 요금은 15만원입니다. 환불은 약관 제9조를 따릅니다.",
+    ],
+    faqs: [
+      { q: "강습비는 얼마인가요?", a: "1:1 2시간 일반 요금은 15만원입니다. 1:1·2:1·3:1 구성이 있습니다." },
+      ...SHARED_FACTS_FAQ.slice(1, 2),
+      { q: "환불은 어떻게 되나요?", a: "환불은 이용약관 제9조를 따릅니다." },
+    ],
   },
 ];
 
