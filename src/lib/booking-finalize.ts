@@ -115,6 +115,12 @@ export async function approveAndFinalizeBooking(
     payment_status: "paid",
     reservation_status: "pending",
     notes,
+    // 어트리뷰션 데이터 추가
+    ...(intent.attribution && {
+      attr_first: intent.attribution.attr_first ? JSON.stringify(intent.attribution.attr_first) : null,
+      attr_last: intent.attribution.attr_last ? JSON.stringify(intent.attribution.attr_last) : null,
+      attr_model: intent.attribution.attr_model || 'last_non_direct',
+    }),
   };
   const created = await createAdminReservation(payload);
 

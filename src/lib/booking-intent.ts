@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import type { BookingInput } from "@/lib/booking";
+import type { AttributionData } from "@/types/attribution";
 
 /**
  * 결제 전 예약 정보는 저장하지 않고, 서버가 서명한 토큰(intent)으로만 들고 다닌다.
@@ -10,6 +11,7 @@ export type BookingIntent = {
   orderNo: string;
   amount: number;
   input: BookingInput;
+  attribution?: AttributionData;
   exp: number;
 };
 
@@ -70,8 +72,20 @@ function decode<T extends { exp: number }>(kind: string, token: string | null | 
   }
 }
 
-export function createBookingIntent(orderNo: string, amount: number, input: BookingInput): string {
-  const payload: BookingIntent = { v: 1, orderNo, amount, input, exp: Date.now() + INTENT_TTL_MS };
+export function createBookingIntent(
+  orderNo: string, 
+  amount: number, 
+  input: BookingInput,
+  attribution?: AttributionData
+): string {
+  const payload: BookingIntent = { 
+    v: 1, 
+    orderNo, 
+    amount, 
+    input, 
+    attribution,
+    exp: Date.now() + INTENT_TTL_MS 
+  };
   return encode("intent", payload);
 }
 
