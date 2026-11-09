@@ -37,7 +37,6 @@ export async function POST(request: NextRequest) {
       amount,
       lessonFee: breakdown.lessonFee,
       badgeFee: breakdown.badgeFee,
-      period: breakdown.period,
       intent,
     });
     // 모바일 결제는 KCP가 Ret_URL로 POST 하므로 서명 토큰을 쿠키로도 실어 둔다(내용은 서버 서명으로 검증).

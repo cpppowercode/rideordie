@@ -1,8 +1,8 @@
 /**
  * 프리셋 버튼 답변. AI 를 쓰지 않는 고정 답변(비용 0). 가격은 pricing.ts 에서 매번 계산한다.
- * 얼리버드 기준일(예약일/강습일)은 말하지 않는다(사장님 확인 전) → 카톡 안내.
+ * 모든 고객에게 연중 할인 가격이 적용된다.
  */
-import { PERIOD_LABEL, allowedRatios, headlineCopy, kstToday, periodFor, tableFor, type SeasonSettings } from "@/lib/pricing";
+import { allowedRatios, headlineCopy, kstToday, type SeasonSettings } from "@/lib/pricing";
 import { KAKAO_CONSULT_URL } from "@/lib/site";
 import { KAKAO_LINE, REFUND_LINES, tableText } from "./knowledge";
 
@@ -13,15 +13,14 @@ export const PRESETS: { id: PresetId; label: string }[] = [
   { id: "refund", label: "환불" }, { id: "gear", label: "준비물·렌탈" }, { id: "group", label: "단체·가족" },
 ];
 
-function priceBlock(s: SeasonSettings, today: string, resortName = ""): string {
-  const period = periodFor(today, s);
-  return `지금은 ${PERIOD_LABEL[period]} 기간이에요. ${headlineCopy(period)}\n${tableText(tableFor(period), allowedRatios(resortName))}`;
+function priceBlock(resortName = ""): string {
+  return `${headlineCopy()}\n모든 고객에게 연중 할인 가격이 적용돼요.\n${tableText(allowedRatios(resortName))}`;
 }
-const resort = (name: string, extra: string) => (s: SeasonSettings, today: string) =>
-  `${name}에서 어린이 스키·보드 강습을 해요. ${extra}\n${priceBlock(s, today, name)}\n예약은 rideordie.kr/book 에서 할 수 있어요.`;
+const resort = (name: string, extra: string) => () =>
+  `${name}에서 어린이 스키·보드 강습을 해요. ${extra}\n${priceBlock(name)}\n예약은 rideordie.kr/book 에서 할 수 있어요.`;
 
 const ANSWERS: Record<PresetId, (s: SeasonSettings, today: string) => string> = {
-  price: (s, t) => `${priceBlock(s, t)}\n(강습비 총액 기준. 비발디·지산은 패찰비가 결제 때 함께 계산돼요.)`,
+  price: () => `${priceBlock()}\n(강습비 총액 기준. 비발디·지산은 패찰비가 결제 때 함께 계산돼요.)`,
   booking: () => `rideordie.kr/book 에서 날짜·스키장·시간·구성을 고르고 이름과 휴대폰 번호를 남긴 뒤 결제하면 예약이 접수돼요. 만날 장소와 시간은 카카오톡으로 보내 드려요. 예약·결제 상태는 카카오톡 채널에서 확인해 드려요: ${KAKAO_CONSULT_URL}`,
   high1: resort("하이원", "패찰비는 없어요."),
   vivaldi: resort("비발디", "패찰비는 인원×시간×12,500원이고 결제 때 함께 계산돼요."),
@@ -38,7 +37,3 @@ export function presetAnswer(id: string, s: SeasonSettings, now: Date = new Date
   const f = ANSWERS[id as PresetId];
   return f ? f(s, kstToday(now)) : null;
 }
-
-/** 얼리버드 등 요금 기간의 '기준 날짜'를 묻는 질문 → AI 를 거치지 않고 카톡 안내. */
-export const BASIS_QUESTION = /(예약\s*(일|날|날짜|한\s*날)|결제\s*(일|날)|강습\s*(일|날)|이용\s*(일|날)).{0,20}(기준|적용|맞|되|인가|인지|냐|요\?)|(기준|적용).{0,15}(예약|결제|강습|이용)\s*(일|날)|(얼리|조기|시즌말|특가).{0,20}(언제\s*예약|날짜\s*기준|어느\s*날)/;
-export const BASIS_ANSWER = `요금 기간(얼리버드·일반·시즌말 특가)을 어느 날짜로 정하는지는 상담으로 정확히 안내해 드릴게요. ${KAKAO_LINE}`;

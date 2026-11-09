@@ -1,15 +1,16 @@
-import { headlineCopy, REGULAR_TABLE, type PricePeriod } from "@/lib/pricing";
+import { headlineCopy, SALE_TABLE, LIST_TABLE } from "@/lib/pricing";
 import { KAKAO_CONSULT_URL, LESSON_PHOTOS, SITE_URL, SKI_RESORTS } from "@/lib/site";
 
-export const REGULAR_PRICE_TABLE = {
+export const PRICE_TABLE = {
   ratios: ["1:1", "2:1", "3:1"] as const,
   hours: [2, 3, 4] as const,
-  amounts: REGULAR_TABLE,
+  sale: SALE_TABLE,
+  list: LIST_TABLE,
 } as const;
 
-/** 정적 문구의 '1:1 2시간 15만원부터'를 현재 요금 기간 문구로 바꾼다. */
-export function priceCopy(text: string, period: PricePeriod): string {
-  return text.split("1:1 2시간 15만원부터").join(headlineCopy(period));
+/** 정적 문구의 '1:1 2시간 15만원부터'를 현재 세일 가격 문구로 바꾼다. */
+export function priceCopy(text: string): string {
+  return text.split("1:1 2시간 15만원부터").join(headlineCopy());
 }
 
 export type ResortLandingSlug = "high1" | "welli-hilli" | "vivaldi" | "jisan" | "yongpyong" | "alpensia";
@@ -61,18 +62,18 @@ export const FAMILY_GUIDE_POSTS: Record<ResortLandingSlug, FamilyGuidePost[]> = 
 
 export const TERMS_REFUND_HREF = "/service-policy#article-9";
 
-export const EARLY_BIRD_LABEL = "시즌 전 얼리버드";
-export const EARLY_BIRD_COPY =
-  "시즌 전 얼리버드·2월 15일 이후 시즌말 특가는 1:1 2시간 14만원, 시즌 중 일반 요금은 1:1 2시간 15만원";
+export const SALE_PRICE_LABEL = "특별 할인 가격";
+export const SALE_PRICE_COPY =
+  "1:1 2시간 14만원 (정가 16.5만원에서 15% 할인). 2:1·3:1 구성은 더 큰 할인이 적용됩니다. 모든 고객에게 연중 할인 가격이 적용됩니다.";
 
 const SHARED_FACTS_FAQ: ResortFaq[] = [
   {
     q: "강습비는 얼마인가요?",
-    a: "1:1 2시간 일반 요금은 15만원입니다. 1:1·2:1·3:1 구성이 있고,",
+    a: "1:1 2시간 14만원 (정가 16.5만원에서 15% 할인)입니다. 1:1·2:1·3:1 구성이 있고, 모든 고객에게 연중 할인 가격이 적용됩니다.",
   },
   {
-    q: "시즌 전 얼리버드가 있나요?",
-    a: EARLY_BIRD_COPY,
+    q: "할인은 언제까지인가요?",
+    a: "할인 가격은 기간 제한 없이 항상 적용됩니다. 모든 예약에 할인된 가격이 청구됩니다.",
   },
   {
     q: "강사는 어떤 사람인가요?",
@@ -95,11 +96,11 @@ export const SITE_FAQ: ResortFaq[] = [
   },
   {
     q: "강습비는 얼마인가요?",
-    a: "1:1 2시간 일반 요금은 15만원입니다. 1:1·2:1·3:1 구성이 있으며,",
+    a: "1:1 2시간 14만원 (정가 16.5만원에서 15% 할인)입니다. 1:1·2:1·3:1 구성이 있으며, 모든 고객에게 연중 할인 가격이 적용됩니다.",
   },
   {
-    q: "시즌 전 얼리버드가 있나요?",
-    a: EARLY_BIRD_COPY,
+    q: "할인은 언제까지인가요?",
+    a: "할인 가격은 기간 제한 없이 항상 적용됩니다. 모든 예약에 할인된 가격이 청구됩니다.",
   },
   {
     q: "강사는 공인 자격인가요?",
@@ -120,7 +121,7 @@ export const RESORT_LANDINGS: ResortLanding[] = [
     title: "하이원 어린이 스키강습·보드강습 1:1 | 라이드올다이",
     h1: "하이원 어린이 스키·보드강습",
     description:
-      "하이원 어린이 스키강습·보드강습 1:1. 1:1·2:1·3:1 구성, 1:1 2시간 15만원부터. 카톡 상담과 온라인 예약(결제 완료 시 접수)으로 신청할 수 있습니다.",
+      "하이원 어린이 스키강습·보드강습 1:1. 1:1·2:1·3:1 구성, 1:1 2시간 14만원 (15% 할인). 카톡 상담과 온라인 예약(결제 완료 시 접수)으로 신청할 수 있습니다.",
     ogTitle: "하이원 어린이 스키강습 1:1 | 라이드올다이",
     keywords: "하이원 스키강습 어린이, 하이원 보드강습, 어린이 스키강습",
     layout: "full",
@@ -182,7 +183,7 @@ export const RESORT_LANDINGS: ResortLanding[] = [
     title: "웰리힐리 어린이 스키강습·보드강습 1:1 | 라이드올다이",
     h1: "웰리힐리 어린이 스키·보드강습",
     description:
-      "웰리힐리 스키강습 가격과 어린이 보드강습. 1:1·2:1·3:1 구성, 1:1 2시간 15만원부터. 카톡 상담과 온라인 예약.",
+      "웰리힐리 스키강습 가격과 어린이 보드강습. 1:1·2:1·3:1 구성, 1:1 2시간 14만원 (15% 할인). 카톡 상담과 온라인 예약.",
     ogTitle: "웰리힐리 스키강습 가격 | 어린이 1:1 강습",
     keywords: "웰리힐리 스키강습 가격, 웰리힐리 어린이 스키, 어린이 스키강습",
     layout: "full",
@@ -245,7 +246,7 @@ export const RESORT_LANDINGS: ResortLanding[] = [
     title: "비발디 어린이 스키강습·보드강습 1:1 | 라이드올다이",
     h1: "비발디파크 어린이 스키·보드강습",
     description:
-      "비발디 스키강습 비용 안내. 1:1·2:1·3:1, 1:1 2시간 15만원부터. 패찰비와 카톡 상담과 온라인 예약.",
+      "비발디 스키강습 비용 안내. 1:1·2:1·3:1, 1:1 2시간 14만원 (15% 할인). 패찰비와 카톡 상담과 온라인 예약.",
     ogTitle: "비발디 스키강습 비용 | 어린이 1:1",
     keywords: "비발디 스키강습 비용, 비발디파크 어린이 스키, 어린이 스키강습",
     layout: "standard",
@@ -269,7 +270,7 @@ export const RESORT_LANDINGS: ResortLanding[] = [
     title: "지산 어린이 스키강습·보드강습 1:1 | 라이드올다이",
     h1: "지산 어린이 스키·보드강습",
     description:
-      "지산 스키강습 가격. 1:1·2:1·3:1 어린이 스키·보드강습, 1:1 2시간 15만원부터. 패찰비 별도. 카톡 상담과 온라인 예약.",
+      "지산 스키강습 가격. 1:1·2:1·3:1 어린이 스키·보드강습, 1:1 2시간 14만원 (15% 할인). 패찰비 별도. 카톡 상담과 온라인 예약.",
     ogTitle: "지산 스키강습 가격 | 어린이 1:1",
     keywords: "지산 스키강습 가격, 지산 어린이 스키, 어린이 스키강습",
     layout: "standard",
@@ -293,7 +294,7 @@ export const RESORT_LANDINGS: ResortLanding[] = [
     title: "용평 어린이 스키강습·보드강습 1:1 | 라이드올다이",
     h1: "용평 어린이 스키·보드강습",
     description:
-      "용평 스키강습 유아·어린이 1:1 강습. 1:1·2:1 구성(3:1 없음), 1:1 2시간 15만원부터. 카톡 상담과 온라인 예약.",
+      "용평 스키강습 유아·어린이 1:1 강습. 1:1·2:1 구성(3:1 없음), 1:1 2시간 14만원 (15% 할인). 카톡 상담과 온라인 예약.",
     ogTitle: "용평 스키강습 유아 | 라이드올다이",
     keywords: "용평 스키강습 유아, 용평 어린이 스키, 어린이 스키강습",
     layout: "minimal",
@@ -302,9 +303,9 @@ export const RESORT_LANDINGS: ResortLanding[] = [
     imageAlt: "용평에서 진행하는 어린이 스키·보드 강습",
     intro: [
       "평창 용평에서 어린이 스키·보드 강습을 진행합니다. 1:1·2:1(용평은 3:1 강습이 없습니다), 공인 강사, 응급처치 교육 이수, 강습보험 적용.",
-      "1:1 2시간 일반 요금은 15만원입니다. 환불은 약관 제9조를 따릅니다.",
+      "1:1 2시간 14만원 (정가 16.5만원에서 15% 할인). 환불은 약관 제9조를 따릅니다.",
     ],
-    faqs: [{ q: "강습비는 얼마인가요?", a: "1:1 2시간 일반 요금은 15만원입니다. 용평은 1:1·2:1 구성만 있습니다(3:1 없음)." }, ...SHARED_FACTS_FAQ.slice(1, 3)],
+    faqs: [{ q: "강습비는 얼마인가요?", a: "1:1 2시간 14만원 (정가 16.5만원에서 15% 할인)입니다. 용평은 1:1·2:1 구성만 있습니다(3:1 없음)." }, ...SHARED_FACTS_FAQ.slice(1, 3)],
   },
   {
     slug: "alpensia",
@@ -314,7 +315,7 @@ export const RESORT_LANDINGS: ResortLanding[] = [
     title: "알펜시아 어린이 스키강습·보드강습 1:1 | 라이드올다이",
     h1: "알펜시아 어린이 스키·보드강습",
     description:
-      "알펜시아 어린이 스키강습·보드강습. 1:1·2:1·3:1 구성, 1:1 2시간 15만원부터. 카톡 상담과 온라인 예약(결제 완료 시 접수).",
+      "알펜시아 어린이 스키강습·보드강습. 1:1·2:1·3:1 구성, 1:1 2시간 14만원 (15% 할인). 카톡 상담과 온라인 예약(결제 완료 시 접수).",
     ogTitle: "알펜시아 어린이 스키강습 1:1 | 라이드올다이",
     keywords: "알펜시아 스키강습 어린이, 알펜시아 보드강습, 어린이 스키강습",
     layout: "minimal",
@@ -323,10 +324,10 @@ export const RESORT_LANDINGS: ResortLanding[] = [
     imageAlt: "알펜시아에서 진행하는 어린이 스키·보드 강습",
     intro: [
       "평창 알펜시아 슬로프에서 어린이 스키·보드 강습을 진행합니다. 1:1·2:1·3:1 구성, 응급처치 교육 이수, 강습보험 적용.",
-      "1:1 2시간 일반 요금은 15만원입니다. 환불은 약관 제9조를 따릅니다.",
+      "1:1 2시간 14만원 (정가 16.5만원에서 15% 할인). 환불은 약관 제9조를 따릅니다.",
     ],
     faqs: [
-      { q: "강습비는 얼마인가요?", a: "1:1 2시간 일반 요금은 15만원입니다. 1:1·2:1·3:1 구성이 있습니다." },
+      { q: "강습비는 얼마인가요?", a: "1:1 2시간 14만원 (정가 16.5만원에서 15% 할인)입니다. 1:1·2:1·3:1 구성이 있습니다." },
       ...SHARED_FACTS_FAQ.slice(1, 2),
       { q: "환불은 어떻게 되나요?", a: "환불은 이용약관 제9조를 따릅니다." },
     ],
@@ -364,7 +365,7 @@ export function resortCanonical(slug: ResortLandingSlug): string {
 }
 
 export function earlyBirdCopy(): string {
-  return EARLY_BIRD_COPY;
+  return SALE_PRICE_COPY;
 }
 
 export function formatManwon(amount: number): string {
