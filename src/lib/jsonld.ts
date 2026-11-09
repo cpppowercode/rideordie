@@ -1,4 +1,4 @@
-import { tableFor, type PricePeriod } from "@/lib/pricing";
+import { saleTable } from "@/lib/pricing";
 import {
   INSTAGRAM_URL,
   KAKAO_CONSULT_URL,
@@ -40,13 +40,13 @@ export function faqPageJsonLd(faqs: ResortFaq[]) {
   };
 }
 
-export function resortServiceJsonLd(landing: ResortLanding, period: PricePeriod = "regular") {
-  const regular = tableFor(period)["1:1"][2];
+export function resortServiceJsonLd(landing: ResortLanding) {
+  const sale = saleTable()["1:1"][2];
   return {
     "@context": "https://schema.org",
     "@type": "Service",
     name: landing.h1,
-    description: priceCopy(landing.description, period),
+    description: priceCopy(landing.description),
     url: `${SITE_URL}/resorts/${landing.slug}`,
     provider: {
       "@type": "Organization",
@@ -56,7 +56,7 @@ export function resortServiceJsonLd(landing: ResortLanding, period: PricePeriod 
     areaServed: landing.placeName,
     offers: {
       "@type": "Offer",
-      price: String(regular),
+      price: String(sale),
       priceCurrency: "KRW",
       url: `${SITE_URL}${bookHref(landing.slug)}`,
       availability: "https://schema.org/InStock",

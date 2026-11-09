@@ -2,15 +2,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { TrustBadges } from "@/components/seo/TrustBadges";
 import { KakaoConsultLink } from "@/components/seo/KakaoConsultLink";
-import { PERIOD_LABEL, allowedRatios, tableFor, type PricePeriod } from "@/lib/pricing";
+import { allowedRatios, saleTable, listTable, discountPercent, type Ratio } from "@/lib/pricing";
 import {
   bookHref,
-  EARLY_BIRD_COPY,
-  EARLY_BIRD_LABEL,
+  SALE_PRICE_COPY,
+  SALE_PRICE_LABEL,
   FAMILY_GUIDE_POSTS,
   formatManwon,
-  REGULAR_PRICE_TABLE,
-  priceCopy,
+  PRICE_TABLE,
   RESORT_LANDINGS,
   TERMS_REFUND_HREF,
   type ResortLanding,
@@ -36,16 +35,17 @@ function Ctas({ landing }: { landing: ResortLanding }) {
   );
 }
 
-function PriceTable({ period, ratios = REGULAR_PRICE_TABLE.ratios }: { period: PricePeriod; ratios?: readonly string[] }) {
-  const table = tableFor(period);
+function PriceTable({ ratios = PRICE_TABLE.ratios }: { ratios?: readonly string[] }) {
+  const sale = saleTable();
+  const list = listTable();
   return (
     <div className="overflow-x-auto rounded-[24px] border border-line bg-white">
       <table className="w-full min-w-[320px] text-left text-[15px]">
-        <caption className="sr-only">{ratios.join('·')} {PERIOD_LABEL[period]} 요금표</caption>
+        <caption className="sr-only">{ratios.join('·')} 할인 가격 요금표</caption>
         <thead>
           <tr className="border-b border-line bg-snow text-muted">
             <th className="px-4 py-3 font-semibold">구성</th>
-            {REGULAR_PRICE_TABLE.hours.map((hour) => (
+            {PRICE_TABLE.hours.map((hour) => (
               <th key={hour} className="px-4 py-3 font-semibold">
                 {hour}시간
               </th>
@@ -53,12 +53,18 @@ function PriceTable({ period, ratios = REGULAR_PRICE_TABLE.ratios }: { period: P
           </tr>
         </thead>
         <tbody>
-          {(ratios as typeof REGULAR_PRICE_TABLE.ratios[number][]).map((ratio) => (
+          {(ratios as typeof PRICE_TABLE.ratios[number][]).map((ratio) => (
             <tr key={ratio} className="border-b border-line last:border-0">
-              <th className="px-4 py-3 font-semibold text-ink">{ratio}</th>
-              {REGULAR_PRICE_TABLE.hours.map((hour) => (
+              <th className="px-4 py-3 font-semibold text-ink">
+                {ratio}
+                <span className="ml-2 text-[13px] font-semibold text-brand">
+                  {discountPercent(ratio as Ratio)}% 할인
+                </span>
+              </th>
+              {PRICE_TABLE.hours.map((hour) => (
                 <td key={hour} className="px-4 py-3">
-                  {formatManwon(table[ratio][hour])}
+                  <div className="font-semibold text-ink">{formatManwon(sale[ratio][hour])}</div>
+                  <div className="text-[13px] text-muted line-through">{formatManwon(list[ratio][hour])}</div>
                 </td>
               ))}
             </tr>
@@ -97,7 +103,7 @@ function FamilyGuideLinks({ landing }: { landing: ResortLanding }) {
   );
 }
 
-export function ResortLandingView({ landing, period = "regular" }: { landing: ResortLanding; period?: PricePeriod }) {
+export function ResortLandingView({ landing }: { landing: ResortLanding }) {
   const showPrice = landing.layout === "full";
   const showImage = landing.layout !== "minimal";
 
@@ -165,18 +171,18 @@ export function ResortLandingView({ landing, period = "regular" }: { landing: Re
         {showPrice ? (
           <>
           <section className="mt-12">
-            <h2 className="text-[24px] font-bold tracking-tight">가격표</h2>
+            <h2 className="text-[24px] font-bold tracking-tight">할인 가격표</h2>
             <p className="mt-3 text-[16px] leading-7 text-muted">
-              {priceCopy("1:1 2시간 15만원부터", period)}. 아래는 {PERIOD_LABEL[period]} 요금입니다.
+              모든 고객에게 연중 할인 가격이 적용됩니다. 정가 대비 할인된 가격으로 예약하실 수 있습니다.
             </p>
-            <div className="mt-5" data-testid="price-table" data-period={period}>
-              <PriceTable period={period} ratios={allowedRatios(landing.bookingValue)} />
+            <div className="mt-5" data-testid="price-table">
+              <PriceTable ratios={allowedRatios(landing.bookingValue)} />
             </div>
           </section>
           <section className="mt-12">
-            <h2 className="text-[24px] font-bold tracking-tight">{EARLY_BIRD_LABEL}</h2>
+            <h2 className="text-[24px] font-bold tracking-tight">{SALE_PRICE_LABEL}</h2>
             <p className="mt-3 text-[16px] leading-7 text-muted">
-              {EARLY_BIRD_COPY}
+              {SALE_PRICE_COPY}
             </p>
           </section>
           </>
@@ -184,7 +190,7 @@ export function ResortLandingView({ landing, period = "regular" }: { landing: Re
           <section className="mt-12">
             <h2 className="text-[24px] font-bold tracking-tight">강습비</h2>
             <p className="mt-3 text-[17px] leading-8 text-muted">
-              {EARLY_BIRD_COPY}.
+              {SALE_PRICE_COPY}.
               {landing.mentionBadgeFee ? " 패찰비도 별도입니다." : ""}
             </p>
             {landing.layout !== "minimal" ? (

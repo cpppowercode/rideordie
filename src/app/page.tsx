@@ -11,17 +11,12 @@ import { KakaoConsultLink } from "@/components/seo/KakaoConsultLink";
 import { faqPageJsonLd } from "@/lib/jsonld";
 import { SITE_FAQ } from "@/lib/resort-landings";
 import { ResortCards } from "@/components/seo/ResortCards";
-import { headlineCopy, kstToday, periodFor } from "@/lib/pricing";
-import { getSeasonSettings } from "@/lib/season-settings";
+import { headlineCopy } from "@/lib/pricing";
 
 export const revalidate = 300;
 
-async function currentPeriod() {
-  return periodFor(kstToday(), await getSeasonSettings());
-}
-
 export async function generateMetadata(): Promise<Metadata> {
-  const description = `전국 6개 스키장(하이원·비발디·웰리힐리·용평·지산·알펜시아) 어린이 스키·보드 강습. ${headlineCopy(await currentPeriod())}. 카카오톡 상담과 온라인 예약.`;
+  const description = `전국 6개 스키장(하이원·비발디·웰리힐리·용평·지산·알펜시아) 어린이 스키·보드 강습. ${headlineCopy()}. 카카오톡 상담과 온라인 예약.`;
   return {
     alternates: pageAlternates(SITE_URL),
     description,
@@ -44,7 +39,6 @@ const HIGHLIGHTS = [
 ];
 
 export default async function Home() {
-  const period = await currentPeriod();
   return (
     <div className="flex flex-col" data-testid="home-page">
       <JsonLd data={faqPageJsonLd(SITE_FAQ)} />
@@ -165,7 +159,7 @@ export default async function Home() {
             ))}
             <div className="flex gap-8 py-5">
               <dt className="w-16 shrink-0 text-muted">강습비</dt>
-              <dd className="text-[22px] font-bold tracking-tight" data-testid="home-headline-price">{headlineCopy(period)}</dd>
+              <dd className="text-[22px] font-bold tracking-tight" data-testid="home-headline-price">{headlineCopy()}</dd>
             </div>
           </dl>
           <div className="mt-8 flex flex-wrap gap-3">

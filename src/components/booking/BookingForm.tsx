@@ -1,6 +1,6 @@
 'use client';
 
-import { PERIOD_LABEL, RATIOS, allowedRatios, UNSET_SETTINGS, type SeasonSettings } from '@/lib/pricing';
+import { RATIOS, allowedRatios, UNSET_SETTINGS, type SeasonSettings } from '@/lib/pricing';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -126,7 +126,6 @@ export function BookingForm({ initialResort, seasonSettings = UNSET_SETTINGS }: 
   try {
     const fee = payBreakdown({ skiResort, participants, durationHours, lessonDate }, seasonSettings);
     feeRows = [
-      ['요금 기간', PERIOD_LABEL[fee.period]],
       ['강습비', `${fee.lessonFee.toLocaleString('ko-KR')}원`],
       ...(fee.badgeFee > 0 ? [['패찰비', `${fee.badgeFee.toLocaleString('ko-KR')}원`] as [string, string]] : []),
       ['합계', `${fee.total.toLocaleString('ko-KR')}원`],

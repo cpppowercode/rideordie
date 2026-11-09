@@ -3,10 +3,10 @@
  * 스트리밍하지 않는다(필터를 통과한 답만 보여 주기 위해).
  * 유료 호출은 AI_GATEWAY_API_KEY 와 CHATBOT_ALLOW_PAID=1 이 모두 있을 때만. 아니면 목업(키워드 → 고정 답변).
  */
-import { type SeasonSettings, kstToday, periodFor } from "@/lib/pricing";
+import { type SeasonSettings } from "@/lib/pricing";
 import { buildKnowledge, KAKAO_LINE, systemInstructions } from "./knowledge";
 import { filterAnswer, SAFE_FALLBACK } from "./filter";
-import { BASIS_ANSWER, BASIS_QUESTION, presetAnswer, type PresetId } from "./presets";
+import { presetAnswer, type PresetId } from "./presets";
 import { LIMIT_MESSAGE, MODEL_ID, type UsageLimiter } from "./limits";
 
 export type ChatTurn = { role: "user" | "assistant"; content: string };
@@ -38,13 +38,12 @@ export async function answer(
   }
   const q = String(input.question || "").trim().slice(0, 300);
   if (!q) return { text: "궁금한 점을 적어 주세요.", via: "rule" };
-  if (BASIS_QUESTION.test(q)) return { text: BASIS_ANSWER, via: "rule", reason: "basis" };
   const blocked = deps.limiter.check(input.sessionId, now);
   if (blocked) return { text: `${LIMIT_MESSAGE[blocked]} ${KAKAO_LINE}`, via: "limit", reason: blocked };
   deps.limiter.record(input.sessionId, now);
   let raw: string; let via: ChatReply["via"];
   if (deps.ai) {
-    const knowledge = buildKnowledge(periodFor(kstToday(now), deps.settings), deps.settings);
+    const knowledge = buildKnowledge(deps.settings);
     const history = (input.history ?? []).slice(-6).map((t) => ({ role: t.role, content: String(t.content).slice(0, 600) }));
     try {
       const r = await deps.ai({ instructions: systemInstructions(knowledge), messages: [...history, { role: "user", content: q }] });
