@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Check, XCircle } from 'lucide-react';
 import { KakaoConsultLink } from '@/components/seo/KakaoConsultLink';
 import { readBookingReceipt } from '@/lib/booking-intent';
+import { ConversionTracker } from '@/components/tracking/ConversionTracker';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,6 +44,12 @@ export default async function BookSuccessPage({ searchParams }: Props) {
 
   return (
     <div className="bg-snow" data-testid="booking-success">
+      <ConversionTracker 
+        orderNo={orderNo} 
+        amount={amount} 
+        resort={resort} 
+        date={date} 
+      />
       <div className="mx-auto flex min-h-[70vh] max-w-lg flex-col items-center px-5 py-16 text-center">
         <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-brand text-white shadow-[0_10px_24px_rgba(49,130,246,0.35)]">
           <Check className="h-8 w-8" strokeWidth={2.5} />

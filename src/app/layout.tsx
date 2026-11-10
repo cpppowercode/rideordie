@@ -11,6 +11,9 @@ import {
   SITE_URL,
   TEACHING_RESORTS_COPY,
 } from "@/lib/site";
+import { NaverWCS } from "@/components/tracking/NaverWCS";
+import { MetaPixel } from "@/components/tracking/MetaPixel";
+import { TikTokPixel } from "@/components/tracking/TikTokPixel";
 
 const SITE_TITLE = `라이드올다이 | ${TEACHING_RESORTS_COPY} 스키·보드 강습`;
 const SITE_DESCRIPTION = "전국 6개 스키장(하이원·비발디·웰리힐리·용평·지산·알펜시아) 어린이 스키·보드 강습. 1:1 2시간 15만원부터. 카카오톡 상담과 온라인 예약.";
@@ -73,6 +76,10 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const naverWcsId = process.env.NEXT_PUBLIC_NAVER_WCS_ID;
+  const metaPixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
+  const tiktokPixelId = process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID;
+
   return (
     <html lang="ko">
       <head>
@@ -87,6 +94,9 @@ export default function RootLayout({
           {`function loadScript(a){var b=document.getElementsByTagName("head")[0],c=document.createElement("script");c.type="text/javascript",c.src="https://tracker.metricool.com/resources/be.js",c.onreadystatechange=a,c.onload=a,b.appendChild(c)}loadScript(function(){beTracker.t({hash:"9ab872809e3633b567433fef1f2ea792"})});`}
         </Script>
         <JsonLd data={organizationJsonLd()} />
+        {naverWcsId && <NaverWCS wcsId={naverWcsId} />}
+        {metaPixelId && <MetaPixel pixelId={metaPixelId} />}
+        {tiktokPixelId && <TikTokPixel pixelId={tiktokPixelId} />}
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />

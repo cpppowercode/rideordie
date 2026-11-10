@@ -4,6 +4,8 @@ import { checkBookingAvailability, parseBookingBody } from "@/lib/booking-checks
 import { createBookingIntent, INTENT_COOKIE } from "@/lib/booking-intent";
 import { BadgeFeeError, payBreakdown } from "@/lib/badge-fee";
 import { getSeasonSettings } from "@/lib/season-settings";
+import { parseAttributionCookie } from "@/lib/attribution";
+import { ATTRIBUTION_COOKIE_NAME } from "@/types/attribution";
 
 /**
  * 결제 전 단계: 예약 정보를 확인만 하고 저장·알림은 하지 않는다.
@@ -28,7 +30,17 @@ export async function POST(request: NextRequest) {
       throw error;
     }
     const amount = breakdown.total;
-    const intent = createBookingIntent(orderNo, amount, checked.input);
+    
+    // 어트리뷰션 데이터 추출
+    const attrCookie = request.cookies.get(ATTRIBUTION_COOKIE_NAME)?.value;
+    const attr = parseAttributionCookie(attrCookie);
+    const attribution = {
+      attr_first: attr.first || null,
+      attr_last: attr.last || null,
+      attr_model: 'last_non_direct',
+    };
+    
+    const intent = createBookingIntent(orderNo, amount, checked.input, attribution);
 
     const response = NextResponse.json({
       success: true,
