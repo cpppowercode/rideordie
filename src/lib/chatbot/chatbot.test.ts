@@ -30,7 +30,7 @@ const salePrice = man(SALE_TABLE["1:1"][2]);
 assert.ok(presetAnswer("price", S, EARLY)!.includes(`1:1 2시간 ${salePrice}`));
 assert.ok(presetAnswer("price", S, REG)!.includes(`1:1 2시간 ${salePrice}`));
 assert.ok(presetAnswer("price", S, LATE)!.includes(`1:1 2시간 ${salePrice}`));
-assert.ok(presetAnswer("price", S, EARLY)!.includes("15% 할인"));
+assert.ok(!presetAnswer("price", S, EARLY)!.includes("% 할인"));
 
 // 용평 1:1·2:1만
 const y = presetAnswer("yongpyong", S, REG)!;
@@ -45,7 +45,7 @@ const kn = systemInstructions(buildKnowledge(S));
 assert.ok(!/강습 날짜 기준|예약 날짜 기준|예약일 기준/.test(kn));
 assert.ok(!/만\s*5세|박강후|010-/.test(kn));
 assert.ok(/용평은 1:1과 2:1만/.test(kn) && /패찰비는 비발디와 지산에만/.test(kn));
-assert.ok(/연중 할인/.test(kn));
+assert.ok(!/% 할인/.test(kn));
 
 // 제한
 const L = new UsageLimiter({ perSession10m: 2, perSessionDay: 3, globalDay: 100, monthlyTokenCap: 1000, monthlyUsdCap: 1 });

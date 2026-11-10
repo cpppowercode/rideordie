@@ -45,7 +45,7 @@ export default function ProductPage() {
                         <TrustBadges className="mt-5" />
 
                         <p className="mt-6 text-[28px] font-extrabold tracking-tight md:text-[32px]">
-                            1:1 2시간 14만원 (15% 할인)
+                            1:1 2시간 14만원
                         </p>
 
                         <ul className="mt-8 divide-y divide-line rounded-[24px] border border-line">
