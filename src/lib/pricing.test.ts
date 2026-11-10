@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { payBreakdown } from "./badge-fee";
-import { DEFAULT_SETTINGS, headlineCopy, kstDate, lessonPrice, normalizeSettings, saleTable, listTable, discountPercent, PriceError } from "./pricing";
+import { DEFAULT_SETTINGS, headlineCopy, kstDate, lessonPrice, normalizeSettings, saleTable, listTable, PriceError } from "./pricing";
 
 const S = DEFAULT_SETTINGS;
 assert.deepEqual(S, { seasonStart: "2026-12-07", seasonEnd: null });
@@ -27,17 +27,12 @@ assert.deepEqual(saleTable()["2:1"], { 2: 170000, 3: 270000, 4: 360000 });
 assert.deepEqual(saleTable()["3:1"], { 2: 220000, 3: 330000, 4: 440000 });
 
 // 정가표
-assert.deepEqual(listTable()["1:1"], { 2: 165000, 3: 247000, 4: 329000 });
-assert.deepEqual(listTable()["2:1"], { 2: 212000, 3: 338000, 4: 450000 });
-assert.deepEqual(listTable()["3:1"], { 2: 293000, 3: 440000, 4: 587000 });
-
-// 할인율
-assert.equal(discountPercent("1:1"), 15);
-assert.equal(discountPercent("2:1"), 20);
-assert.equal(discountPercent("3:1"), 25);
+assert.deepEqual(listTable()["1:1"], { 2: 150000, 3: 240000, 4: 290000 });
+assert.deepEqual(listTable()["2:1"], { 2: 190000, 3: 300000, 4: 370000 });
+assert.deepEqual(listTable()["3:1"], { 2: 240000, 3: 360000, 4: 470000 });
 
 // 헤드라인 카피
-assert.equal(headlineCopy(), "1:1 2시간 14만원 (15% 할인)");
+assert.equal(headlineCopy(), "1:1 2시간 14만원");
 
 // 어드민 값이 깨졌으면 기본값
 assert.deepEqual(normalizeSettings({ seasonStart: "2026-13-40" }), S);

@@ -4,7 +4,7 @@
  * 매뉴얼에 없는 사실(준비물·렌탈 업체, 숙소, 리프트권 등)은 넣지 않는다 → 카톡 상담 안내.
  */
 import { KAKAO_CONSULT_URL } from "@/lib/site";
-import { SALE_TABLE, LIST_TABLE, RATIOS, PRICE_HOURS, discountPercent, headlineCopy, type Ratio, type SeasonSettings } from "@/lib/pricing";
+import { SALE_TABLE, RATIOS, PRICE_HOURS, headlineCopy, type SeasonSettings } from "@/lib/pricing";
 
 export const RESORTS = ["하이원", "비발디", "웰리힐리", "용평", "지산"] as const;
 export const BADGE_FEE_RESORTS = ["비발디", "지산"] as const;
@@ -20,15 +20,9 @@ export const REFUND_LINES = [
 export const KAKAO_LINE = `자세한 건 카카오톡 채널로 물어봐 주세요: ${KAKAO_CONSULT_URL}`;
 
 function man(n: number) { return `${n / 10000}만원`; }
-function priceWithDiscount(ratio: Ratio, hours: (typeof PRICE_HOURS)[number]): string {
-  const sale = SALE_TABLE[ratio][hours];
-  const list = LIST_TABLE[ratio][hours];
-  const discount = discountPercent(ratio);
-  return `${man(sale)} (정가 ${man(list)}에서 ${discount}% 할인)`;
-}
 
 export function tableText(ratios: readonly (typeof RATIOS)[number][] = RATIOS): string {
-  return ratios.map((r) => `${r} ${PRICE_HOURS.map((h) => priceWithDiscount(r, h)).join(" / ")}`).join("\n");
+  return ratios.map((r) => `${r} ${PRICE_HOURS.map((h) => man(SALE_TABLE[r][h])).join(" / ")}`).join("\n");
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -46,8 +40,7 @@ export function buildKnowledge(_s: SeasonSettings): string {
     `- 상담: 카카오톡 채널 ${KAKAO_CONSULT_URL}`,
     "## 가격 (2026/27 시즌, 강습비 총액)",
     `- ${headlineCopy()}`,
-    "- 모든 고객에게 연중 할인 가격이 적용됩니다. 기간 제한이 없으며, 모든 예약에 할인된 가격이 청구됩니다.",
-    "- 할인 가격:", tableText(),
+    "- 가격표:", tableText(),
     "- 비발디와 지산은 패찰비 별도(홈페이지 결제 때 강습비와 함께 받습니다). 비발디: 인원×시간×12,500원. 지산: 1인 2시간 35,000원 / 3·4시간 50,000원.",
     "- 패찰비는 비발디와 지산에만 있습니다. 하이원, 용평, 웰리힐리, 알펜시아는 패찰비가 없습니다.",
     "## 환불 (이용약관 제9조)",
@@ -61,7 +54,7 @@ export function systemInstructions(knowledge: string): string {
     "당신은 라이드올다이 홈페이지 상담 도우미입니다. 한국어로 짧고 친절하게(3~5문장) 답합니다.",
     "아래 '지식'에 있는 사실만 말합니다. 지식에 없는 것(준비물, 장비 렌탈, 숙소, 리프트권, 날씨, 특정 강사, 할인 협상, 연령 등)은 추측하지 말고 카카오톡 채널 상담으로 안내합니다.",
     "절대 하지 말 것: 전화번호·주소·이메일 안내, 사람 이름 언급, 내부 기준이나 강사료 언급, 나이·연령 기준 언급, '숙소·리프트권·장비 별도' 같은 추가 비용 문구, '마감 임박' 같은 재촉 표현, 가짜 후기.",
-    "가격은 지식의 표에 있는 할인 가격 숫자만 씁니다. 다른 금액을 만들지 않습니다. 모든 고객에게 연중 할인 가격이 적용된다는 것을 명확히 안내합니다.",
+    "가격은 지식의 표에 있는 숫자만 씁니다. 다른 금액을 만들지 않습니다.",
     "예약이 확정됐다거나 결제가 완료됐다고 말하거나 약속하지 않습니다. 예약·결제 상태 확인은 카카오톡 채널로 안내합니다.",
     "강사 이름·연락처 등 강사 개인정보는 말하지 않습니다.",
     "가격은 지식의 표 숫자만 그대로 씁니다. 계산이 필요하면 표 금액 + 패찰비 규칙만 씁니다.",

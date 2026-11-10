@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { TrustBadges } from "@/components/seo/TrustBadges";
 import { KakaoConsultLink } from "@/components/seo/KakaoConsultLink";
-import { allowedRatios, saleTable, listTable, discountPercent, type Ratio } from "@/lib/pricing";
+import { allowedRatios, saleTable, listTable } from "@/lib/pricing";
 import {
   bookHref,
   SALE_PRICE_COPY,
@@ -41,7 +41,7 @@ function PriceTable({ ratios = PRICE_TABLE.ratios }: { ratios?: readonly string[
   return (
     <div className="overflow-x-auto rounded-[24px] border border-line bg-white">
       <table className="w-full min-w-[320px] text-left text-[15px]">
-        <caption className="sr-only">{ratios.join('·')} 할인 가격 요금표</caption>
+        <caption className="sr-only">{ratios.join('·')} 가격표</caption>
         <thead>
           <tr className="border-b border-line bg-snow text-muted">
             <th className="px-4 py-3 font-semibold">구성</th>
@@ -55,12 +55,7 @@ function PriceTable({ ratios = PRICE_TABLE.ratios }: { ratios?: readonly string[
         <tbody>
           {(ratios as typeof PRICE_TABLE.ratios[number][]).map((ratio) => (
             <tr key={ratio} className="border-b border-line last:border-0">
-              <th className="px-4 py-3 font-semibold text-ink">
-                {ratio}
-                <span className="ml-2 text-[13px] font-semibold text-brand">
-                  {discountPercent(ratio as Ratio)}% 할인
-                </span>
-              </th>
+              <th className="px-4 py-3 font-semibold text-ink">{ratio}</th>
               {PRICE_TABLE.hours.map((hour) => (
                 <td key={hour} className="px-4 py-3">
                   <div className="font-semibold text-ink">{formatManwon(sale[ratio][hour])}</div>
@@ -171,9 +166,9 @@ export function ResortLandingView({ landing }: { landing: ResortLanding }) {
         {showPrice ? (
           <>
           <section className="mt-12">
-            <h2 className="text-[24px] font-bold tracking-tight">할인 가격표</h2>
+            <h2 className="text-[24px] font-bold tracking-tight">가격표</h2>
             <p className="mt-3 text-[16px] leading-7 text-muted">
-              모든 고객에게 연중 할인 가격이 적용됩니다. 정가 대비 할인된 가격으로 예약하실 수 있습니다.
+              모든 고객에게 표시된 가격이 적용됩니다.
             </p>
             <div className="mt-5" data-testid="price-table">
               <PriceTable ratios={allowedRatios(landing.bookingValue)} />

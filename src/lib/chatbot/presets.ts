@@ -1,6 +1,5 @@
 /**
  * 프리셋 버튼 답변. AI 를 쓰지 않는 고정 답변(비용 0). 가격은 pricing.ts 에서 매번 계산한다.
- * 모든 고객에게 연중 할인 가격이 적용된다.
  */
 import { allowedRatios, headlineCopy, kstToday, type SeasonSettings } from "@/lib/pricing";
 import { KAKAO_CONSULT_URL } from "@/lib/site";
@@ -14,7 +13,7 @@ export const PRESETS: { id: PresetId; label: string }[] = [
 ];
 
 function priceBlock(resortName = ""): string {
-  return `${headlineCopy()}\n모든 고객에게 연중 할인 가격이 적용돼요.\n${tableText(allowedRatios(resortName))}`;
+  return `${headlineCopy()}\n${tableText(allowedRatios(resortName))}`;
 }
 const resort = (name: string, extra: string) => () =>
   `${name}에서 어린이 스키·보드 강습을 해요. ${extra}\n${priceBlock(name)}\n예약은 rideordie.kr/book 에서 할 수 있어요.`;
