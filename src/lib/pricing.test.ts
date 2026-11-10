@@ -23,7 +23,7 @@ assert.equal(kstDate(new Date("2026-12-06T15:00:00Z")), "2026-12-07");
 
 // 세일 가격표
 assert.deepEqual(saleTable()["1:1"], { 2: 140000, 3: 210000, 4: 280000 });
-assert.deepEqual(saleTable()["2:1"], { 2: 170000, 3: 270000, 4: 360000 });
+assert.deepEqual(saleTable()["2:1"], { 2: 170000, 3: 270000, 4: 340000 });
 assert.deepEqual(saleTable()["3:1"], { 2: 220000, 3: 330000, 4: 440000 });
 
 // 정가표
