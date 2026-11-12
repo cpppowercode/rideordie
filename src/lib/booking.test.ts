@@ -73,13 +73,13 @@ assert.equal(maxBookingDateExclusive(new Date("2027-11-30T03:00:00Z")), "2028-02
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 assert.match(validateBookingInput(sample({ skiResort: "오투리조트" as any })) || "", /스키장/);
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-assert.match(validateBookingInput(sample({ skiResort: "곤지암리조트" as any })) || "", /스키장/);
+assert.match(validateBookingInput(sample({ skiResort: "존재하지않는리조트" as any })) || "", /스키장/);
 assert.match(validateBookingInput(sample({ durationHours: 5 })) || "", /강습 시간/);
 assert.match(validateBookingInput(sample({ startHour: 20.5 })) || "", /운영 시간/);
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 assert.equal(SKI_RESORTS.some((resort) => resort.value === ("오투리조트" as any)), false);
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-assert.equal(SKI_RESORTS.some((resort) => resort.value === ("곤지암리조트" as any)), false);
+assert.equal(SKI_RESORTS.some((resort) => resort.value === ("존재하지않는리조트" as any)), false);
 
 const payload = toAdminPayload(sample(), "WEB_TEST");
 assert.equal(payload.customer_phone, "01012345678");

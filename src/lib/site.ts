@@ -30,6 +30,9 @@ export const SKI_RESORTS = [
   { value: "용평리조트", label: "용평" },
   { value: "지산포레스트", label: "지산" },
   { value: "알펜시아리조트", label: "알펜시아" },
+  { value: "무주덕유산리조트", label: "무주" },
+  { value: "곤지암리조트", label: "곤지암" },
+  { value: "휘닉스평창", label: "휘닉스파크" },
 ] as const;
 
 /** Short names for marketing copy. Booking picker labels stay SKI_RESORTS. */
@@ -39,7 +42,9 @@ export const TEACHING_RESORTS = [
   "웰리힐리",
   "용평",
   "지산",
-  "알펜시아",
+  "무주",
+  "곤지암",
+  "휘닉스파크",
 ] as const;
 
 export const TEACHING_RESORTS_COPY = TEACHING_RESORTS.join(", ");
