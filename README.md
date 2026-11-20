@@ -75,6 +75,9 @@ NEXT_PUBLIC_KCP_SITE_CD=
 NEXT_PUBLIC_KCP_SITE_NAME=라이드올다이
 NEXT_PUBLIC_KCP_ENV=test
 KCP_CERT_INFO=
+
+# 채널톡 웹 메신저 (선택 — 없으면 코드 기본 공개 키 사용)
+NEXT_PUBLIC_CHANNELTALK_PLUGIN_KEY=
 ```
 
 인스타그램 URL은 코드 상수입니다: `src/lib/site.ts`의 `INSTAGRAM_URL` (`https://www.instagram.com/ski.rideordie/`).
@@ -117,7 +120,7 @@ src/
 
 1. Vercel에 `RESEND_API_KEY`(또는 Slack/Discord/Solapi) 설정 — 없으면 예약은 저장되지만 메일 알림은 안 갑니다.
 2. `admin.rideordie.kr` → 테이블 → 강습예약에서 테스트 예약이 보이는지 확인.
-3. 채널톡 플러그인 키(`NEXT_PUBLIC_CHANNEL_TALK_PLUGIN_KEY`)는 더 이상 쓰지 않습니다. Vercel에서 지워도 됩니다.
+3. 채널톡: 공개 사이트 우하단에 기본 런처가 뜹니다. `NEXT_PUBLIC_CHANNELTALK_PLUGIN_KEY`가 있으면 그걸 쓰고, 없으면 코드 기본 키로 동작합니다. `/book`·`/checkout`에서는 숨깁니다.
 
 ## 문의
 
