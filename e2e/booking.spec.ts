@@ -6,7 +6,7 @@ const ARTIFACT_DIR = "/opt/cursor/artifacts/screenshots";
 const STATE_FILE = "/tmp/rideordie-e2e-booking.json";
 const TEST_NAME = "테스트 예약 (삭제 예정)";
 const TEST_PHONE = "010-0000-0000";
-const LESSON_DATE = process.env.E2E_LESSON_DATE || "2027-01-24";
+const LESSON_DATE = process.env.E2E_LESSON_DATE || "2026-12-20";
 const SKI_RESORT = "하이원리조트";
 const DURATION_HOURS = 2;
 const START_HOUR = 9;
@@ -250,7 +250,7 @@ test.describe("mobile layout", () => {
     const state = readState();
     const successUrl = state.orderNo
       ? `/book/success?orderNo=${encodeURIComponent(state.orderNo)}&date=${LESSON_DATE}&resort=${encodeURIComponent(SKI_RESORT)}&time=${encodeURIComponent(TIME_LABEL)}&name=${encodeURIComponent(TEST_NAME)}&people=1`
-      : "/book/success?orderNo=WEB_PREVIEW&date=2027-01-24&resort=하이원리조트";
+      : "/book/success?orderNo=WEB_PREVIEW&date=2026-12-20&resort=하이원리조트";
     await page.goto(successUrl);
     await expect(page.getByTestId("booking-success")).toBeVisible();
     await shot(page, "booking_confirmation_mobile");

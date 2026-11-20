@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 const ARTIFACT_DIR = "/opt/cursor/artifacts/screenshots";
-const LESSON_DATE = "2027-01-24";
+const LESSON_DATE = "2026-12-20";
 
 function ensureDir(dir: string) {
   fs.mkdirSync(dir, { recursive: true });

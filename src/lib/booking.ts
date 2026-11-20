@@ -51,6 +51,17 @@ export function formatPhoneDisplay(raw: string): string {
   return raw;
 }
 
+/** 사전예약 가능 기간(개월). UI·서버 검증·결제 경로가 모두 이 값만 본다. */
+export const BOOKING_WINDOW_MONTHS = 2;
+
+export function bookingWindowHint(): string {
+  return `예약은 오늘부터 ${BOOKING_WINDOW_MONTHS}개월 이내 날짜만 가능해요`;
+}
+
+export function bookingWindowError(): string {
+  return `사전예약은 ${BOOKING_WINDOW_MONTHS}개월 미만만 가능합니다.`;
+}
+
 export function todayYmd(now = new Date()): string {
   const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
   const y = kst.getUTCFullYear();
@@ -59,16 +70,20 @@ export function todayYmd(now = new Date()): string {
   return `${y}-${m}-${d}`;
 }
 
-/** 사전예약 가능 상한(미포함): 오늘부터 정확히 3개월 뒤. 예약은 이 날짜 전날까지. */
+/**
+ * 사전예약 가능 상한(미포함): 오늘(KST)부터 정확히 BOOKING_WINDOW_MONTHS개월 뒤.
+ * 예약은 이 날짜 전날까지(즉 N개월째 날은 선택 불가 = 기존 3개월 미만과 동일 경계).
+ * 월말 클램프: 예) 1/31 + 2개월 → 3/31, 11/30 + 2개월 → 1/30(익년).
+ */
 export function maxBookingDateExclusive(now = new Date()): string {
   const [year, month, day] = todayYmd(now).split("-").map(Number);
-  const first = new Date(Date.UTC(year, month - 1 + 3, 1));
+  const first = new Date(Date.UTC(year, month - 1 + BOOKING_WINDOW_MONTHS, 1));
   const lastDay = new Date(Date.UTC(first.getUTCFullYear(), first.getUTCMonth() + 1, 0)).getUTCDate();
   first.setUTCDate(Math.min(day, lastDay));
   return first.toISOString().slice(0, 10);
 }
 
-/** 선택 가능한 마지막 날짜 YYYY-MM-DD (오늘 + 3개월 − 1일). */
+/** 선택 가능한 마지막 날짜 YYYY-MM-DD (오늘 + N개월 − 1일). */
 export function maxBookingDateInclusive(now = new Date()): string {
   const exclusive = maxBookingDateExclusive(now);
   const [y, m, day] = exclusive.split("-").map(Number);
@@ -174,7 +189,7 @@ export function validateBookingInput(input: BookingInput): string | null {
     return "예약 날짜를 오늘 이후로 선택해 주세요.";
   }
   if (input.lessonDate >= maxBookingDateExclusive()) {
-    return "사전예약은 3개월 미만만 가능합니다.";
+    return bookingWindowError();
   }
   if (!isLessonDuration(input.durationHours)) {
     return "강습 시간을 선택해 주세요.";
