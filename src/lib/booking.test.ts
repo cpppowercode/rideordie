@@ -1,5 +1,8 @@
 import assert from "node:assert/strict";
 import {
+  BOOKING_WINDOW_MONTHS,
+  bookingWindowError,
+  bookingWindowHint,
   buildNotes,
   formatPhoneDisplay,
   hasDuplicateBooking,
@@ -61,15 +64,21 @@ assert.match(validateBookingInput(sample({ customerName: "김" })) || "", /이�
 assert.match(validateBookingInput(sample({ customerPhone: "123" })) || "", /휴대폰/);
 assert.match(validateBookingInput(sample({ childCount: 3, participants: 2 })) || "", /아이/);
 assert.match(validateBookingInput(sample({ lessonDate: "2001-01-01" })) || "", /날짜/);
-assert.match(validateBookingInput(sample({ lessonDate: maxBookingDateExclusive() })) || "", /3개월/);
-assert.match(validateBookingInput(sample({ lessonDate: "2099-01-15" })) || "", /3개월/);
+assert.equal(BOOKING_WINDOW_MONTHS, 2);
+assert.match(bookingWindowHint(), /2개월 이내/);
+assert.match(bookingWindowError(), /2개월 미만/);
+assert.match(validateBookingInput(sample({ lessonDate: maxBookingDateExclusive() })) || "", /2개월/);
+assert.match(validateBookingInput(sample({ lessonDate: "2099-01-15" })) || "", /2개월/);
 assert.equal(validateBookingInput(sample({ lessonDate: todayYmd() })), null);
 assert.equal(validateBookingInput(sample({ lessonDate: maxBookingDateInclusive() })), null);
 assert.equal(todayYmd(new Date("2026-10-28T15:00:00Z")), "2026-10-29");
 assert.equal(todayYmd(new Date("2026-10-28T14:59:59Z")), "2026-10-28");
-assert.equal(maxBookingDateExclusive(new Date("2027-01-31T03:00:00Z")), "2027-04-30");
-assert.equal(maxBookingDateInclusive(new Date("2027-01-31T03:00:00Z")), "2027-04-29");
-assert.equal(maxBookingDateExclusive(new Date("2027-11-30T03:00:00Z")), "2028-02-29");
+// 1/31 + 2개월 → exclusive 3/31, inclusive 3/30 (월말 클램프, N개월째 날 미포함)
+assert.equal(maxBookingDateExclusive(new Date("2027-01-31T03:00:00Z")), "2027-03-31");
+assert.equal(maxBookingDateInclusive(new Date("2027-01-31T03:00:00Z")), "2027-03-30");
+// 11/30 + 2개월 → exclusive 1/30 (대상 월 일수 클램프)
+assert.equal(maxBookingDateExclusive(new Date("2027-11-30T03:00:00Z")), "2028-01-30");
+assert.equal(maxBookingDateInclusive(new Date("2027-11-30T03:00:00Z")), "2028-01-29");
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 assert.match(validateBookingInput(sample({ skiResort: "오투리조트" as any })) || "", /스키장/);
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

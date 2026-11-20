@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Minus, Plus } from 'lucide-react';
 import { LESSON_TYPES, SKI_RESORTS } from '@/lib/site';
-import { formatPhoneDisplay, maxBookingDateExclusive, maxBookingDateInclusive, todayYmd } from '@/lib/booking';
+import { bookingWindowHint, formatPhoneDisplay, maxBookingDateExclusive, maxBookingDateInclusive, todayYmd } from '@/lib/booking';
 import { PENDING_BOOKING_KEY } from '@/lib/pending-booking';
 import { payBreakdown } from '@/lib/badge-fee';
 import {
@@ -342,6 +342,7 @@ export function BookingForm({ initialResort, seasonSettings = UNSET_SETTINGS }: 
                   </button>
                 </div>
               </div>
+              <p className="mb-3 text-[14px] text-muted" data-testid="booking-window-hint">{bookingWindowHint()}</p>
               <div className="rounded-[24px] bg-white p-3 shadow-[0_8px_30px_rgba(25,31,40,0.04)] sm:p-4">
                 <div className="grid grid-cols-7 gap-1 text-center text-[13px] font-medium text-muted">
                   {['일', '월', '화', '수', '목', '금', '토'].map((day) => (
