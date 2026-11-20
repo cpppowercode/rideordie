@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
+import { isChannelTalkEnabled } from '@/lib/channeltalk';
 
 type Preset = { id: string; label: string };
 type Msg = { role: 'user' | 'assistant'; content: string };
@@ -18,14 +19,17 @@ export function ChatWidget() {
   const pathname = usePathname() || '';
   // 예약·결제 화면에서는 하단 버튼('다음'·결제)을 가리지 않도록 숨긴다.
   const hidden = /^\/(book|checkout)(\/|$)/.test(pathname);
+  // 채널톡 기본 런처와 우하단이 겹치므로, 채널톡이 켜져 있으면 이 위젯은 렌더하지 않는다(코드·API는 유지).
+  const channelTalkOn = isChannelTalkEnabled();
 
   useEffect(() => {
+    if (channelTalkOn) return;
     sid.current = sessionStorage.getItem('rd_chat_sid') || Math.random().toString(36).slice(2);
     sessionStorage.setItem('rd_chat_sid', sid.current);
     fetch('/api/chat').then((r) => r.json()).then((r) => { setEnabled(!!r.enabled); setPresets(r.presets || []); }).catch(() => {});
-  }, []);
+  }, [channelTalkOn]);
   useEffect(() => { end.current?.scrollIntoView({ block: 'end' }); }, [msgs, open]);
-  if (!enabled || hidden) return null;
+  if (channelTalkOn || !enabled || hidden) return null;
 
   const ask = async (payload: { question?: string; presetId?: string }, shown: string) => {
     if (busy) return;

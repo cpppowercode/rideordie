@@ -75,8 +75,7 @@ test.describe("desktop booking", () => {
 
     await page.goto("/");
     await expect(page.getByTestId("home-page")).toBeVisible();
-    await expect(page.locator("text=채널톡")).toHaveCount(0);
-    await expect(page.locator("script[src*='channel.io']")).toHaveCount(0);
+    await expect(page.locator("script[src*='channel.io']")).toHaveCount(1);
     await shot(page, "home_desktop");
 
     await page.getByTestId("home-cta-book").click();
