@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "npx tsx src/lib/booking.test.ts && npx tsx src/lib/availability.test.ts && npx tsx src/lib/resort-landings.test.ts && npx tsx src/lib/badge-fee.test.ts && npx tsx src/lib/pricing.test.ts && npx tsx src/lib/season.test.ts && npx tsx src/lib/chatbot/chatbot.test.ts && npx tsx src/lib/channeltalk.test.ts",
+    "test": "npx tsx src/lib/booking.test.ts && npx tsx src/lib/booking-intent.test.ts && npx tsx src/lib/request-origin.test.ts && npx tsx src/lib/availability.test.ts && npx tsx src/lib/resort-landings.test.ts && npx tsx src/lib/badge-fee.test.ts && npx tsx src/lib/pricing.test.ts && npx tsx src/lib/season.test.ts && npx tsx src/lib/chatbot/chatbot.test.ts && npx tsx src/lib/channeltalk.test.ts",
     "test:booking": "npx tsx src/lib/booking.test.ts",
     "test:e2e": "playwright test"
   },
@@ -19,11 +19,10 @@
     "framer-motion": "^12.23.0",
     "iconv-lite": "^0.7.3",
     "lucide-react": "^0.563.0",
-    "next": "15.3.8",
+    "next": "^15.5.29",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "tailwind-merge": "^3.4.0",
-    "uuid": "^13.0.0"
+    "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -32,7 +31,6 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@types/uuid": "^11.0.0",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
     "tailwindcss": "^4",

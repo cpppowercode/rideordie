@@ -2,18 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import iconv from "iconv-lite";
 import { INTENT_COOKIE, readBookingIntent } from "@/lib/booking-intent";
 import { approveAndFinalizeBooking } from "@/lib/booking-finalize";
+import { requestOrigin } from "@/lib/request-origin";
 
-function originFrom(request: NextRequest) {
-  const proto = request.headers.get("x-forwarded-proto") || "https";
-  const host = request.headers.get("x-forwarded-host") || request.headers.get("host");
-  if (host) return `${proto}://${host}`;
-  return process.env.NEXT_PUBLIC_SITE_URL || "https://rideordie-eight.vercel.app";
-}
-
-function failRedirect(request: NextRequest, code: string, message: string) {
-  const url = new URL("/checkout/fail", originFrom(request));
+function failRedirect(request: NextRequest, code: string, order?: string) {
+  const url = new URL("/checkout/fail", requestOrigin(request.headers));
   url.searchParams.set("code", code);
-  url.searchParams.set("message", message);
+  if (order) url.searchParams.set("order", order);
   return NextResponse.redirect(url, 303);
 }
 
@@ -26,9 +20,9 @@ async function handleReturn(request: NextRequest) {
   const params = new URLSearchParams(text);
 
   const resCd = params.get("res_cd") || "";
-  const resMsg = params.get("res_msg") || "결제에 실패했습니다.";
   if (resCd !== "0000") {
-    return failRedirect(request, resCd || "FAIL", resMsg);
+    // KCP 메시지를 URL에 그대로 넣지 않는다(피싱·오인 문구 방지).
+    return failRedirect(request, resCd || "FAIL");
   }
 
   const enc_data = params.get("enc_data") || "";
@@ -38,27 +32,23 @@ async function handleReturn(request: NextRequest) {
   const payMethod = params.get("pay_method") || params.get("use_pay_method") || "CARD";
 
   if (!enc_data || !enc_info || !tran_cd || !orderId) {
-    return failRedirect(request, "INVALID", "결제 정보가 올바르지 않습니다.");
+    return failRedirect(request, "INVALID");
   }
 
-  const intent = readBookingIntent(
-    request.cookies.get(INTENT_COOKIE)?.value || request.nextUrl.searchParams.get("intent"),
-  );
+  // intent 는 httpOnly 쿠키만 사용. Ret_URL 호스트 = 쿠키를 심은 호스트(허용 목록)여야 한다.
+  const intent = readBookingIntent(request.cookies.get(INTENT_COOKIE)?.value);
   if (!intent) {
-    return failRedirect(request, "INTENT", "예약 정보가 만료되었거나 올바르지 않습니다. 예약을 다시 진행해 주세요.");
+    return failRedirect(request, "INTENT");
   }
 
   try {
     const result = await approveAndFinalizeBooking(intent, { enc_data, enc_info, tran_cd, orderId, payMethod });
-    const url = new URL("/book/success", originFrom(request));
+    const url = new URL("/book/success", requestOrigin(request.headers));
     url.searchParams.set("r", result.receipt);
     return NextResponse.redirect(url, 303);
   } catch (error: unknown) {
     console.error("KCP return processing failed", { orderId, error });
-    const url = new URL("/checkout/fail", originFrom(request));
-    url.searchParams.set("code", "APPROVE_FAIL");
-    url.searchParams.set("order", orderId);
-    return NextResponse.redirect(url, 303);
+    return failRedirect(request, "APPROVE_FAIL", orderId);
   }
 }
 
@@ -67,5 +57,5 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-  return failRedirect(request, "METHOD", "잘못된 결제 콜백입니다.");
+  return failRedirect(request, "METHOD");
 }

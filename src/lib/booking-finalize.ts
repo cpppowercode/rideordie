@@ -64,7 +64,6 @@ export async function approveAndFinalizeBooking(
       orderNo: intent.orderNo,
       amount,
       tno,
-      name: input.customerName.trim(),
       date: input.lessonDate,
       resort: input.skiResort,
       time: formatLessonRange(input.startHour, input.durationHours),

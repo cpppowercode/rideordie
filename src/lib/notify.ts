@@ -75,7 +75,16 @@ async function sendResend(notice: BookingNotice): Promise<boolean> {
 
 async function sendWebhook(url: string | undefined, notice: BookingNotice, kind: "slack" | "discord"): Promise<boolean> {
   if (!url) return false;
-  const text = noticeText(notice);
+  // 웹훅 URL 유출 시 전화·이름이 새지 않도록 일정·주문번호만 보낸다. 상세는 이메일·어드민 확인.
+  const text = [
+    "새 강습 예약이 접수되었습니다.",
+    `주문번호: ${notice.orderNo}`,
+    `스키장: ${notice.skiResort}`,
+    `종목: ${lessonTypeLabel(notice.lessonType)}`,
+    `일정: ${notice.lessonDate} ${notice.timeLabel}`,
+    `인원: ${notice.participants}명 (아이 ${notice.childCount}명)`,
+    "상세(이름·연락처)는 어드민/이메일에서 확인하세요.",
+  ].join("\n");
   const payload =
     kind === "slack"
       ? { text }

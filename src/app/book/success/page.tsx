@@ -37,7 +37,6 @@ export default async function BookSuccessPage({ searchParams }: Props) {
   const date = receipt.date;
   const resort = receipt.resort;
   const time = receipt.time;
-  const name = receipt.name;
   const people = String(receipt.people);
   const amount = receipt.amount;
 
@@ -57,12 +56,6 @@ export default async function BookSuccessPage({ searchParams }: Props) {
             <div className="flex justify-between gap-4 border-b border-line px-5 py-4">
               <dt className="text-[15px] text-muted">예약번호</dt>
               <dd className="font-semibold" data-testid="success-order-no">{orderNo}</dd>
-            </div>
-          )}
-          {name && (
-            <div className="flex justify-between gap-4 border-b border-line px-5 py-4">
-              <dt className="text-[15px] text-muted">이름</dt>
-              <dd className="font-semibold">{name}</dd>
             </div>
           )}
           {date && (
