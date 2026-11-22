@@ -2,14 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import iconv from "iconv-lite";
 import { INTENT_COOKIE, readBookingIntent } from "@/lib/booking-intent";
 import { approveAndFinalizeBooking } from "@/lib/booking-finalize";
-import { SITE_URL } from "@/lib/site";
+import { requestOrigin } from "@/lib/request-origin";
 
-function siteOrigin(): string {
-  return SITE_URL;
-}
-
-function failRedirect(code: string, order?: string) {
-  const url = new URL("/checkout/fail", siteOrigin());
+function failRedirect(request: NextRequest, code: string, order?: string) {
+  const url = new URL("/checkout/fail", requestOrigin(request.headers));
   url.searchParams.set("code", code);
   if (order) url.searchParams.set("order", order);
   return NextResponse.redirect(url, 303);
@@ -26,7 +22,7 @@ async function handleReturn(request: NextRequest) {
   const resCd = params.get("res_cd") || "";
   if (resCd !== "0000") {
     // KCP 메시지를 URL에 그대로 넣지 않는다(피싱·오인 문구 방지).
-    return failRedirect(resCd || "FAIL");
+    return failRedirect(request, resCd || "FAIL");
   }
 
   const enc_data = params.get("enc_data") || "";
@@ -36,23 +32,23 @@ async function handleReturn(request: NextRequest) {
   const payMethod = params.get("pay_method") || params.get("use_pay_method") || "CARD";
 
   if (!enc_data || !enc_info || !tran_cd || !orderId) {
-    return failRedirect("INVALID");
+    return failRedirect(request, "INVALID");
   }
 
-  // intent 는 httpOnly 쿠키만 사용. 쿼리 문자열 폴백은 Referer·로그 유출 위험이 있어 제거.
+  // intent 는 httpOnly 쿠키만 사용. Ret_URL 호스트 = 쿠키를 심은 호스트(허용 목록)여야 한다.
   const intent = readBookingIntent(request.cookies.get(INTENT_COOKIE)?.value);
   if (!intent) {
-    return failRedirect("INTENT");
+    return failRedirect(request, "INTENT");
   }
 
   try {
     const result = await approveAndFinalizeBooking(intent, { enc_data, enc_info, tran_cd, orderId, payMethod });
-    const url = new URL("/book/success", siteOrigin());
+    const url = new URL("/book/success", requestOrigin(request.headers));
     url.searchParams.set("r", result.receipt);
     return NextResponse.redirect(url, 303);
   } catch (error: unknown) {
     console.error("KCP return processing failed", { orderId, error });
-    return failRedirect("APPROVE_FAIL", orderId);
+    return failRedirect(request, "APPROVE_FAIL", orderId);
   }
 }
 
@@ -60,6 +56,6 @@ export async function POST(request: NextRequest) {
   return handleReturn(request);
 }
 
-export async function GET() {
-  return failRedirect("METHOD");
+export async function GET(request: NextRequest) {
+  return failRedirect(request, "METHOD");
 }

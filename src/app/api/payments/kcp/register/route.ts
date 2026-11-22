@@ -8,12 +8,7 @@ import {
   KCP_PAY_METHODS,
   type KcpPayMethod,
 } from "@/lib/kcp";
-import { SITE_URL } from "@/lib/site";
-
-/** 결제 콜백은 항상 우리 사이트로만. 클라이언트 retUrl 은 무시한다. */
-function kcpReturnUrl(): string {
-  return `${SITE_URL}/api/payments/kcp/return`;
-}
+import { kcpReturnUrl } from "@/lib/request-origin";
 
 export async function POST(request: NextRequest) {
   try {
@@ -43,7 +38,8 @@ export async function POST(request: NextRequest) {
     if (intent.amount !== amount) {
       return NextResponse.json({ error: "결제 금액이 주문 금액과 다릅니다." }, { status: 400 });
     }
-    const retUrl = kcpReturnUrl();
+    // Ret_URL 은 요청 호스트가 허용 목록일 때만 그 origin(쿠키 호스트와 일치). 클라이언트 retUrl 무시.
+    const retUrl = kcpReturnUrl(request.headers);
     const response = await fetch(kcpRegisterUrl(), {
       method: "POST",
       headers: { "Content-Type": "application/json; charset=utf-8" },
