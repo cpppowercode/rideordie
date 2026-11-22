@@ -58,6 +58,11 @@ export function Footer() {
                   카톡 상담
                 </KakaoConsultLink>
               </li>
+              <li>
+                <Link href="/orders" className="font-semibold text-ink hover:text-brand" data-testid="footer-orders">
+                  예약 내역 보기
+                </Link>
+              </li>
               <li>연중 무휴</li>
               <li>
                 <a href="mailto:contact@rideordie.kr" className="hover:text-ink">contact@rideordie.kr</a>

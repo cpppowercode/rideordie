@@ -92,6 +92,9 @@ export default async function BookSuccessPage({ searchParams }: Props) {
           <KakaoConsultLink className="btn-ghost min-h-14">
             카톡 상담
           </KakaoConsultLink>
+          <Link href="/orders" className="btn-ghost min-h-14" data-testid="success-orders-link">
+            예약 내역 보기
+          </Link>
           <Link href="/" className="btn-primary min-h-14">홈으로</Link>
         </div>
       </div>

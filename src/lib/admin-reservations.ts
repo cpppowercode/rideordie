@@ -8,6 +8,7 @@ export type AdminReservation = ExistingReservation & {
   notes?: string | null;
   payment_status?: string | null;
   reservation_status?: string | null;
+  lesson_type?: string | null;
 };
 
 type AdminListResponse = {

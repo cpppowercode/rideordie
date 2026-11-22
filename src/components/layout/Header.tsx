@@ -10,6 +10,7 @@ import { INSTAGRAM_URL, KAKAO_CONSULT_URL } from "@/lib/site";
 const NAV = [
   { href: `/product/${PRODUCT_DATA.id}`, label: "강습 안내" },
   { href: "/book", label: "강습 예약" },
+  { href: "/orders", label: "예약 내역 보기" },
   { href: "/#faq", label: "자주 묻는 질문" },
   { href: "/service-policy", label: "이용약관" },
 ];
@@ -24,9 +25,14 @@ export function Header() {
           <Image src="/logo.svg" alt="RideOrDie" width={88} height={40} className="h-9 w-auto" priority />
         </Link>
 
-        <nav className="hidden items-center gap-7 text-[15px] font-medium text-muted md:flex">
+        <nav className="hidden items-center gap-7 text-[15px] font-medium text-muted md:flex" data-testid="header-nav">
           {NAV.map((item) => (
-            <Link key={item.href} href={item.href} className="transition-colors hover:text-ink">
+            <Link
+              key={item.href}
+              href={item.href}
+              className="transition-colors hover:text-ink"
+              data-testid={item.href === "/orders" ? "header-orders" : undefined}
+            >
               {item.label}
             </Link>
           ))}
@@ -81,6 +87,7 @@ export function Header() {
                 href={item.href}
                 onClick={() => setOpen(false)}
                 className="rounded-[8px] px-3 py-3 text-[16px] font-medium hover:bg-snow"
+                data-testid={item.href === "/orders" ? "header-orders-mobile" : undefined}
               >
                 {item.label}
               </Link>
