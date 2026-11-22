@@ -100,6 +100,33 @@ export const RESORT_HOURS: Record<ResortValue, ResortHours> = {
     confirmed: false,
     note: "Official Alpensia operating hours were not confirmed; using 09:00–22:00.",
   },
+
+  // 무주: 공식 26/27 운영시간 미확인. 예약 창은 기본 09:00–22:00.
+  무주덕유산리조트: {
+    openHour: 9,
+    closeHour: 22,
+    source: "default: typical 09:00–22:00; muju official hours not confirmed as of 2026-11-12",
+    confirmed: false,
+    note: "Official Muju operating hours were not confirmed; using 09:00–22:00.",
+  },
+
+  // 곤지암: 공식 26/27 운영시간 미확인. 예약 창은 기본 09:00–22:00.
+  곤지암리조트: {
+    openHour: 9,
+    closeHour: 22,
+    source: "default: typical 09:00–22:00; konjiam official hours not confirmed as of 2026-11-12",
+    confirmed: false,
+    note: "Official Konjiam operating hours were not confirmed; using 09:00–22:00.",
+  },
+
+  // 휘닉스파크: 공식 26/27 운영시간 미확인. 예약 창은 기본 09:00–22:00.
+  휘닉스평창: {
+    openHour: 9,
+    closeHour: 22,
+    source: "default: typical 09:00–22:00; phoenix official hours not confirmed as of 2026-11-12",
+    confirmed: false,
+    note: "Official Phoenix operating hours were not confirmed; using 09:00–22:00.",
+  },
 };
 
 export function resortHoursFor(skiResort: string): ResortHours {

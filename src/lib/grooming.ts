@@ -118,6 +118,39 @@ export const GROOMING_BREAKS: Record<ResortValue, GroomingWindow[]> = {
       note: "Official Alpensia 정설 hours were not confirmed; using the common afternoon/night gap.",
     },
   ],
+
+  // 무주: 공식 정설 시간 미확인. 흔한 주간~야간 간격 17:00–19:00을 임시 사용.
+  무주덕유산리조트: [
+    {
+      startHour: 17,
+      durationHours: 2,
+      source: "default: typical 17:00–19:00 day-to-night slope grooming gap; not confirmed for Muju",
+      confirmed: false,
+      note: "Official Muju 정설 hours were not confirmed; using the common afternoon/night gap.",
+    },
+  ],
+
+  // 곤지암: 공식 정설 시간 미확인. 흔한 주간~야간 간격 17:00–19:00을 임시 사용.
+  곤지암리조트: [
+    {
+      startHour: 17,
+      durationHours: 2,
+      source: "default: typical 17:00–19:00 day-to-night slope grooming gap; not confirmed for Konjiam",
+      confirmed: false,
+      note: "Official Konjiam 정설 hours were not confirmed; using the common afternoon/night gap.",
+    },
+  ],
+
+  // 휘닉스파크: 공식 정설 시간 미확인. 흔한 주간~야간 간격 17:00–19:00을 임시 사용.
+  휘닉스평창: [
+    {
+      startHour: 17,
+      durationHours: 2,
+      source: "default: typical 17:00–19:00 day-to-night slope grooming gap; not confirmed for Phoenix",
+      confirmed: false,
+      note: "Official Phoenix 정설 hours were not confirmed; using the common afternoon/night gap.",
+    },
+  ],
 };
 
 export function formatGroomingHour(hour: number): string {
