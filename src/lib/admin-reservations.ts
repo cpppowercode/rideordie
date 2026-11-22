@@ -18,14 +18,33 @@ type AdminListResponse = {
   message?: string;
 };
 
+/** 공개 사이트 → 관리자 API 서버 간 호출용. 손님 세션이 아니라 서비스 토큰이 필요하다. */
+function requireAdminApiToken(): string {
+  const token = process.env.ADMIN_API_TOKEN?.trim() || "";
+  if (!token) {
+    throw new Error("예약 서버 연동에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+  }
+  return token;
+}
+
 function adminHeaders(json = false): HeadersInit {
   const headers: Record<string, string> = {
     "X-Tenant-Id": ADMIN_TENANT_ID,
+    Authorization: `Bearer ${requireAdminApiToken()}`,
   };
   if (json) headers["Content-Type"] = "application/json";
-  const token = process.env.ADMIN_API_TOKEN;
-  if (token) headers.Authorization = `Bearer ${token}`;
   return headers;
+}
+
+function mapAdminListError(status: number, body: AdminListResponse): Error {
+  const raw = body.error || body.message || "";
+  // 관리자 패널의 로그인 요구를 손님 UI에 그대로 넘기지 않는다.
+  if (status === 401 || status === 403 || /로그인|unauthorized|인증/i.test(raw)) {
+    return new Error(
+      "예약 현황을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
+    );
+  }
+  return new Error(raw || `예약 현황을 불러오지 못했습니다. (${status})`);
 }
 
 export async function listReservations(options: {
@@ -50,8 +69,8 @@ export async function listReservations(options: {
     cache: "no-store",
   });
   const body = (await response.json().catch(() => ({}))) as AdminListResponse;
-  if (!response.ok || body.error) {
-    throw new Error(body.error || body.message || `예약 현황을 불러오지 못했습니다. (${response.status})`);
+  if (!response.ok || body.error || body.success === false) {
+    throw mapAdminListError(response.status, body);
   }
   return Array.isArray(body.data) ? body.data : [];
 }

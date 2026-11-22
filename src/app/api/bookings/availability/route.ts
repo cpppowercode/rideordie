@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { listReservationsForDate } from "@/lib/admin-reservations";
-import { overlappingReservations } from "@/lib/booking";
-import { generateLessonStarts, isLessonDuration } from "@/lib/hours";
+import {
+  computeAvailabilitySlots,
+  publicAvailabilityErrorMessage,
+} from "@/lib/availability";
+import { isLessonDuration } from "@/lib/hours";
 import { bookingSlotCapacity, SKI_RESORTS } from "@/lib/site";
 
 export async function GET(request: NextRequest) {
@@ -21,25 +24,13 @@ export async function GET(request: NextRequest) {
 
   try {
     const capacity = bookingSlotCapacity();
+    // 서버 간 ADMIN_API_TOKEN 으로 조회한다. 손님 로그인과는 무관하다.
     const existing = await listReservationsForDate({ date, skiResort });
-    const slots = generateLessonStarts(skiResort, durationHours).map((slot) => {
-      const used = overlappingReservations(
-        existing,
-        skiResort,
-        slot.startHour,
-        slot.durationHours
-      ).length;
-      const remaining = Math.max(0, capacity - used);
-      return {
-        id: slot.id,
-        startHour: slot.startHour,
-        durationHours: slot.durationHours,
-        timeLabel: slot.timeLabel,
-        used,
-        remaining,
-        available: remaining > 0,
-        reason: remaining > 0 ? null : "full",
-      };
+    const slots = computeAvailabilitySlots({
+      skiResort,
+      durationHours,
+      existing,
+      capacity,
     });
 
     return NextResponse.json({
@@ -51,7 +42,7 @@ export async function GET(request: NextRequest) {
       slots,
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "예약 가능 여부를 확인하지 못했습니다.";
+    const message = publicAvailabilityErrorMessage(error);
     console.error("availability error", error);
     return NextResponse.json({ error: message }, { status: 502 });
   }

@@ -22,7 +22,7 @@ type SlotAvailability = {
   startHour: number;
   timeLabel: string;
   available: boolean;
-  remaining: number;
+  remaining: number | null;
 };
 
 function monthMatrix(year: number, monthIndex: number): (string | null)[][] {
@@ -138,13 +138,17 @@ export function BookingForm({ initialResort, seasonSettings = UNSET_SETTINGS }: 
 
   const slots = useMemo(() => {
     return generatedStarts.map((slot) => {
-      const live = liveSlots.find((item) => item.startHour === slot.startHour);
+      // id(09:30)로 맞춘다. startHour 부동소수 비교 실패 시 잔여가 0으로 보이지 않게.
+      const live =
+        liveSlots.find((item) => item.id === slot.id) ||
+        liveSlots.find((item) => item.startHour === slot.startHour);
       return {
         id: slot.id,
         startHour: slot.startHour,
         timeLabel: slot.timeLabel,
+        // 라이브 데이터가 없으면 마감/0팀으로 단정하지 않는다.
         available: live ? live.available : true,
-        remaining: live?.remaining ?? 0,
+        remaining: live ? live.remaining : null,
       };
     });
   }, [generatedStarts, liveSlots]);
@@ -159,7 +163,6 @@ export function BookingForm({ initialResort, seasonSettings = UNSET_SETTINGS }: 
   useEffect(() => {
     let cancelled = false;
     setLoadingSlots(true);
-    setLiveSlots([]);
     setError('');
     fetch(
       `/api/bookings/availability?date=${lessonDate}&skiResort=${encodeURIComponent(skiResort)}&duration=${durationHours}`
@@ -168,10 +171,10 @@ export function BookingForm({ initialResort, seasonSettings = UNSET_SETTINGS }: 
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || '예약 현황을 불러오지 못했습니다.');
         if (!cancelled) {
-          setLiveSlots(data.slots);
+          setLiveSlots(Array.isArray(data.slots) ? data.slots : []);
           setStartHour((current) => {
             if (current == null) return current;
-            const stillOpen = data.slots.find(
+            const stillOpen = (data.slots || []).find(
               (slot: SlotAvailability) => slot.startHour === current && slot.available
             );
             return stillOpen ? current : null;
@@ -179,7 +182,16 @@ export function BookingForm({ initialResort, seasonSettings = UNSET_SETTINGS }: 
         }
       })
       .catch((err: unknown) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : '예약 현황을 불러오지 못했습니다.');
+        if (!cancelled) {
+          // 실패 시 이전 슬롯을 비우지 않는다. 잔여 0팀으로 오인되지 않게 한다.
+          setLiveSlots([]);
+          const raw = err instanceof Error ? err.message : '예약 현황을 불러오지 못했습니다.';
+          setError(
+            /로그인|unauthorized|401|인증/i.test(raw)
+              ? '예약 현황을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'
+              : raw,
+          );
+        }
       })
       .finally(() => {
         if (!cancelled) setLoadingSlots(false);
@@ -430,9 +442,11 @@ export function BookingForm({ initialResort, seasonSettings = UNSET_SETTINGS }: 
                   const disabled = loadingSlots ? false : !slot.available;
                   const badge = loadingSlots
                     ? '확인 중'
-                    : slot.available
-                      ? `잔여 ${slot.remaining}팀`
-                      : '마감';
+                    : slot.remaining == null
+                      ? '잔여 확인 중'
+                      : slot.available
+                        ? `잔여 ${slot.remaining}팀`
+                        : '마감';
                   return (
                     <button
                       key={slot.id}
