@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import {
+  getChannelTalkBootOptions,
   getChannelTalkPluginKey,
   shouldHideChannelTalk,
   shouldOffsetChannelTalkForMobileCta,
@@ -70,10 +71,10 @@ export function ChannelTalk() {
     const startHidden = shouldHideChannelTalk(
       typeof window !== "undefined" ? window.location.pathname : pathname,
     );
-    ch?.("boot", {
+    ch?.("boot", getChannelTalkBootOptions({
       pluginKey: PLUGIN_KEY,
       hideChannelButtonOnBoot: startHidden,
-    });
+    }));
 
     return () => {
       window.ChannelIO?.("shutdown");

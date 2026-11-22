@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import {
+  CHANNELTALK_LANGUAGE,
   DEFAULT_CHANNELTALK_PLUGIN_KEY,
+  getChannelTalkBootOptions,
   getChannelTalkPluginKey,
   isChannelTalkEnabled,
   shouldHideChannelTalk,
@@ -15,6 +17,17 @@ assert.equal(getChannelTalkPluginKey("  custom-key  "), "custom-key");
 
 assert.equal(isChannelTalkEnabled(), true);
 assert.equal(isChannelTalkEnabled("x"), true);
+
+assert.equal(CHANNELTALK_LANGUAGE, "ko");
+assert.deepEqual(getChannelTalkBootOptions({ pluginKey: "k" }), {
+  pluginKey: "k",
+  language: "ko",
+  hideChannelButtonOnBoot: false,
+});
+assert.deepEqual(
+  getChannelTalkBootOptions({ pluginKey: "k", hideChannelButtonOnBoot: true }),
+  { pluginKey: "k", language: "ko", hideChannelButtonOnBoot: true },
+);
 
 assert.equal(shouldHideChannelTalk("/book"), true);
 assert.equal(shouldHideChannelTalk("/book/success"), true);

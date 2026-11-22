@@ -2,6 +2,9 @@
 export const DEFAULT_CHANNELTALK_PLUGIN_KEY =
   "a7826be5-8e5c-4fe3-9cd1-47b044d4f503";
 
+/** 공개 사이트 UI 언어 — 채널톡 boot 옵션에 고정. */
+export const CHANNELTALK_LANGUAGE = "ko" as const;
+
 /** 예약·결제 흐름 — 하단 CTA를 가리지 않도록 런처 숨김. ChatWidget과 동일 규칙. */
 export const CHANNELTALK_HIDDEN_PATH =
   /^\/(book|checkout)(\/|$)/;
@@ -11,6 +14,22 @@ export function getChannelTalkPluginKey(
 ): string {
   const trimmed = envValue?.trim();
   return trimmed || DEFAULT_CHANNELTALK_PLUGIN_KEY;
+}
+
+/** ChannelIO("boot", options) 에 넘기는 공개 옵션. language 는 항상 한국어. */
+export function getChannelTalkBootOptions(options: {
+  pluginKey: string;
+  hideChannelButtonOnBoot?: boolean;
+}): {
+  pluginKey: string;
+  language: typeof CHANNELTALK_LANGUAGE;
+  hideChannelButtonOnBoot: boolean;
+} {
+  return {
+    pluginKey: options.pluginKey,
+    language: CHANNELTALK_LANGUAGE,
+    hideChannelButtonOnBoot: Boolean(options.hideChannelButtonOnBoot),
+  };
 }
 
 export function isChannelTalkEnabled(
