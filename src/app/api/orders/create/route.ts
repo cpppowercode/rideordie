@@ -1,50 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { v4 as uuidv4 } from 'uuid';
+import { NextResponse } from "next/server";
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const {
-      customerName,
-      customerPhone,
-      lessonDate,
-      productId,
-      productName,
-      selectedOptions,
-      amount
-    } = body;
-
-    // 입력 검증 (이메일은 선택)
-    if (!customerName || !customerPhone || !productId || !productName || amount === undefined) {
-      return NextResponse.json(
-        { error: '필수 정보가 누락되었습니다.' },
-        { status: 400 }
-      );
-    }
-
-    const orderId = `ROD${Date.now()}${uuidv4().replace(/-/g, "").slice(0, 8)}`.slice(0, 50);
-    return NextResponse.json({
-      orderId,
-      order: {
-        order_id: orderId,
-        customer_name: customerName,
-        customer_email: null,
-        customer_phone: customerPhone,
-        lesson_date: lessonDate || null,
-        product_id: productId,
-        product_name: productName,
-        selected_options: selectedOptions || {},
-        amount,
-        status: 'pending'
-      },
-      success: true
-    });
-  } catch (error: unknown) {
-    console.error('Order creation error:', error);
-    const errorMessage = error instanceof Error ? error.message : '주문 생성에 실패했습니다.';
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 }
-    );
-  }
+/**
+ * 레거시 Toss 주문 API. 클라이언트 금액을 신뢰하고 개인정보를 에코하던 엔드포인트라
+ * 비활성화한다. 활성 결제는 /api/bookings → KCP 경로만 사용한다.
+ */
+export async function POST() {
+  return NextResponse.json(
+    { error: "이 주문 API는 더 이상 사용할 수 없습니다. /api/bookings 를 이용해 주세요." },
+    { status: 410 },
+  );
 }

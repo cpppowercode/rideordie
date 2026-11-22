@@ -8,10 +8,16 @@ import {
   KCP_PAY_METHODS,
   type KcpPayMethod,
 } from "@/lib/kcp";
+import { SITE_URL } from "@/lib/site";
+
+/** 결제 콜백은 항상 우리 사이트로만. 클라이언트 retUrl 은 무시한다. */
+function kcpReturnUrl(): string {
+  return `${SITE_URL}/api/payments/kcp/return`;
+}
 
 export async function POST(request: NextRequest) {
   try {
-    const { orderId, goodName, payMethod, retUrl, intent: intentToken } = (await request.json()) as {
+    const { orderId, goodName, payMethod, intent: intentToken } = (await request.json()) as {
       intent?: string;
       orderId?: string;
       goodName?: string;
@@ -19,7 +25,7 @@ export async function POST(request: NextRequest) {
       retUrl?: string;
     };
 
-    if (!orderId || !goodName || !payMethod || !retUrl) {
+    if (!orderId || !goodName || !payMethod) {
       return NextResponse.json({ error: "필수 정보가 누락되었습니다." }, { status: 400 });
     }
 
@@ -37,6 +43,7 @@ export async function POST(request: NextRequest) {
     if (intent.amount !== amount) {
       return NextResponse.json({ error: "결제 금액이 주문 금액과 다릅니다." }, { status: 400 });
     }
+    const retUrl = kcpReturnUrl();
     const response = await fetch(kcpRegisterUrl(), {
       method: "POST",
       headers: { "Content-Type": "application/json; charset=utf-8" },
@@ -71,6 +78,7 @@ export async function POST(request: NextRequest) {
       PayUrl: data.PayUrl,
       amount,
       payMethod: method.mobile,
+      retUrl,
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "KCP 거래등록에 실패했습니다.";

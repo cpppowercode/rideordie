@@ -88,9 +88,8 @@ export async function listReservationsForDate(options: {
 
 export async function findReservationByOrderNo(orderNo: string): Promise<AdminReservation | null> {
   const rows = await listReservations({ searchQuery: orderNo, limit: 50 });
-  const exact = rows.find((row) => row.order_no === orderNo);
-  if (exact) return exact;
-  return rows.find((row) => (row.order_no || "").includes(orderNo)) || null;
+  // 부분 일치(includes)는 잘못된 "이미 접수" 판정 위험이 있어 정확 일치만 허용한다.
+  return rows.find((row) => row.order_no === orderNo) || null;
 }
 
 export async function createAdminReservation(payload: Record<string, unknown>) {

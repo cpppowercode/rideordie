@@ -135,7 +135,7 @@ export default function CheckoutPage() {
             const mobile = isMobileUserAgent(navigator.userAgent);
 
             if (mobile) {
-                const retUrl = `${window.location.origin}/api/payments/kcp/return`;
+                // Ret_URL 은 서버가 SITE_URL 기준으로 고정한다. 클라이언트 origin 은 쓰지 않는다.
                 const registerRes = await fetch('/api/payments/kcp/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -144,7 +144,6 @@ export default function CheckoutPage() {
                         intent,
                         goodName: PRODUCT_DATA.title,
                         payMethod,
-                        retUrl,
                     }),
                 });
                 const registerData = await registerRes.json();
@@ -156,7 +155,7 @@ export default function CheckoutPage() {
                     intent,
                     approvalKey: registerData.approvalKey,
                     payUrl: registerData.PayUrl,
-                    retUrl,
+                    retUrl: registerData.retUrl,
                 });
                 return;
             }
