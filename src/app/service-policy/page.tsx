@@ -10,8 +10,7 @@ export default function ServicePolicy() {
   return (
     <main className="min-h-screen bg-white text-ink">
       <div className="mx-auto max-w-3xl px-5 py-14 md:py-20">
-        <p className="eyebrow text-center">LEGAL</p>
-        <h1 className="mt-3 text-center text-[32px] font-bold tracking-tight md:text-[40px]">서비스 이용약관</h1>
+        <h1 className="text-center text-[32px] font-bold tracking-tight md:text-[40px]">서비스 이용약관</h1>
         <p className="mt-3 text-center text-muted">(전자상거래 표준약관 준용·스포츠 강습 특화)</p>
         
         {/* 서비스 이용약관 */}

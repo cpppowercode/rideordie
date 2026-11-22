@@ -57,7 +57,7 @@ function Stepper({ value, min, max, onChange, testId }: {
   testId: string;
 }) {
   return (
-    <div className="flex h-14 items-center justify-between rounded-2xl border border-line bg-white px-2">
+    <div className="flex h-14 items-center justify-between rounded-[14px] border border-line bg-white px-2">
       <button
         type="button"
         aria-label="줄이기"
@@ -284,7 +284,7 @@ export function BookingForm({ initialResort, seasonSettings = UNSET_SETTINGS }: 
   };
 
   const inputClass =
-    'w-full rounded-2xl border border-line bg-white px-4 py-4 text-[17px] outline-none transition-shadow placeholder:text-muted/60 focus:border-brand focus:ring-4 focus:ring-brand/15';
+    'w-full rounded-[14px] border border-line bg-white px-4 py-4 text-[17px] outline-none transition-shadow placeholder:text-muted/60 focus:border-brand focus:ring-4 focus:ring-brand/15';
 
   const STEPS = [
     { n: 1, label: '일정' },
@@ -343,7 +343,7 @@ export function BookingForm({ initialResort, seasonSettings = UNSET_SETTINGS }: 
                 </div>
               </div>
               <p className="mb-3 text-[14px] text-muted" data-testid="booking-window-hint">{bookingWindowHint()}</p>
-              <div className="rounded-[24px] bg-white p-3 shadow-[0_8px_30px_rgba(25,31,40,0.04)] sm:p-4">
+              <div className="rounded-[16px] bg-white p-3 shadow-[0_8px_30px_rgba(25,31,40,0.04)] sm:p-4">
                 <div className="grid grid-cols-7 gap-1 text-center text-[13px] font-medium text-muted">
                   {['일', '월', '화', '수', '목', '금', '토'].map((day) => (
                     <div key={day} className="py-2">{day}</div>
@@ -408,7 +408,7 @@ export function BookingForm({ initialResort, seasonSettings = UNSET_SETTINGS }: 
                       type="button"
                       data-testid={`duration-${hours}`}
                       onClick={() => setDurationHours(hours)}
-                      className={`min-h-14 rounded-2xl text-[16px] font-semibold ${
+                      className={`min-h-14 rounded-[14px] text-[16px] font-semibold ${
                         selected ? 'bg-ink text-white' : 'bg-white text-ink ring-1 ring-line hover:bg-snow'
                       }`}
                     >
@@ -440,7 +440,7 @@ export function BookingForm({ initialResort, seasonSettings = UNSET_SETTINGS }: 
                       data-testid={`start-${slot.id}`}
                       disabled={disabled}
                       onClick={() => setStartHour(slot.startHour)}
-                      className={`flex min-h-[72px] flex-col items-start justify-center rounded-[20px] px-4 py-3 text-left transition-all ${
+                      className={`flex min-h-[72px] flex-col items-start justify-center rounded-[14px] px-4 py-3 text-left transition-colors duration-150 ${
                         selected
                           ? 'bg-ice ring-2 ring-brand'
                           : disabled
@@ -462,7 +462,7 @@ export function BookingForm({ initialResort, seasonSettings = UNSET_SETTINGS }: 
                 })}
               </div>
               {slots.length === 0 && (
-                <p className="rounded-2xl bg-snow px-4 py-5 text-[14px] text-muted">
+                <p className="rounded-[14px] bg-snow px-4 py-5 text-[14px] text-muted">
                   이 스키장에서 예약 가능한 시작 시간이 없습니다.
                 </p>
               )}
@@ -516,7 +516,7 @@ export function BookingForm({ initialResort, seasonSettings = UNSET_SETTINGS }: 
                     return (
                       <button key={ratio} type="button" role="radio" aria-checked={on}
                         onClick={() => { setParticipants(n); if (childCount > n) setChildCount(n); }}
-                        className={`rounded-2xl border py-3 text-[16px] font-bold ${on ? 'border-brand bg-brand text-white' : 'border-line bg-white'}`}
+                        className={`rounded-[14px] border py-3 text-[16px] font-bold ${on ? 'border-brand bg-brand text-white' : 'border-line bg-white'}`}
                         data-testid={`ratio-${n}`}>{ratio}</button>
                     );
                   })}
@@ -536,7 +536,7 @@ export function BookingForm({ initialResort, seasonSettings = UNSET_SETTINGS }: 
                     type="button"
                     data-testid={`type-${type.value}`}
                     onClick={() => setLessonType(type.value)}
-                    className={`min-h-14 rounded-2xl text-[16px] font-semibold ${
+                    className={`min-h-14 rounded-[14px] text-[16px] font-semibold ${
                       lessonType === type.value ? 'bg-ink text-white' : 'bg-white ring-1 ring-line'
                     }`}
                   >
@@ -570,7 +570,7 @@ export function BookingForm({ initialResort, seasonSettings = UNSET_SETTINGS }: 
           >
             <h2 className="text-[22px] font-bold tracking-tight">이 내용으로 예약할까요?</h2>
             <p className="mt-2 text-[15px] text-muted">다음 화면에서 결제를 마치면 예약이 접수됩니다.</p>
-            <dl className="mt-6 overflow-hidden rounded-[24px] bg-white shadow-[0_8px_30px_rgba(25,31,40,0.04)]" data-testid="booking-summary">
+            <dl className="mt-6 overflow-hidden rounded-[16px] bg-white shadow-[0_8px_30px_rgba(25,31,40,0.04)]" data-testid="booking-summary">
               {[
                 ['날짜', lessonDate],
                 ['스키장', resortLabel],
@@ -594,7 +594,7 @@ export function BookingForm({ initialResort, seasonSettings = UNSET_SETTINGS }: 
       </AnimatePresence>
 
       {error && (
-        <p className="mt-5 rounded-2xl bg-red-50 px-4 py-3 text-[14px] font-medium text-red-600" data-testid="booking-error">
+        <p className="mt-5 rounded-[14px] bg-red-50 px-4 py-3 text-[14px] font-medium text-red-600" data-testid="booking-error">
           {error}
         </p>
       )}

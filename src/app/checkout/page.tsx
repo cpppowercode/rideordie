@@ -169,13 +169,12 @@ export default function CheckoutPage() {
         }
     };
 
-    const inputClass = 'w-full rounded-2xl border border-line bg-white px-4 py-4 text-[17px] outline-none focus:border-brand focus:ring-4 focus:ring-brand/15';
+    const inputClass = 'w-full rounded-[14px] border border-line bg-white px-4 py-4 text-[17px] outline-none focus:border-brand focus:ring-4 focus:ring-brand/15';
 
     return (
         <div className="bg-snow">
         <div className="mx-auto max-w-5xl px-4 py-10 md:py-14">
-            <p className="eyebrow">CHECKOUT</p>
-            <h1 className="mb-8 mt-2 text-[32px] font-bold tracking-tight">결제하기</h1>
+            <h1 className="mb-8 text-[32px] font-bold tracking-tight">결제하기</h1>
 
             <KcpPayForm
                 key={kcpLaunch?.orderId || 'idle'}
@@ -195,7 +194,7 @@ export default function CheckoutPage() {
             <form onSubmit={handlePayment} className="grid grid-cols-1 gap-6 md:grid-cols-3">
                 <div className="space-y-6 md:col-span-2">
                     {loaded && !pending ? (
-                        <section className="flex gap-4 rounded-[24px] bg-ink p-6 text-white md:p-7" data-testid="checkout-no-booking">
+                        <section className="flex gap-4 rounded-[16px] bg-ink p-6 text-white md:p-7" data-testid="checkout-no-booking">
                             <CalendarCheck className="mt-0.5 h-6 w-6 shrink-0 text-[#9db4ff]" />
                             <div>
                                 <h2 className="text-lg font-bold">먼저 강습 일정을 골라 주세요</h2>
@@ -243,7 +242,7 @@ export default function CheckoutPage() {
                             {([['card', '신용카드'], ['bank', '계좌이체']] as const).map(([value, label]) => (
                                 <label
                                     key={value}
-                                    className={`flex min-h-14 cursor-pointer items-center justify-center rounded-2xl border-2 py-4 text-lg font-semibold transition-colors ${payMethod === value ? 'border-brand bg-ice text-brand' : 'border-line hover:bg-snow'}`}
+                                    className={`flex min-h-14 cursor-pointer items-center justify-center rounded-[14px] border-2 py-4 text-lg font-semibold transition-colors ${payMethod === value ? 'border-brand bg-ice text-brand' : 'border-line hover:bg-snow'}`}
                                 >
                                     <input type="radio" name="payment" checked={payMethod === value} onChange={() => setPayMethod(value)} className="sr-only" />
                                     {label}

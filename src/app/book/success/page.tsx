@@ -44,16 +44,15 @@ export default async function BookSuccessPage({ searchParams }: Props) {
   return (
     <div className="bg-snow" data-testid="booking-success">
       <div className="mx-auto flex min-h-[70vh] max-w-lg flex-col items-center px-5 py-16 text-center">
-        <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-brand text-white shadow-[0_10px_24px_rgba(49,130,246,0.35)]">
+        <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-brand text-white">
           <Check className="h-8 w-8" strokeWidth={2.5} />
         </div>
-        <p className="eyebrow">예약 접수</p>
         <h1 className="mt-2 text-[32px] font-bold tracking-tight md:text-[40px]">예약이 접수됐어요</h1>
         <p className="mt-3 text-[16px] leading-7 text-muted">
           결제가 확인됐어요. 남겨 주신 번호로 일정 확인 연락을 드립니다.
         </p>
 
-        <dl className="mt-8 w-full overflow-hidden rounded-[24px] bg-white text-left shadow-[0_8px_30px_rgba(25,31,40,0.04)]">
+        <dl className="mt-8 w-full overflow-hidden rounded-[16px] bg-white text-left shadow-[0_8px_30px_rgba(25,31,40,0.04)]">
           {orderNo && (
             <div className="flex justify-between gap-4 border-b border-line px-5 py-4">
               <dt className="text-[15px] text-muted">예약번호</dt>

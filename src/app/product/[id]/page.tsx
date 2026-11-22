@@ -48,7 +48,7 @@ export default function ProductPage() {
                             1:1 2시간 14만원
                         </p>
 
-                        <ul className="mt-8 divide-y divide-line rounded-[24px] border border-line">
+                        <ul className="mt-8 divide-y divide-line rounded-[16px] border border-line">
                             {FACTS.map(({ icon: Icon, label, value }) => (
                                 <li key={label} className="flex items-center gap-4 px-5 py-4 text-[17px]">
                                     <Icon className="h-5 w-5 shrink-0 text-brand" />
@@ -71,7 +71,7 @@ export default function ProductPage() {
                             ))}
                         </div>
 
-                        <div className="mt-8 flex gap-3 rounded-[20px] bg-ice p-5">
+                        <div className="mt-8 flex gap-3 rounded-[14px] bg-ice p-5">
                             <Info className="mt-0.5 h-5 w-5 shrink-0 text-brand" />
                             <div>
                                 <p className="font-bold">날짜와 시간을 고르고 결제하면 접수됩니다</p>
@@ -92,7 +92,7 @@ export default function ProductPage() {
 
                     <div className="mb-12 grid gap-3 sm:grid-cols-2">
                         {PRODUCT_DATA.images.detail.map((src, i) => (
-                            <div key={src} className="relative aspect-[4/5] overflow-hidden rounded-[24px] bg-snow sm:aspect-[3/4]">
+                            <div key={src} className="relative aspect-[4/5] overflow-hidden rounded-[16px] bg-snow sm:aspect-[3/4]">
                                 <Image
                                     src={src}
                                     alt={`강습 상세 ${i + 1}`}
@@ -111,7 +111,7 @@ export default function ProductPage() {
                     </div>
                 </div>
 
-                <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white/90 backdrop-blur-xl lg:hidden">
+                <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white lg:hidden">
                     <div className="mx-auto flex max-w-6xl gap-3 px-4 py-3">{actions}</div>
                 </div>
             </div>

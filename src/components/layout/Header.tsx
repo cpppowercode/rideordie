@@ -18,7 +18,7 @@ export function Header() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-line/80 bg-white/80 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 w-full border-b border-line bg-white">
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-8 px-5">
         <Link href="/" aria-label="RideOrDie 홈" className="shrink-0">
           <Image src="/logo.svg" alt="RideOrDie" width={88} height={40} className="h-9 w-auto" priority />
@@ -39,9 +39,9 @@ export function Header() {
             rel="noopener noreferrer"
             aria-label="카톡 상담"
             data-testid="header-kakao"
-            className="inline-flex h-11 items-center gap-1.5 rounded-full px-3 text-[14px] font-semibold text-ink transition-colors hover:bg-snow"
+            className="inline-flex h-11 items-center gap-2 rounded-[8px] px-3 text-[15px] font-medium text-ink transition-colors hover:bg-snow"
           >
-            <MessageCircle className="h-5 w-5" />
+            <MessageCircle className="h-[18px] w-[18px]" strokeWidth={1.5} />
             <span className="hidden sm:inline">카톡 상담</span>
           </a>
           <a
@@ -50,20 +50,20 @@ export function Header() {
             rel="noopener noreferrer"
             aria-label="인스타그램"
             data-testid="header-instagram"
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full text-ink transition-colors hover:bg-snow"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-[8px] text-ink transition-colors hover:bg-snow"
           >
-            <Instagram className="h-5 w-5" />
+            <Instagram className="h-[18px] w-[18px]" strokeWidth={1.5} />
           </a>
           <Link
             href="/book"
             data-testid="header-book"
-            className="hidden h-11 items-center rounded-full bg-brand px-5 text-[15px] font-semibold text-white shadow-[0_6px_16px_rgba(49,130,246,0.25)] transition-colors hover:bg-brand-dark sm:inline-flex"
+            className="hidden h-9 items-center rounded-[8px] bg-brand px-4 text-[15px] font-semibold text-white transition-colors hover:bg-brand-dark sm:inline-flex"
           >
             예약하기
           </Link>
           <button
             type="button"
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full text-ink hover:bg-snow md:hidden"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-[8px] text-ink hover:bg-snow md:hidden"
             aria-label={open ? "메뉴 닫기" : "메뉴 열기"}
             onClick={() => setOpen((v) => !v)}
           >
@@ -80,7 +80,7 @@ export function Header() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setOpen(false)}
-                className="rounded-xl px-3 py-3 text-[16px] font-medium hover:bg-snow"
+                className="rounded-[8px] px-3 py-3 text-[16px] font-medium hover:bg-snow"
               >
                 {item.label}
               </Link>

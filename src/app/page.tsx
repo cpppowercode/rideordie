@@ -61,32 +61,31 @@ export default async function Home() {
           sizes="100vw"
           className="-z-10 object-cover object-[center_42%] md:hidden"
         />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/80 via-black/45 to-black/20" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/75 via-black/35 to-black/10" />
 
         <div className="mx-auto flex min-h-[calc(100svh-4rem)] max-w-6xl flex-col justify-end px-5 pb-10 pt-16 md:pb-24">
-          <p className="animate-fade-up text-[13px] font-semibold tracking-[0.18em] text-white/80">
-            RIDE OR DIE
-          </p>
-          <h1 className="animate-fade-up mt-3 max-w-3xl text-[34px] font-bold leading-[1.2] tracking-tight drop-shadow-[0_8px_24px_rgba(0,0,0,0.45)] md:mt-4 md:text-[64px] md:leading-[1.15]" style={{ animationDelay: "80ms" }}>
+          <div className="animate-fade-up">
+          <h1 className="max-w-3xl text-[36px] font-semibold leading-[1.15] tracking-[-0.02em] md:text-[64px] md:leading-[1.08] md:tracking-[-0.03em]">
             스키를 가르치는 게 아니라,
             <br />
             라이딩을 가르칩니다.
           </h1>
-          <p className="animate-fade-up mt-4 max-w-xl text-[16px] leading-7 text-white/85 md:mt-5 md:text-[20px]" style={{ animationDelay: "160ms" }}>
+          <p className="mt-4 max-w-xl text-[17px] leading-7 text-white/85 md:mt-5 md:text-[20px] md:leading-[30px]">
             {TEACHING_RESORTS_COPY}에서 강습합니다. 입문부터 상급까지, 레벨에 맞춰
-            1:1 또는 소그룹으로 진행합니다. 날짜와 시간만 고르면 예약이 끝나요.
+            1:1 또는 소그룹으로 진행합니다.
           </p>
-          <TrustBadges className="animate-fade-up mt-5" />
-          <div className="animate-fade-up mt-7 flex flex-col gap-3 sm:flex-row md:mt-9" style={{ animationDelay: "240ms" }}>
-            <Link href="/book" className="btn-primary px-8 py-4 text-[18px]" data-testid="home-cta-book">
+          <TrustBadges onImage className="mt-4" />
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Link href="/book" className="btn-primary px-6 text-[17px]" data-testid="home-cta-book">
               강습 예약하기
             </Link>
             <KakaoConsultLink
-              className="btn border border-white/30 bg-white/10 px-8 py-4 text-[18px] text-white backdrop-blur hover:bg-white/20"
+              className="btn border border-white/40 px-6 text-[17px] text-white hover:bg-white/10"
               testId="home-cta-kakao"
             >
               카톡 상담
             </KakaoConsultLink>
+          </div>
           </div>
         </div>
       </section>
@@ -114,8 +113,7 @@ export default async function Home() {
       <section className="mx-auto w-full max-w-6xl px-5 py-16 md:py-20">
         <div className="flex items-end justify-between gap-6">
           <div>
-            <p className="eyebrow">RESORTS</p>
-            <h2 className="mt-3 text-[32px] font-bold tracking-tight md:text-[40px]">강습 스키장</h2>
+            <h2 className="text-[28px] font-semibold tracking-[-0.02em] md:text-[36px]">강습 스키장</h2>
           </div>
           <Link
             href="/resorts"
@@ -131,7 +129,7 @@ export default async function Home() {
       </section>
 
       <section className="mx-auto grid w-full max-w-6xl items-center gap-12 px-5 py-20 md:grid-cols-2 md:gap-16 md:py-28">
-        <div className="relative aspect-[4/5] overflow-hidden rounded-[32px] bg-snow">
+        <div className="relative aspect-[4/5] overflow-hidden rounded-[16px] bg-snow">
           <Image
             src="/images/lessons/lesson-home.webp"
             alt="눈 덮인 슬로프에서 강사가 스키를 타는 아이들 곁에서 자세를 봐 주는 강습 장면"
@@ -141,8 +139,7 @@ export default async function Home() {
           />
         </div>
         <div>
-          <p className="eyebrow">LESSON</p>
-          <h2 className="mt-3 text-[32px] font-bold tracking-tight md:text-[40px]">강습 안내</h2>
+          <h2 className="text-[28px] font-semibold tracking-[-0.02em] md:text-[36px]">강습 안내</h2>
           <p className="mt-4 text-[17px] leading-7 text-muted">
             {PRODUCT_DATA.description}
           </p>
@@ -159,33 +156,32 @@ export default async function Home() {
             ))}
             <div className="flex gap-8 py-5">
               <dt className="w-16 shrink-0 text-muted">강습비</dt>
-              <dd className="text-[22px] font-bold tracking-tight" data-testid="home-headline-price">{headlineCopy()}</dd>
+              <dd className="text-[22px] font-semibold tabular-nums" data-testid="home-headline-price">{headlineCopy()}</dd>
             </div>
           </dl>
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link href="/book" className="btn-primary">예약하기</Link>
             <Link href="/season" className="btn-ghost" data-testid="home-cta-season">시즌강습 결제하기</Link>
-            <Link href={`/product/${PRODUCT_DATA.id}`} className="btn-ghost">자세히 보기</Link>
+            <Link href={`/product/${PRODUCT_DATA.id}`} className="px-1 text-[15px] font-medium text-muted underline decoration-line underline-offset-4 hover:text-ink">
+              강습 자세히 보기
+            </Link>
           </div>
         </div>
       </section>
 
       <section className="bg-snow py-20 md:py-28">
         <div className="mx-auto max-w-6xl px-5">
-          <p className="eyebrow">HOW TO BOOK</p>
-          <h2 className="mt-3 text-[32px] font-bold tracking-tight md:text-[40px]">예약은 세 단계면 끝나요</h2>
-          <ol className="mt-12 grid gap-5 md:grid-cols-3">
+          <h2 className="text-[28px] font-semibold tracking-[-0.02em] md:text-[36px]">예약 방법</h2>
+          <ol className="mt-8 grid gap-8 md:grid-cols-3">
             {STEPS.map((step, i) => (
-              <li key={step.title} className="rounded-[24px] bg-white p-8 shadow-[0_8px_30px_rgba(25,31,40,0.04)]">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-ice text-[15px] font-bold text-brand">
-                  {i + 1}
-                </span>
-                <h3 className="mt-5 text-[22px] font-bold tracking-tight">{step.title}</h3>
-                <p className="mt-3 text-[16px] leading-7 text-muted">{step.body}</p>
+              <li key={step.title} className="border-t border-ink/80 pt-5">
+                <span className="font-mono text-[13px] text-muted tabular-nums">0{i + 1}</span>
+                <h3 className="mt-2 text-[20px] font-semibold">{step.title}</h3>
+                <p className="mt-2 text-[16px] leading-7 text-muted">{step.body}</p>
               </li>
             ))}
           </ol>
-          <p className="mt-10 text-[16px] text-muted">
+          <p className="mt-12 text-[16px] text-muted">
             일정 상담은 카카오톡으로 받습니다.{" "}
             <KakaoConsultLink className="font-semibold text-ink underline decoration-line underline-offset-4">
               카톡 상담 열기
@@ -197,8 +193,7 @@ export default async function Home() {
       <section className="mx-auto w-full max-w-6xl px-5 py-20 md:py-28">
         <div className="flex items-end justify-between gap-6">
           <div>
-            <p className="eyebrow">GALLERY</p>
-            <h2 className="mt-3 text-[32px] font-bold tracking-tight md:text-[40px]">강습 사진</h2>
+            <h2 className="text-[28px] font-semibold tracking-[-0.02em] md:text-[36px]">강습 사진</h2>
           </div>
           <a
             href={INSTAGRAM_URL}
@@ -211,13 +206,13 @@ export default async function Home() {
         </div>
         <div className="mt-10 grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
           {PRODUCT_DATA.images.sub.slice(0, 4).map((src, i) => (
-            <div key={src} className="relative aspect-[4/5] overflow-hidden rounded-[24px]">
+            <div key={src} className="relative aspect-[4/5] overflow-hidden rounded-[12px]">
               <Image
                 src={src}
                 alt={`강습 현장 ${i + 1}`}
                 fill
                 sizes="(min-width: 768px) 25vw, 50vw"
-                className="object-cover transition-transform duration-700 hover:scale-105"
+                className="object-cover"
               />
             </div>
           ))}
@@ -225,14 +220,13 @@ export default async function Home() {
       </section>
 
       <section id="faq" className="scroll-mt-24 mx-auto w-full max-w-3xl px-5 pb-20 md:pb-28">
-        <p className="eyebrow">FAQ</p>
-        <h2 className="mt-3 text-[32px] font-bold tracking-tight md:text-[40px]">자주 묻는 질문</h2>
+        <h2 className="text-[28px] font-semibold tracking-[-0.02em] md:text-[36px]">자주 묻는 질문</h2>
         <div className="mt-8 border-t border-line">
           {SITE_FAQ.map(({ q, a }) => (
             <details key={q} className="group border-b border-line py-6">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-[18px] font-semibold tracking-tight">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-[18px] font-medium">
                 {q}
-                <span className="text-2xl font-light text-muted transition group-open:rotate-45">+</span>
+                <span className="text-2xl font-light text-muted transition-transform duration-150 group-open:rotate-45">+</span>
               </summary>
               <p className="mt-3 text-[16px] leading-7 text-muted">{a}</p>
             </details>
@@ -240,19 +234,19 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="border-t border-line bg-ink py-16 text-white md:py-20">
+      <section className="border-t border-line bg-snow py-16 md:py-20">
         <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-8 px-5 md:flex-row md:items-center">
           <div>
-            <h2 className="text-[28px] font-bold tracking-tight md:text-[36px]">이번 시즌, 슬로프에서 만나요</h2>
-            <p className="mt-3 text-[16px] text-white/70">날짜를 고르고 결제하면 접수됩니다. 확인 안내는 사장님이 드려요.</p>
+            <h2 className="text-[24px] font-semibold md:text-[28px]">강습 예약</h2>
+            <p className="mt-2 text-[16px] text-muted">날짜를 고르고 결제하면 접수됩니다. 일정 확인 안내는 따로 드립니다.</p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
-            <KakaoConsultLink className="btn border border-white/30 bg-white/10 px-8 py-4 text-[18px] text-white hover:bg-white/20">
-              카톡 상담
-            </KakaoConsultLink>
-            <Link href="/book" className="btn-primary px-8 py-4 text-[18px]">
+            <Link href="/book" className="btn-primary">
               강습 예약하기
             </Link>
+            <KakaoConsultLink className="btn-ghost">
+              카톡 상담
+            </KakaoConsultLink>
           </div>
         </div>
       </section>

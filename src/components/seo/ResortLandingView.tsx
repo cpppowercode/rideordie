@@ -39,7 +39,7 @@ function PriceTable({ ratios = PRICE_TABLE.ratios }: { ratios?: readonly string[
   const sale = saleTable();
   const list = listTable();
   return (
-    <div className="overflow-x-auto rounded-[24px] border border-line bg-white">
+    <div className="overflow-x-auto rounded-[16px] border border-line bg-white">
       <table className="w-full min-w-[320px] text-left text-[15px]">
         <caption className="sr-only">{ratios.join('·')} 가격표</caption>
         <thead>
@@ -75,7 +75,7 @@ function FamilyGuideLinks({ landing }: { landing: ResortLanding }) {
   if (posts.length === 0) return null;
   return (
     <section
-      className="mt-12 rounded-[24px] bg-ice px-5 py-6"
+      className="mt-12 rounded-[16px] bg-ice px-5 py-6"
       aria-label={`${landing.shortName} 가족 가이드`}
       data-testid={`resort-guide-${landing.slug}`}
     >
@@ -120,7 +120,7 @@ export function ResortLandingView({ landing }: { landing: ResortLanding }) {
 
       <div className="mx-auto max-w-3xl px-5 py-12 md:py-16">
         {showImage ? (
-          <div className="relative mb-10 aspect-[16/10] overflow-hidden rounded-[28px] bg-snow">
+          <div className="relative mb-10 aspect-[16/10] overflow-hidden rounded-[16px] bg-snow">
             <Image
               src={landing.image}
               alt={landing.imageAlt}
@@ -139,7 +139,7 @@ export function ResortLandingView({ landing }: { landing: ResortLanding }) {
         </div>
 
         {landing.mentionBadgeFee ? (
-          <p className="mt-6 rounded-[20px] bg-ice px-5 py-4 text-[16px] leading-7 text-ink">
+          <p className="mt-6 rounded-[14px] bg-ice px-5 py-4 text-[16px] leading-7 text-ink">
             이 스키장은 패찰비가 별도입니다.
           </p>
         ) : null}
@@ -230,7 +230,7 @@ export function ResortLandingView({ landing }: { landing: ResortLanding }) {
         <Ctas landing={landing} />
 
         <nav className="mt-14 border-t border-line pt-8" aria-label="다른 스키장 강습">
-          <p className="text-[13px] font-semibold tracking-[0.04em] text-muted">다른 스키장</p>
+          <p className="text-[13px] font-semibold text-muted">다른 스키장</p>
           <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-[16px]">
             {RESORT_LANDINGS.filter((row) => row.slug !== landing.slug).map((row) => (
               <li key={row.slug}>

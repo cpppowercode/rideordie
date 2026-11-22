@@ -49,16 +49,16 @@ export function ChatWidget() {
   return (
     <div className="fixed bottom-5 right-5 z-[60]" data-testid="chat-widget">
       {open ? (
-        <div className="mb-3 flex h-[560px] max-h-[75vh] w-[360px] max-w-[calc(100vw-2.5rem)] flex-col overflow-hidden rounded-[24px] border border-line bg-white shadow-2xl" data-testid="chat-panel">
+        <div className="mb-3 flex h-[560px] max-h-[75vh] w-[360px] max-w-[calc(100vw-2.5rem)] flex-col overflow-hidden rounded-[16px] border border-line bg-white shadow-2xl" data-testid="chat-panel">
           <div className="flex items-center justify-between bg-brand px-4 py-3 text-white">
             <b>라이드올다이 상담</b>
             <button onClick={() => setOpen(false)} aria-label="닫기" className="text-xl leading-none">×</button>
           </div>
           <div className="flex-1 space-y-2 overflow-y-auto bg-snow p-3 text-[14px]">
             {msgs.map((m, i) => (
-              <div key={i} className={`whitespace-pre-line rounded-2xl px-3 py-2 ${m.role === 'user' ? 'ml-10 bg-brand text-white' : 'mr-6 bg-white'}`}>{m.role === 'assistant' ? linkify(m.content) : m.content}</div>
+              <div key={i} className={`whitespace-pre-line rounded-[14px] px-3 py-2 ${m.role === 'user' ? 'ml-10 bg-brand text-white' : 'mr-6 bg-white'}`}>{m.role === 'assistant' ? linkify(m.content) : m.content}</div>
             ))}
-            {busy ? <div className="mr-6 rounded-2xl bg-white px-3 py-2 text-muted">답변 준비 중…</div> : null}
+            {busy ? <div className="mr-6 rounded-[14px] bg-white px-3 py-2 text-muted">답변 준비 중…</div> : null}
             <div ref={end} />
           </div>
           <div className="flex flex-wrap gap-1.5 border-t border-line p-2">

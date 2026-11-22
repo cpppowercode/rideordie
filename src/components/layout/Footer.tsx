@@ -51,7 +51,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="mb-4 text-[13px] font-semibold tracking-[0.04em] text-muted">고객센터</h3>
+            <h3 className="mb-4 text-[13px] font-semibold text-muted">고객센터</h3>
             <ul className="space-y-2 text-[15px] text-muted">
               <li>
                 <KakaoConsultLink className="text-[22px] font-bold tracking-tight text-ink hover:text-brand">
@@ -63,7 +63,7 @@ export function Footer() {
                 <a href="mailto:contact@rideordie.kr" className="hover:text-ink">contact@rideordie.kr</a>
               </li>
             </ul>
-            <h3 className="mb-3 mt-8 text-[13px] font-semibold tracking-[0.04em] text-muted">
+            <h3 className="mb-3 mt-8 text-[13px] font-semibold text-muted">
               <Link href="/resorts" className="hover:text-ink">
                 강습 스키장
               </Link>
@@ -80,7 +80,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="mb-4 text-[13px] font-semibold tracking-[0.04em] text-muted">회사 정보</h3>
+            <h3 className="mb-4 text-[13px] font-semibold text-muted">회사 정보</h3>
             <ul className="space-y-1.5 text-[14px] leading-6 text-muted">
               <li>상호: 라이드올다이</li>
               <li>대표: 정동진</li>

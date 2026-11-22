@@ -21,8 +21,7 @@ export default function ResortsIndexPage() {
     <article className="bg-white" data-testid="resorts-index">
       <header className="border-b border-line bg-snow">
         <div className="mx-auto max-w-6xl px-5 py-14 md:py-20">
-          <p className="eyebrow">RESORTS</p>
-          <h1 className="mt-3 text-[32px] font-bold tracking-tight md:text-[44px]">
+          <h1 className="text-[32px] font-bold tracking-tight md:text-[44px]">
             강습 스키장
           </h1>
           <p className="mt-4 max-w-2xl text-[17px] leading-7 text-muted">
