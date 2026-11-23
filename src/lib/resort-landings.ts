@@ -58,12 +58,10 @@ export const FAMILY_GUIDE_POSTS: Record<ResortLandingSlug, FamilyGuidePost[]> = 
       url: "https://blog.naver.com/rideordieski/224452187481",
     },
   ],
-  vivaldi: [],
-  "welli-hilli": [],
   yongpyong: [],
+  vivaldi: [],
   jisan: [],
-  alpensia: [],
-  muju: [],
+  "welli-hilli": [],
 };
 
 export const TERMS_REFUND_HREF = "/service-policy#article-9";
@@ -193,7 +191,7 @@ export const RESORT_LANDINGS: ResortLanding[] = [
     intro: [
       "홍천 웰리힐리파크는 서울에서 당일로 오기 쉬운 슬로프입니다. 주말에 아이와 잠깐 다녀오기 좋은 리듬으로 강습을 짭니다.",
       "초급 지형이 완만해 첫 스키·보드를 붙이기 좋습니다. 공인 강사가 아이 키와 걷는 속도에 맞춰 리프트와 슬로프를 고릅니다.",
-      "강습비 외에 패찰비가 별도입니다(1인 2시간 40,000원).",
+      "강습비 외에 패찰비가 별도입니다(1인 40,000원, 2·3·4시간 동일).",
     ],
     sections: [
       {
@@ -239,7 +237,7 @@ export const RESORT_LANDINGS: ResortLanding[] = [
       ...SHARED_FACTS_FAQ,
       {
         q: "패찰비가 따로 있나요?",
-        a: "네. 웰리힐리는 강습비 외에 패찰비가 별도입니다(1인 2시간 40,000원). 온라인 결제 때 함께 계산됩니다.",
+        a: "네. 웰리힐리는 강습비 외에 패찰비가 별도입니다(1인 40,000원, 2·3·4시간 동일). 온라인 결제 때 함께 계산됩니다.",
       },
     ],
   },
@@ -311,56 +309,6 @@ export const RESORT_LANDINGS: ResortLanding[] = [
       "1:1 2시간 14만원. 환불은 약관 제9조를 따릅니다.",
     ],
     faqs: [{ q: "강습비는 얼마인가요?", a: "1:1 2시간 14만원입니다. 용평은 1:1·2:1 구성만 있습니다(3:1 없음)." }, ...SHARED_FACTS_FAQ.slice(1, 2)],
-  },
-  {
-    slug: "alpensia",
-    bookingValue: "알펜시아리조트",
-    shortName: "알펜시아",
-    placeName: "알펜시아리조트",
-    title: "알펜시아 어린이 스키강습·보드강습 1:1 | 라이드올다이",
-    h1: "알펜시아 어린이 스키·보드강습",
-    description:
-      "알펜시아 어린이 스키강습·보드강습. 1:1·2:1·3:1 구성, 1:1 2시간 14만원. 카톡 상담과 온라인 예약(결제 완료 시 접수).",
-    ogTitle: "알펜시아 어린이 스키강습 1:1 | 라이드올다이",
-    keywords: "알펜시아 스키강습 어린이, 알펜시아 보드강습, 어린이 스키강습",
-    layout: "minimal",
-    mentionBadgeFee: false,
-    image: LESSON_PHOTOS.carve,
-    imageAlt: "알펜시아에서 진행하는 어린이 스키·보드 강습",
-    intro: [
-      "평창 알펜시아 슬로프에서 어린이 스키·보드 강습을 진행합니다. 1:1·2:1·3:1 구성, 응급처치 교육 이수, 강습보험 적용.",
-      "1:1 2시간 14만원. 환불은 약관 제9조를 따릅니다.",
-    ],
-    faqs: [
-      { q: "강습비는 얼마인가요?", a: "1:1 2시간 14만원입니다. 1:1·2:1·3:1 구성이 있습니다." },
-      ...SHARED_FACTS_FAQ.slice(1, 2),
-      { q: "환불은 어떻게 되나요?", a: "환불은 이용약관 제9조를 따릅니다." },
-    ],
-  },
-  {
-    slug: "muju",
-    bookingValue: "무주덕유산리조트",
-    shortName: "무주",
-    placeName: "무주덕유산리조트",
-    title: "무주 어린이 스키강습·보드강습 1:1 | 라이드올다이",
-    h1: "무주덕유산 어린이 스키·보드강습",
-    description:
-      "무주덕유산리조트 어린이 스키강습·보드강습. 1:1·2:1·3:1 구성, 1:1 2시간 14만원. 카톡 상담과 온라인 예약(결제 완료 시 접수).",
-    ogTitle: "무주 어린이 스키강습 1:1 | 라이드올다이",
-    keywords: "무주 스키강습 어린이, 무주덕유산 보드강습, 어린이 스키강습",
-    layout: "minimal",
-    mentionBadgeFee: false,
-    image: LESSON_PHOTOS.slope,
-    imageAlt: "무주덕유산에서 진행하는 어린이 스키·보드 강습",
-    intro: [
-      "무주덕유산리조트 슬로프에서 어린이 스키·보드 강습을 진행합니다. 1:1·2:1·3:1 구성, 응급처치 교육 이수, 강습보험 적용.",
-      "1:1 2시간 14만원. 환불은 약관 제9조를 따릅니다.",
-    ],
-    faqs: [
-      { q: "강습비는 얼마인가요?", a: "1:1 2시간 14만원입니다. 1:1·2:1·3:1 구성이 있습니다." },
-      ...SHARED_FACTS_FAQ.slice(1, 2),
-      { q: "환불은 어떻게 되나요?", a: "환불은 이용약관 제9조를 따릅니다." },
-    ],
   },
 ];
 

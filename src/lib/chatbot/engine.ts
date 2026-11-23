@@ -15,7 +15,6 @@ export type AiCall = (args: { instructions: string; messages: ChatTurn[] }) => P
 
 const KEYWORDS: [RegExp, PresetId][] = [
   [/용평/, "yongpyong"], [/하이원/, "high1"], [/비발디/, "vivaldi"], [/웰리|힐리/, "welli"], [/지산/, "jisan"],
-  [/알펜시아/, "alpensia"], [/무주|덕유산/, "muju"],
   [/환불|취소|위약/, "refund"], [/준비물|렌탈|렌털|장비|복장|옷/, "gear"], [/단체|가족|형제|친구|여러\s*명/, "group"],
   [/예약|결제|접수|신청/, "booking"], [/가격|요금|얼마|비용|금액|얼리|특가/, "price"],
 ];

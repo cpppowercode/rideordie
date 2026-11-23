@@ -37,8 +37,6 @@ export const metadata: Metadata = {
     "용평 스키강습 유아",
     "비발디 스키강습 비용",
     "웰리힐리 스키강습 가격",
-    "알펜시아 스키강습 어린이",
-    "무주 스키강습 어린이",
   ],
   alternates: pageAlternates(SITE_URL),
   openGraph: {

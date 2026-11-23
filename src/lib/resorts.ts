@@ -8,12 +8,10 @@ import { RATIOS, type Ratio } from "@/lib/pricing-tables";
 
 export type ResortSlug =
   | "high1"
-  | "welli-hilli"
+  | "yongpyong"
   | "vivaldi"
   | "jisan"
-  | "yongpyong"
-  | "alpensia"
-  | "muju";
+  | "welli-hilli";
 
 export type BadgeFeeKind = "none" | "vivaldi" | "jisan" | "welli";
 
@@ -64,7 +62,7 @@ export const DEFAULT_GROOMING_WINDOW: GroomingWindowDef = {
 
 /**
  * 운영 스키장 목록 (순서 = 메인·/resorts·예약 피커·챗봇 노출 순서).
- * 기존 6곳 + 무주(무주덕유산리조트, 사장님 확인 2026-11).
+ * 손님 노출 5곳: 하이원, 용평, 비발디, 지산, 웰리힐리.
  */
 export const RESORTS: readonly ResortDefinition[] = [
   {
@@ -89,6 +87,30 @@ export const RESORTS: readonly ResortDefinition[] = [
       },
     ],
     image: LESSON_PHOTOS.lesson,
+  },
+  {
+    value: "용평리조트",
+    label: "용평",
+    shortName: "용평",
+    slug: "yongpyong",
+    allowedRatios: ["1:1", "2:1"],
+    badgeFee: "none",
+    hours: {
+      openHour: 9,
+      closeHour: 23,
+      source: "https://www.yongpyong.co.kr/mobile/kor/skiNboard/charge/lift.do",
+      confirmed: true,
+    },
+    grooming: [
+      {
+        startHour: 17,
+        durationHours: 2,
+        source: "https://www.yongpyong.co.kr/mobile/kor/skiNboard/charge/lift.do",
+        confirmed: true,
+        note: "Listed as 오후야간권 Breaktime 17:00–19:00 on the 25/26 lift ticket table.",
+      },
+    ],
+    image: LESSON_PHOTOS.air,
   },
   {
     value: "비발디파크",
@@ -116,6 +138,30 @@ export const RESORTS: readonly ResortDefinition[] = [
     image: LESSON_PHOTOS.slope,
   },
   {
+    value: "지산포레스트",
+    label: "지산",
+    shortName: "지산",
+    slug: "jisan",
+    allowedRatios: null,
+    badgeFee: "jisan",
+    hours: {
+      openHour: 9,
+      closeHour: 26,
+      source: "https://www.jisanresort.co.kr/w/ski/slopes/info.asp",
+      confirmed: true,
+      note: "Night skiing listed through 02:00 (26:00 in booking hours).",
+    },
+    grooming: [
+      {
+        startHour: 17,
+        durationHours: 1.5,
+        source: "https://www.jisanresort.co.kr/w/ski/slopes/info.asp",
+        confirmed: true,
+      },
+    ],
+    image: LESSON_PHOTOS.lift,
+  },
+  {
     value: "웰리힐리파크",
     label: "웰리힐리파크",
     shortName: "웰리힐리",
@@ -141,98 +187,6 @@ export const RESORTS: readonly ResortDefinition[] = [
       },
     ],
     image: LESSON_PHOTOS.carve,
-  },
-  {
-    value: "용평리조트",
-    label: "용평",
-    shortName: "용평",
-    slug: "yongpyong",
-    allowedRatios: ["1:1", "2:1"],
-    badgeFee: "none",
-    hours: {
-      openHour: 9,
-      closeHour: 23,
-      source: "https://www.yongpyong.co.kr/mobile/kor/skiNboard/charge/lift.do",
-      confirmed: true,
-    },
-    grooming: [
-      {
-        startHour: 17,
-        durationHours: 2,
-        source: "https://www.yongpyong.co.kr/mobile/kor/skiNboard/charge/lift.do",
-        confirmed: true,
-        note: "Listed as 오후야간권 Breaktime 17:00–19:00 on the 25/26 lift ticket table.",
-      },
-    ],
-    image: LESSON_PHOTOS.air,
-  },
-  {
-    value: "지산포레스트",
-    label: "지산",
-    shortName: "지산",
-    slug: "jisan",
-    allowedRatios: null,
-    badgeFee: "jisan",
-    hours: {
-      openHour: 9,
-      closeHour: 26,
-      source: "https://www.jisanresort.co.kr/w/ski/slopes/info.asp",
-      confirmed: true,
-      note: "Night skiing listed through 02:00 (26:00 in booking hours).",
-    },
-    grooming: [
-      {
-        startHour: 17,
-        durationHours: 1.5,
-        source: "https://www.jisanresort.co.kr/w/ski/slopes/info.asp",
-        confirmed: true,
-      },
-    ],
-    image: LESSON_PHOTOS.lift,
-  },
-  {
-    value: "알펜시아리조트",
-    label: "알펜시아",
-    shortName: "알펜시아",
-    slug: "alpensia",
-    allowedRatios: null,
-    badgeFee: "none",
-    hours: {
-      openHour: 9,
-      closeHour: 22,
-      source: "default: typical 09:00–22:00; alpensia official hours not confirmed as of 2026-11-05",
-      confirmed: false,
-      note: "Official Alpensia operating hours were not confirmed; using 09:00–22:00.",
-    },
-    grooming: [
-      {
-        startHour: 17,
-        durationHours: 2,
-        source: "default: typical 17:00–19:00 day-to-night slope grooming gap; not confirmed for Alpensia",
-        confirmed: false,
-        note: "Official Alpensia 정설 hours were not confirmed; using the common afternoon/night gap.",
-      },
-    ],
-    image: LESSON_PHOTOS.carve,
-  },
-  {
-    value: "무주덕유산리조트",
-    label: "무주",
-    shortName: "무주",
-    slug: "muju",
-    allowedRatios: null,
-    badgeFee: "none",
-    hours: {
-      ...DEFAULT_RESORT_HOURS,
-      note: "무주덕유산 공식 26/27 운영시간 미확인; 09:00–22:00 임시.",
-    },
-    grooming: [
-      {
-        ...DEFAULT_GROOMING_WINDOW,
-        note: "무주덕유산 공식 정설 시간 미확인; 17:00–19:00 임시.",
-      },
-    ],
-    image: LESSON_PHOTOS.slope,
   },
 ];
 
@@ -289,7 +243,7 @@ export function badgeFeeNotice(skiResort: string): string | null {
     return "지산은 패찰비가 별도입니다(1인 2시간 35,000원 / 3·4시간 50,000원). 온라인 결제 때 강습비와 함께 계산됩니다.";
   }
   if (kind === "welli") {
-    return "웰리힐리는 패찰비가 별도입니다(1인 2시간 40,000원). 온라인 결제 때 강습비와 함께 계산됩니다. 3·4시간 요율은 확정 전이라 우선 2시간 요율(1인 40,000원)을 적용합니다.";
+    return "웰리힐리는 패찰비가 별도입니다(1인 40,000원, 2·3·4시간 동일). 온라인 결제 때 강습비와 함께 계산됩니다.";
   }
   return null;
 }

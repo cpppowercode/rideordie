@@ -10,8 +10,8 @@
  *
  * - 비발디파크: 인원 × 시간 × 12,500원
  * - 지산포레스트: 2시간 35,000 / 4시간 50,000 / 6시간 85,000 (1인), 홀수는 다음 짝수
- * - 웰리힐리파크: 1인 2시간 40,000원 (3·4시간은 미확정 → 우선 2시간 요율 적용)
- * - 그 외(하이원, 용평, 알펜시아, 무주): 0원
+ * - 웰리힐리파크: 1인 40,000원 (2·3·4시간 동일, 사장님 확정 2026-11-23)
+ * - 그 외(하이원, 용평): 0원
  */
 export const ADMIN_SOURCE = {
   repo: "cpppowercode/admin",
@@ -19,14 +19,12 @@ export const ADMIN_SOURCE = {
   commit: "f2bd5f3",
 } as const;
 
-/** 웰리힐리 3·4시간 패찰비 요율은 미확정. true 로 바꾸면 별도 구간표를 쓴다. */
-export const WELLI_LONGER_HOURS_CONFIRMED = false;
-
 import { badgeFeeKind, type BadgeFeeKind } from "@/lib/resorts";
 import { assertResortRatio, lessonPrice, PriceError, UNSET_SETTINGS, type SeasonSettings } from "@/lib/pricing";
 
 const VIVALDI_PER_PERSON_HOUR = 12500;
-const WELLI_PER_PERSON_2H = 40000;
+/** 웰리힐리 패찰비: 1인 40,000원 (2·3·4시간 동일). */
+const WELLI_PER_PERSON = 40000;
 
 function jisanTierPerPerson(hours: number): number {
   const even = hours % 2 === 0 ? hours : hours + 1;
@@ -61,8 +59,7 @@ export function computeBadgeFee(skiResort: string, participants: number, duratio
   } else if (kind === "jisan") {
     fee = participants * jisanTierPerPerson(durationHours);
   } else if (kind === "welli") {
-    // 확정: 1인 2시간 40,000. 3·4시간은 미확정이라 동일 요율(인원×40,000)을 임시 적용.
-    fee = participants * WELLI_PER_PERSON_2H;
+    fee = participants * WELLI_PER_PERSON;
   }
   if (!Number.isFinite(fee) || fee <= 0) throw new BadgeFeeError("패찰비를 계산할 수 없습니다.");
   return fee;

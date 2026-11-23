@@ -37,14 +37,17 @@ export {
 };
 
 export type SeasonSettings = {
-  /** 시즌(강습 일정) 오픈일 YYYY-MM-DD. 이 날짜 미만은 /book 에서 '오픈 예정'. */
+  /**
+   * 강습 일정 오픈일 YYYY-MM-DD.
+   * null = 즉시 오픈(기본). 어드민이 명시적으로 넣은 경우에만 /book 에서
+   * 그 날짜 미만을 '오픈 예정'으로 막는다.
+   */
   seasonStart: string | null;
   /** 시즌 종료일 YYYY-MM-DD, 없으면 null */
   seasonEnd: string | null;
 };
-/** 기본 시즌 오픈일 (26/27). 어드민 season-settings 가 우선. */
-export const DEFAULT_SEASON_START = "2026-12-07";
-export const DEFAULT_SETTINGS: SeasonSettings = { seasonStart: DEFAULT_SEASON_START, seasonEnd: null };
+/** 기본: 오픈일 미설정 → 홈페이지 예약 즉시 가능. */
+export const DEFAULT_SETTINGS: SeasonSettings = { seasonStart: null, seasonEnd: null };
 /** 하위 호환 이름: 어드민 값을 못 읽을 때 쓰는 기본값 */
 export const UNSET_SETTINGS = DEFAULT_SETTINGS;
 
@@ -56,9 +59,9 @@ export function isYmd(v: unknown): v is string {
 }
 
 export function normalizeSettings(raw: Partial<Record<keyof SeasonSettings, unknown>> | null | undefined): SeasonSettings {
-  const seasonStart = isYmd(raw?.seasonStart) ? raw!.seasonStart as string : DEFAULT_SEASON_START;
-  const seasonEnd = isYmd(raw?.seasonEnd) ? raw!.seasonEnd as string : null;
-  if (seasonEnd && seasonEnd < seasonStart) return { seasonStart, seasonEnd: null };
+  const seasonStart = isYmd(raw?.seasonStart) ? (raw!.seasonStart as string) : null;
+  const seasonEnd = isYmd(raw?.seasonEnd) ? (raw!.seasonEnd as string) : null;
+  if (seasonStart && seasonEnd && seasonEnd < seasonStart) return { seasonStart, seasonEnd: null };
   return { seasonStart, seasonEnd };
 }
 
@@ -72,11 +75,13 @@ export function kstToday(now: Date = new Date()): string {
   return new Date(now.getTime() + 9 * 3600_000).toISOString().slice(0, 10);
 }
 
-/** 강습 일정이 오픈된 날짜인지 (seasonStart 이상). */
+/**
+ * 강습 일정이 오픈된 날짜인지.
+ * seasonStart 가 없으면(기본) 항상 오픈. 어드민이 오픈일을 넣은 경우에만 그 미만을 막는다.
+ */
 export function isLessonScheduleOpen(lessonDate: string, settings: SeasonSettings = DEFAULT_SETTINGS): boolean {
   if (!isYmd(lessonDate)) return false;
-  const start = settings.seasonStart && isYmd(settings.seasonStart) ? settings.seasonStart : DEFAULT_SEASON_START;
-  if (lessonDate < start) return false;
+  if (settings.seasonStart && isYmd(settings.seasonStart) && lessonDate < settings.seasonStart) return false;
   if (settings.seasonEnd && isYmd(settings.seasonEnd) && lessonDate > settings.seasonEnd) return false;
   return true;
 }
