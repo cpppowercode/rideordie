@@ -1,6 +1,13 @@
 import { overlappingReservations, type ExistingReservation } from "@/lib/booking";
 import { generateLessonStarts, type LessonDurationHours } from "@/lib/hours";
 import { bookingSlotCapacity } from "@/lib/site";
+import {
+  DEFAULT_SETTINGS,
+  isLessonScheduleOpen,
+  type SeasonSettings,
+} from "@/lib/pricing";
+
+export type AvailabilitySlotReason = "full" | "opening_soon" | null;
 
 export type AvailabilitySlot = {
   id: string;
@@ -8,24 +15,42 @@ export type AvailabilitySlot = {
   durationHours: number;
   timeLabel: string;
   used: number;
-  remaining: number;
+  remaining: number | null;
   available: boolean;
-  reason: "full" | null;
+  reason: AvailabilitySlotReason;
 };
 
 /**
  * 공개 예약 화면용 잔여 팀 수.
  * capacity(동시 강습 가능 팀 = 강사 여유) − 같은 스키장·겹치는 시간대 예약 수.
- * 테넌트/스키장 필터는 호출 측(listReservationsForDate)에서 이미 적용된 existing 을 넘긴다.
+ * 시즌 오픈 전(lessonDate < seasonStart)이면 remaining=null, reason=opening_soon.
  */
 export function computeAvailabilitySlots(options: {
   skiResort: string;
   durationHours: LessonDurationHours;
   existing: ExistingReservation[];
   capacity?: number;
+  lessonDate?: string;
+  seasonSettings?: SeasonSettings;
 }): AvailabilitySlot[] {
   const capacity = options.capacity ?? bookingSlotCapacity();
+  const settings = options.seasonSettings ?? DEFAULT_SETTINGS;
+  const scheduleOpen =
+    !options.lessonDate || isLessonScheduleOpen(options.lessonDate, settings);
+
   return generateLessonStarts(options.skiResort, options.durationHours).map((slot) => {
+    if (!scheduleOpen) {
+      return {
+        id: slot.id,
+        startHour: slot.startHour,
+        durationHours: slot.durationHours,
+        timeLabel: slot.timeLabel,
+        used: 0,
+        remaining: null,
+        available: false,
+        reason: "opening_soon" as const,
+      };
+    }
     const used = overlappingReservations(
       options.existing,
       options.skiResort,
@@ -41,7 +66,7 @@ export function computeAvailabilitySlots(options: {
       used,
       remaining,
       available: remaining > 0,
-      reason: remaining > 0 ? null : "full",
+      reason: remaining > 0 ? null : ("full" as const),
     };
   });
 }

@@ -11,17 +11,30 @@ const empty = computeAvailabilitySlots({
   durationHours: 4,
   existing: [],
   capacity: 6,
+  lessonDate: "2026-11-27",
 });
 assert.ok(empty.length > 0);
 assert.equal(empty.every((s) => s.remaining === 6 && s.available), true);
 assert.ok(empty.some((s) => s.startHour === 9));
 assert.ok(empty.some((s) => s.startHour === 18));
-assert.equal(empty.some((s) => s.startHour === 13), false); // 정설 겹침
+assert.equal(empty.some((s) => s.startHour === 13), false);
+
+// 기본(오픈일 미설정) → 오늘·11/27도 오픈
+const todayOpen = computeAvailabilitySlots({
+  skiResort: high1,
+  durationHours: 2,
+  existing: [],
+  capacity: 6,
+  lessonDate: "2026-11-23",
+  seasonSettings: { seasonStart: null, seasonEnd: null },
+});
+assert.equal(todayOpen.every((s) => s.available && s.remaining === 6), true);
 
 const booked = computeAvailabilitySlots({
   skiResort: high1,
   durationHours: 4,
   capacity: 2,
+  lessonDate: "2026-11-27",
   existing: [
     {
       ski_resort: "하이원리조트",
@@ -41,12 +54,25 @@ const nine = booked.find((s) => s.startHour === 9)!;
 assert.equal(nine.used, 2);
 assert.equal(nine.remaining, 0);
 assert.equal(nine.available, false);
+assert.equal(nine.reason, "full");
 
-// 다른 스키장·취소 건은 잔여에 넣지 않는다 (스노프로 등 다른 테넌트 행은 조회 단계에서 제외).
+// 어드민이 오픈일을 명시한 경우에만 오픈 예정
+const soon = computeAvailabilitySlots({
+  skiResort: high1,
+  durationHours: 2,
+  existing: [],
+  capacity: 6,
+  lessonDate: "2026-11-23",
+  seasonSettings: { seasonStart: "2026-12-07", seasonEnd: null },
+});
+assert.ok(soon.length > 0);
+assert.equal(soon.every((s) => s.reason === "opening_soon" && s.remaining === null && !s.available), true);
+
 const ignored = computeAvailabilitySlots({
   skiResort: high1,
   durationHours: 2,
   capacity: 1,
+  lessonDate: "2026-11-27",
   existing: [
     {
       ski_resort: "비발디파크",
@@ -64,12 +90,12 @@ const ignored = computeAvailabilitySlots({
 });
 assert.equal(ignored.find((s) => s.startHour === 9)?.remaining, 1);
 
-// 하이원 4시간과 비발디 4시간이 같은 계산기를 쓴다.
 const vivaldi = computeAvailabilitySlots({
   skiResort: "비발디파크",
   durationHours: 4,
   existing: [],
   capacity: 6,
+  lessonDate: "2026-11-28",
 });
 assert.ok(vivaldi.every((s) => s.remaining === 6));
 

@@ -6,6 +6,8 @@ import {
 } from "@/lib/availability";
 import { isLessonDuration } from "@/lib/hours";
 import { bookingSlotCapacity, SKI_RESORTS } from "@/lib/site";
+import { getSeasonSettings } from "@/lib/season-settings";
+import { isLessonScheduleOpen } from "@/lib/pricing";
 
 export async function GET(request: NextRequest) {
   const date = request.nextUrl.searchParams.get("date") || "";
@@ -24,13 +26,24 @@ export async function GET(request: NextRequest) {
 
   try {
     const capacity = bookingSlotCapacity();
-    // 서버 간 ADMIN_API_TOKEN 으로 조회한다. 손님 로그인과는 무관하다.
-    const existing = await listReservationsForDate({ date, skiResort });
+    const seasonSettings = await getSeasonSettings();
+    const scheduleOpen = isLessonScheduleOpen(date, seasonSettings);
+
+    // 오픈 전이면 어드민 예약 조회를 건너뛰고 '오픈 예정'만 내린다.
+    // (마감/0팀으로 오해하지 않게 한다. workplace_schedule 미등록과 동일 UX.)
+    // AVAILABILITY_OFFLINE=1 → 운영 DB에 쓰지 않는 빈 예약으로 잔여만 계산(로컬·E2E용).
+    const offline = process.env.AVAILABILITY_OFFLINE === "1";
+    const existing = !scheduleOpen || offline
+      ? []
+      : await listReservationsForDate({ date, skiResort });
+
     const slots = computeAvailabilitySlots({
       skiResort,
       durationHours,
       existing,
       capacity,
+      lessonDate: date,
+      seasonSettings,
     });
 
     return NextResponse.json({
@@ -39,6 +52,8 @@ export async function GET(request: NextRequest) {
       skiResort,
       durationHours,
       capacity,
+      scheduleStatus: scheduleOpen ? "open" : "opening_soon",
+      seasonStart: seasonSettings.seasonStart,
       slots,
     });
   } catch (error) {

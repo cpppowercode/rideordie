@@ -11,12 +11,12 @@ import { KakaoConsultLink } from "@/components/seo/KakaoConsultLink";
 import { faqPageJsonLd } from "@/lib/jsonld";
 import { SITE_FAQ } from "@/lib/resort-landings";
 import { ResortCards } from "@/components/seo/ResortCards";
-import { headlineCopy } from "@/lib/pricing";
+import { earlyBirdFromCopy, headlineCopy } from "@/lib/pricing";
 
 export const revalidate = 300;
 
 export async function generateMetadata(): Promise<Metadata> {
-  const description = `전국 6개 스키장(하이원·비발디·웰리힐리·용평·지산·알펜시아) 어린이 스키·보드 강습. ${headlineCopy()}. 카카오톡 상담과 온라인 예약.`;
+  const description = `${TEACHING_RESORTS_COPY} 어린이 스키·보드 강습. ${earlyBirdFromCopy()}. 카카오톡 상담과 온라인 예약.`;
   return {
     alternates: pageAlternates(SITE_URL),
     description,
@@ -28,7 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
 const STEPS = [
   { title: "날짜와 시간", body: "원하는 스키장과 강습 시간(2·3·4시간)을 고릅니다. 정설·마감된 시간은 바로 보이지 않아요." },
   { title: "연락처만", body: "이름과 휴대폰 번호, 인원을 남기고 결제하면 접수가 끝납니다." },
-  { title: "확인 안내", body: "사장님이 일정을 확인하고, 당일 스키장에서 만납니다." },
+  { title: "확인 안내", body: "담당 매니저가 일정을 확인하고, 당일 스키장에서 만납니다." },
 ];
 
 const HIGHLIGHTS = [
@@ -123,7 +123,7 @@ export default async function Home() {
           </Link>
         </div>
         <p className="mt-3 max-w-2xl text-[16px] leading-7 text-muted">
-          하이원, 비발디, 웰리힐리, 용평, 지산, 알펜시아에서 어린이 스키·보드강습을 진행합니다.
+          {TEACHING_RESORTS_COPY}에서 어린이 스키·보드강습을 진행합니다.
         </p>
         <ResortCards />
       </section>

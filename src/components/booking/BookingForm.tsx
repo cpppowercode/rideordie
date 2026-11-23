@@ -9,6 +9,7 @@ import { LESSON_TYPES, SKI_RESORTS } from '@/lib/site';
 import { bookingWindowHint, formatPhoneDisplay, maxBookingDateExclusive, maxBookingDateInclusive, todayYmd } from '@/lib/booking';
 import { PENDING_BOOKING_KEY } from '@/lib/pending-booking';
 import { payBreakdown } from '@/lib/badge-fee';
+import { badgeFeeNotice } from '@/lib/resorts';
 import {
   generateLessonStarts,
   LESSON_DURATIONS,
@@ -23,6 +24,7 @@ type SlotAvailability = {
   timeLabel: string;
   available: boolean;
   remaining: number | null;
+  reason?: 'full' | 'opening_soon' | null;
 };
 
 function monthMatrix(year: number, monthIndex: number): (string | null)[][] {
@@ -136,6 +138,8 @@ export function BookingForm({ initialResort, seasonSettings = UNSET_SETTINGS }: 
 
   const typeLabel = LESSON_TYPES.find((t) => t.value === lessonType)?.label;
 
+  const badgeNotice = badgeFeeNotice(skiResort);
+
   const slots = useMemo(() => {
     return generatedStarts.map((slot) => {
       // id(09:30)로 맞춘다. startHour 부동소수 비교 실패 시 잔여가 0으로 보이지 않게.
@@ -149,6 +153,7 @@ export function BookingForm({ initialResort, seasonSettings = UNSET_SETTINGS }: 
         // 라이브 데이터가 없으면 마감/0팀으로 단정하지 않는다.
         available: live ? live.available : true,
         remaining: live ? live.remaining : null,
+        reason: live?.reason ?? null,
       };
     });
   }, [generatedStarts, liveSlots]);
@@ -439,14 +444,17 @@ export function BookingForm({ initialResort, seasonSettings = UNSET_SETTINGS }: 
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-3" data-testid="start-grid">
                 {slots.map((slot) => {
                   const selected = startHour === slot.startHour;
+                  const openingSoon = slot.reason === 'opening_soon';
                   const disabled = loadingSlots ? false : !slot.available;
                   const badge = loadingSlots
                     ? '확인 중'
-                    : slot.remaining == null
-                      ? '잔여 확인 중'
-                      : slot.available
-                        ? `잔여 ${slot.remaining}팀`
-                        : '마감';
+                    : openingSoon
+                      ? '오픈 예정'
+                      : slot.remaining == null
+                        ? '잔여 확인 중'
+                        : slot.available
+                          ? `잔여 ${slot.remaining}팀`
+                          : '마감';
                   return (
                     <button
                       key={slot.id}
@@ -466,7 +474,7 @@ export function BookingForm({ initialResort, seasonSettings = UNSET_SETTINGS }: 
                       <span
                         data-testid={`start-badge-${slot.id}`}
                         className={`mt-1 text-[12px] font-semibold ${
-                          !slot.available && !loadingSlots ? 'text-muted' : 'text-brand'
+                          (!slot.available && !loadingSlots) || openingSoon ? 'text-muted' : 'text-brand'
                         }`}
                       >
                         {badge}
@@ -475,12 +483,23 @@ export function BookingForm({ initialResort, seasonSettings = UNSET_SETTINGS }: 
                   );
                 })}
               </div>
+              {slots.some((s) => s.reason === 'opening_soon') && (
+                <p className="mt-3 rounded-[14px] bg-ice px-4 py-3 text-[14px] leading-6 text-ink" data-testid="opening-soon-notice">
+                  이 날짜는 아직 강습 일정이 오픈되지 않았습니다. 시즌 오픈일 이후 날짜를 선택해 주세요.
+                </p>
+              )}
               {slots.length === 0 && (
                 <p className="rounded-[14px] bg-snow px-4 py-5 text-[14px] text-muted">
                   이 스키장에서 예약 가능한 시작 시간이 없습니다.
                 </p>
               )}
             </section>
+
+            {badgeNotice ? (
+              <p className="rounded-[14px] bg-ice px-4 py-3 text-[14px] leading-6 text-ink" data-testid="badge-fee-notice">
+                {badgeNotice}
+              </p>
+            ) : null}
           </motion.div>
         )}
 

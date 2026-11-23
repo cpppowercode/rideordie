@@ -35,7 +35,7 @@ export default function SeasonPage() {
       </ul>
       <section className="mt-8 rounded-[14px] bg-snow p-6 text-[15px] leading-7" data-testid="season-summary">
         <h2 className="text-[18px] font-bold">결제 전 확인</h2>
-        <p className="mt-2">이름과 휴대폰 번호가 필요하며, 결제가 승인된 뒤에만 접수됩니다. 비발디·지산은 어드민 계산기 기준 패찰비가 포함됩니다.</p>
+        <p className="mt-2">이름과 휴대폰 번호가 필요하며, 결제가 승인된 뒤에만 접수됩니다. 비발디·지산·웰리힐리는 어드민 계산기 기준 패찰비가 포함됩니다.</p>
         <p className="mt-2">환불은 <Link href="/service-policy#article-9" className="font-semibold underline">이용약관 제9조(결제 및 환불 규정)</Link>를 따릅니다.</p>
         <p className="mt-2">지금은 시즌강습 가격이 확정되지 않아 결제를 받지 않아요. <KakaoConsultLink className="font-semibold underline">카톡 상담</KakaoConsultLink>으로 문의해 주세요.</p>
       </section>
