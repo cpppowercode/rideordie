@@ -1,4 +1,5 @@
-import { headlineCopy, SALE_TABLE, LIST_TABLE } from "@/lib/pricing";
+import { earlyBirdFromCopy, headlineCopy, SALE_TABLE, LIST_TABLE } from "@/lib/pricing";
+import { resortHasBadgeFee, teachingResortsCopy, type ResortSlug } from "@/lib/resorts";
 import { KAKAO_CONSULT_URL, LESSON_PHOTOS, SITE_URL, SKI_RESORTS } from "@/lib/site";
 
 export const PRICE_TABLE = {
@@ -8,12 +9,16 @@ export const PRICE_TABLE = {
   list: LIST_TABLE,
 } as const;
 
-/** 정적 문구의 '1:1 2시간 15만원부터'를 현재 세일 가격 문구로 바꾼다. */
+/** 정적 문구의 구 가격 표기를 현재 세일/얼리버드 문구로 바꾼다. */
 export function priceCopy(text: string): string {
-  return text.split("1:1 2시간 15만원부터").join(headlineCopy());
+  return text
+    .split("1:1 2시간 15만원부터")
+    .join(headlineCopy())
+    .split("정가 15만원")
+    .join("얼리버드 특가");
 }
 
-export type ResortLandingSlug = "high1" | "welli-hilli" | "vivaldi" | "jisan" | "yongpyong" | "alpensia";
+export type ResortLandingSlug = ResortSlug;
 
 export type ResortFaq = { q: string; a: string };
 
@@ -58,18 +63,21 @@ export const FAMILY_GUIDE_POSTS: Record<ResortLandingSlug, FamilyGuidePost[]> = 
   yongpyong: [],
   jisan: [],
   alpensia: [],
+  muju: [],
 };
 
 export const TERMS_REFUND_HREF = "/service-policy#article-9";
 
-export const SALE_PRICE_LABEL = "강습 가격";
+export const SALE_PRICE_LABEL = "얼리버드 특가";
 export const SALE_PRICE_COPY =
-  "1:1 2시간 14만원 (정가 15만원). 모든 고객에게 표시된 가격이 적용됩니다.";
+  `얼리버드 특가 ${headlineCopy()}부터. 모든 고객에게 표시된 가격이 적용됩니다.`;
+
+const RESORTS_WHERE_COPY = teachingResortsCopy();
 
 const SHARED_FACTS_FAQ: ResortFaq[] = [
   {
     q: "강습비는 얼마인가요?",
-    a: "1:1 2시간 14만원입니다. 1:1·2:1·3:1 구성이 있습니다.",
+    a: `${headlineCopy()}입니다. 1:1·2:1·3:1 구성이 있습니다.`,
   },
   {
     q: "강사는 어떤 사람인가요?",
@@ -88,11 +96,11 @@ export const SITE_FAQ: ResortFaq[] = [
   },
   {
     q: "강습은 어디서 진행하나요?",
-    a: "하이원, 비발디, 웰리힐리, 용평, 지산, 알펜시아에서 강습합니다. 예약할 때 스키장을 고릅니다.",
+    a: `${RESORTS_WHERE_COPY}에서 강습합니다. 예약할 때 스키장을 고릅니다.`,
   },
   {
     q: "강습비는 얼마인가요?",
-    a: "1:1 2시간 14만원입니다. 1:1·2:1·3:1 구성이 있습니다.",
+    a: `${headlineCopy()}입니다. 1:1·2:1·3:1 구성이 있습니다. ${earlyBirdFromCopy()}.`,
   },
   {
     q: "강사는 공인 자격인가요?",
@@ -162,7 +170,7 @@ export const RESORT_LANDINGS: ResortLanding[] = [
     faqs: [
       {
         q: "하이원에서만 강습하나요?",
-        a: "하이원뿐 아니라 비발디, 웰리힐리, 용평, 지산에서도 강습합니다. 이 페이지는 하이원 일정용입니다.",
+        a: `하이원뿐 아니라 ${RESORTS_WHERE_COPY.replace("하이원, ", "")}에서도 강습합니다. 이 페이지는 하이원 일정용입니다.`,
       },
       ...SHARED_FACTS_FAQ,
     ],
@@ -175,16 +183,17 @@ export const RESORT_LANDINGS: ResortLanding[] = [
     title: "웰리힐리 어린이 스키강습·보드강습 1:1 | 라이드올다이",
     h1: "웰리힐리 어린이 스키·보드강습",
     description:
-      "웰리힐리 스키강습 가격과 어린이 보드강습. 1:1·2:1·3:1 구성, 1:1 2시간 14만원. 카톡 상담과 온라인 예약.",
+      "웰리힐리 스키강습 가격과 어린이 보드강습. 1:1·2:1·3:1 구성, 1:1 2시간 14만원. 패찰비 별도. 카톡 상담과 온라인 예약.",
     ogTitle: "웰리힐리 스키강습 가격 | 어린이 1:1 강습",
     keywords: "웰리힐리 스키강습 가격, 웰리힐리 어린이 스키, 어린이 스키강습",
     layout: "full",
-    mentionBadgeFee: false,
+    mentionBadgeFee: true,
     image: LESSON_PHOTOS.carve,
     imageAlt: "웰리힐리파크에서 진행하는 어린이 스키·보드 강습",
     intro: [
       "홍천 웰리힐리파크는 서울에서 당일로 오기 쉬운 슬로프입니다. 주말에 아이와 잠깐 다녀오기 좋은 리듬으로 강습을 짭니다.",
       "초급 지형이 완만해 첫 스키·보드를 붙이기 좋습니다. 공인 강사가 아이 키와 걷는 속도에 맞춰 리프트와 슬로프를 고릅니다.",
+      "강습비 외에 패찰비가 별도입니다(1인 2시간 40,000원).",
     ],
     sections: [
       {
@@ -225,9 +234,13 @@ export const RESORT_LANDINGS: ResortLanding[] = [
     faqs: [
       {
         q: "웰리힐리만 가나요?",
-        a: "하이원, 비발디, 용평, 지산에서도 강습합니다. 이 페이지는 웰리힐리 예약용입니다.",
+        a: `${RESORTS_WHERE_COPY.replace("웰리힐리, ", "")}에서도 강습합니다. 이 페이지는 웰리힐리 예약용입니다.`,
       },
       ...SHARED_FACTS_FAQ,
+      {
+        q: "패찰비가 따로 있나요?",
+        a: "네. 웰리힐리는 강습비 외에 패찰비가 별도입니다(1인 2시간 40,000원). 온라인 결제 때 함께 계산됩니다.",
+      },
     ],
   },
   {
@@ -324,6 +337,31 @@ export const RESORT_LANDINGS: ResortLanding[] = [
       { q: "환불은 어떻게 되나요?", a: "환불은 이용약관 제9조를 따릅니다." },
     ],
   },
+  {
+    slug: "muju",
+    bookingValue: "무주덕유산리조트",
+    shortName: "무주",
+    placeName: "무주덕유산리조트",
+    title: "무주 어린이 스키강습·보드강습 1:1 | 라이드올다이",
+    h1: "무주덕유산 어린이 스키·보드강습",
+    description:
+      "무주덕유산리조트 어린이 스키강습·보드강습. 1:1·2:1·3:1 구성, 1:1 2시간 14만원. 카톡 상담과 온라인 예약(결제 완료 시 접수).",
+    ogTitle: "무주 어린이 스키강습 1:1 | 라이드올다이",
+    keywords: "무주 스키강습 어린이, 무주덕유산 보드강습, 어린이 스키강습",
+    layout: "minimal",
+    mentionBadgeFee: false,
+    image: LESSON_PHOTOS.slope,
+    imageAlt: "무주덕유산에서 진행하는 어린이 스키·보드 강습",
+    intro: [
+      "무주덕유산리조트 슬로프에서 어린이 스키·보드 강습을 진행합니다. 1:1·2:1·3:1 구성, 응급처치 교육 이수, 강습보험 적용.",
+      "1:1 2시간 14만원. 환불은 약관 제9조를 따릅니다.",
+    ],
+    faqs: [
+      { q: "강습비는 얼마인가요?", a: "1:1 2시간 14만원입니다. 1:1·2:1·3:1 구성이 있습니다." },
+      ...SHARED_FACTS_FAQ.slice(1, 2),
+      { q: "환불은 어떻게 되나요?", a: "환불은 이용약관 제9조를 따릅니다." },
+    ],
+  },
 ];
 
 export function resortLandingBySlug(slug: string): ResortLanding | undefined {
@@ -359,6 +397,8 @@ export function resortCanonical(slug: ResortLandingSlug): string {
 export function earlyBirdCopy(): string {
   return SALE_PRICE_COPY;
 }
+
+export { earlyBirdFromCopy, resortHasBadgeFee };
 
 export function formatManwon(amount: number): string {
   return `${amount / 10_000}만원`;

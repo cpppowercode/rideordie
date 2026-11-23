@@ -10,23 +10,26 @@ import {
   resortCanonical,
   resortLandingBySlug,
 } from "./resort-landings";
+import { RESORTS } from "./resorts";
 
-assert.equal(RESORT_LANDINGS.length, 6);
+assert.equal(RESORT_LANDINGS.length, RESORTS.length);
 assert.equal(bookingValueFromResortQuery("high1"), "하이원리조트");
 assert.equal(bookingValueFromResortQuery("welli-hilli"), "웰리힐리파크");
 assert.equal(bookingValueFromResortQuery("vivaldi"), "비발디파크");
 assert.equal(bookingValueFromResortQuery("jisan"), "지산포레스트");
 assert.equal(bookingValueFromResortQuery("yongpyong"), "용평리조트");
 assert.equal(bookingValueFromResortQuery("alpensia"), "알펜시아리조트");
+assert.equal(bookingValueFromResortQuery("muju"), "무주덕유산리조트");
 assert.equal(bookingValueFromResortQuery("하이원리조트"), "하이원리조트");
 assert.equal(bookHref("high1"), "/book?resort=high1");
 assert.equal(resortCanonical("high1"), "https://rideordie.kr/resorts/high1");
 assert.equal(resortLandingBySlug("missing"), undefined);
 assert.equal(PRICE_TABLE.sale["1:1"][2], 140_000);
 assert.equal(PRICE_TABLE.list["1:1"][2], 150_000);
-assert.equal(SALE_PRICE_LABEL, "강습 가격");
+assert.equal(SALE_PRICE_LABEL, "얼리버드 특가");
 assert.ok(SALE_PRICE_COPY.includes("1:1 2시간 14만원"));
-assert.ok(SALE_PRICE_COPY.includes("정가 15만원"));
+assert.ok(SALE_PRICE_COPY.includes("얼리버드"));
+assert.equal(SALE_PRICE_COPY.includes("정가"), false);
 // 오픈 기념, 할인율 문구 금지
 assert.equal(SALE_PRICE_COPY.includes("오픈 기념"), false);
 assert.equal(SALE_PRICE_COPY.includes("오픈기념"), false);
@@ -35,7 +38,7 @@ const landingBlob = JSON.stringify(RESORT_LANDINGS);
 assert.equal(landingBlob.includes("2월 한 달"), false);
 assert.equal(landingBlob.includes("오픈 기념"), false);
 assert.equal(landingBlob.includes("오픈기념"), false);
-assert.equal(landingBlob.includes("얼리버드"), false);
+assert.equal(landingBlob.includes("정가"), false);
 assert.equal(landingBlob.includes("% 할인"), false);
 assert.equal(landingBlob.includes("15% "), false);
 assert.equal(landingBlob.includes("20% "), false);
@@ -56,12 +59,15 @@ const vivaldi = resortLandingBySlug("vivaldi");
 const jisan = resortLandingBySlug("jisan");
 const welli = resortLandingBySlug("welli-hilli");
 const alpensia = resortLandingBySlug("alpensia");
+const muju = resortLandingBySlug("muju");
 assert.ok(vivaldi?.mentionBadgeFee && vivaldi.intro.some((p) => p.includes("패찰비")));
 assert.ok(vivaldi?.faqs.some((f) => f.q === "패찰비가 따로 있나요?"));
 assert.ok(jisan?.mentionBadgeFee && jisan.intro.some((p) => p.includes("패찰비")));
 assert.ok(jisan?.faqs.some((f) => f.q === "패찰비가 따로 있나요?"));
-assert.ok(welli && !welli.mentionBadgeFee && !JSON.stringify(welli).includes("패찰비"));
+assert.ok(welli?.mentionBadgeFee && welli.intro.some((p) => p.includes("패찰비")));
+assert.ok(welli?.faqs.some((f) => f.q === "패찰비가 따로 있나요?"));
 assert.ok(alpensia && !alpensia.mentionBadgeFee && !JSON.stringify(alpensia).includes("패찰비"));
+assert.ok(muju && !muju.mentionBadgeFee && !JSON.stringify(muju).includes("패찰비"));
 assert.equal(PRICE_TABLE.sale["3:1"][4], 440_000);
 assert.equal(PRICE_TABLE.list["3:1"][4], 470_000);
 assert.ok(
@@ -74,6 +80,7 @@ const sitemapUrls = sitemap().map((entry) => entry.url);
 assert.ok(sitemapUrls.includes("https://rideordie.kr/resorts"));
 assert.ok(sitemapUrls.includes("https://rideordie.kr/resorts/high1"));
 assert.ok(sitemapUrls.includes("https://rideordie.kr/resorts/alpensia"));
+assert.ok(sitemapUrls.includes("https://rideordie.kr/resorts/muju"));
 
 assert.deepEqual(
   RESORT_LANDINGS.map((row) => [row.slug, row.title, row.h1]),
@@ -84,15 +91,16 @@ assert.deepEqual(
     ["jisan", "지산 어린이 스키강습·보드강습 1:1 | 라이드올다이", "지산 어린이 스키·보드강습"],
     ["yongpyong", "용평 어린이 스키강습·보드강습 1:1 | 라이드올다이", "용평 어린이 스키·보드강습"],
     ["alpensia", "알펜시아 어린이 스키강습·보드강습 1:1 | 라이드올다이", "알펜시아 어린이 스키·보드강습"],
+    ["muju", "무주 어린이 스키강습·보드강습 1:1 | 라이드올다이", "무주덕유산 어린이 스키·보드강습"],
   ]
 );
 
 const titles = new Set(RESORT_LANDINGS.map((row) => row.title));
 const descriptions = new Set(RESORT_LANDINGS.map((row) => row.description));
 const intros = new Set(RESORT_LANDINGS.map((row) => row.intro.join("\n")));
-assert.equal(titles.size, 6);
-assert.equal(descriptions.size, 6);
-assert.equal(intros.size, 6);
+assert.equal(titles.size, RESORTS.length);
+assert.equal(descriptions.size, RESORTS.length);
+assert.equal(intros.size, RESORTS.length);
 
 console.log("resort landing tests passed");
 import { priceCopy as __pc } from "./resort-landings";

@@ -33,7 +33,8 @@ test("clean visual captures", async ({ page }, testInfo) => {
   await page.goto("/", { waitUntil: "networkidle" });
   await expect(page.getByTestId("home-page")).toBeVisible();
   await expect(page.getByTestId("home-cta-book")).toBeVisible();
-  await expect(page.getByTestId("home-cta-book")).toHaveCSS("background-color", "rgb(49, 130, 246)");
+  // brand primary (unslop 이후 --brand)
+  await expect(page.getByTestId("home-cta-book")).toHaveCSS("background-color", "rgb(31, 79, 209)");
   await shot(page, `final_home_hero_${suffix}`, false);
   await shot(page, `final_home_full_${suffix}`, true);
 
@@ -57,9 +58,8 @@ test("clean visual captures", async ({ page }, testInfo) => {
   await expect(page.getByTestId("step-confirm")).toBeVisible();
   await shot(page, `final_booking_review_${suffix}`);
 
-  await page.goto(
-    `/book/success?orderNo=${encodeURIComponent("WEB_1792754666968_C3ZXY2")}&date=${LESSON_DATE}&resort=${encodeURIComponent(SKI_RESORT)}&time=${encodeURIComponent("09:00~11:00")}&name=${encodeURIComponent(TEST_NAME)}&people=1`
-  );
-  await expect(page.getByTestId("booking-success")).toBeVisible();
+  // 성공 화면은 서명 영수증(?r=)이 있을 때만 표시. URL 쿼리만으로는 위조 불가.
+  await page.goto("/book/success");
+  await expect(page.getByTestId("booking-not-confirmed")).toBeVisible();
   await shot(page, `final_booking_done_${suffix}`);
 });

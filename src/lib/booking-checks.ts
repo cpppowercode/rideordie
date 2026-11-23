@@ -7,6 +7,11 @@ import {
 } from "@/lib/booking";
 import { GROOMING_BOOKING_ERROR, slotOverlapsGrooming } from "@/lib/grooming";
 import { findLessonStart, isLessonDuration, normalizeHalfHour } from "@/lib/hours";
+import {
+  isLessonScheduleOpen,
+  SCHEDULE_OPENING_SOON_MESSAGE,
+} from "@/lib/pricing";
+import { getSeasonSettings } from "@/lib/season-settings";
 
 export type CheckedBooking = { ok: true; input: BookingInput } | { ok: false; status: number; error: string };
 
@@ -30,6 +35,11 @@ export async function checkBookingAvailability(raw: BookingInput): Promise<Check
   const validationError = validateBookingInput(raw);
   if (validationError) return { ok: false, status: 400, error: validationError };
 
+  const seasonSettings = await getSeasonSettings();
+  if (!isLessonScheduleOpen(raw.lessonDate, seasonSettings)) {
+    return { ok: false, status: 409, error: SCHEDULE_OPENING_SOON_MESSAGE };
+  }
+
   const duration = isLessonDuration(raw.durationHours) ? raw.durationHours : null;
   const start = Number.isFinite(raw.startHour) ? normalizeHalfHour(raw.startHour) : NaN;
   if (!duration || !Number.isFinite(start)) {
@@ -40,6 +50,11 @@ export async function checkBookingAvailability(raw: BookingInput): Promise<Check
   }
   if (!findLessonStart(raw.skiResort, duration, start)) {
     return { ok: false, status: 400, error: "선택한 시간에는 강습을 예약할 수 없습니다." };
+  }
+
+  // 로컬·E2E 격리: 운영 어드민 조회를 건너뛴다(예약 저장은 결제 승인 경로에서만).
+  if (process.env.AVAILABILITY_OFFLINE === "1") {
+    return { ok: true, input: { ...raw, startHour: start, durationHours: duration } };
   }
 
   const existing = await listReservationsForDate({ date: raw.lessonDate, skiResort: raw.skiResort });

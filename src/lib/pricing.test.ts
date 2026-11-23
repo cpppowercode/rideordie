@@ -1,6 +1,17 @@
 import assert from "node:assert/strict";
 import { payBreakdown } from "./badge-fee";
-import { DEFAULT_SETTINGS, headlineCopy, kstDate, lessonPrice, normalizeSettings, saleTable, listTable, PriceError } from "./pricing";
+import {
+  DEFAULT_SETTINGS,
+  earlyBirdFromCopy,
+  headlineCopy,
+  isLessonScheduleOpen,
+  kstDate,
+  lessonPrice,
+  normalizeSettings,
+  saleTable,
+  listTable,
+  PriceError,
+} from "./pricing";
 
 const S = DEFAULT_SETTINGS;
 assert.deepEqual(S, { seasonStart: "2026-12-07", seasonEnd: null });
@@ -26,13 +37,17 @@ assert.deepEqual(saleTable()["1:1"], { 2: 140000, 3: 210000, 4: 280000 });
 assert.deepEqual(saleTable()["2:1"], { 2: 170000, 3: 270000, 4: 340000 });
 assert.deepEqual(saleTable()["3:1"], { 2: 220000, 3: 330000, 4: 440000 });
 
-// 정가표
+// 표시용 취소선 표
 assert.deepEqual(listTable()["1:1"], { 2: 150000, 3: 240000, 4: 290000 });
 assert.deepEqual(listTable()["2:1"], { 2: 190000, 3: 300000, 4: 370000 });
 assert.deepEqual(listTable()["3:1"], { 2: 240000, 3: 360000, 4: 470000 });
 
-// 헤드라인 카피
+// 헤드라인·얼리버드 카피
 assert.equal(headlineCopy(), "1:1 2시간 14만원");
+assert.equal(earlyBirdFromCopy(), "얼리버드 14만원부터");
+assert.equal(isLessonScheduleOpen("2026-11-23", S), false);
+assert.equal(isLessonScheduleOpen("2026-12-07", S), true);
+assert.equal(isLessonScheduleOpen("2026-12-20", S), true);
 
 // 어드민 값이 깨졌으면 기본값
 assert.deepEqual(normalizeSettings({ seasonStart: "2026-13-40" }), S);

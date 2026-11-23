@@ -11,6 +11,7 @@ const empty = computeAvailabilitySlots({
   durationHours: 4,
   existing: [],
   capacity: 6,
+  lessonDate: "2026-12-20",
 });
 assert.ok(empty.length > 0);
 assert.equal(empty.every((s) => s.remaining === 6 && s.available), true);
@@ -22,6 +23,7 @@ const booked = computeAvailabilitySlots({
   skiResort: high1,
   durationHours: 4,
   capacity: 2,
+  lessonDate: "2026-12-20",
   existing: [
     {
       ski_resort: "하이원리조트",
@@ -41,12 +43,26 @@ const nine = booked.find((s) => s.startHour === 9)!;
 assert.equal(nine.used, 2);
 assert.equal(nine.remaining, 0);
 assert.equal(nine.available, false);
+assert.equal(nine.reason, "full");
+
+// 시즌 오픈 전 → 오픈 예정 (마감/0팀으로 보이지 않음)
+const soon = computeAvailabilitySlots({
+  skiResort: high1,
+  durationHours: 2,
+  existing: [],
+  capacity: 6,
+  lessonDate: "2026-11-23",
+  seasonSettings: { seasonStart: "2026-12-07", seasonEnd: null },
+});
+assert.ok(soon.length > 0);
+assert.equal(soon.every((s) => s.reason === "opening_soon" && s.remaining === null && !s.available), true);
 
 // 다른 스키장·취소 건은 잔여에 넣지 않는다 (스노프로 등 다른 테넌트 행은 조회 단계에서 제외).
 const ignored = computeAvailabilitySlots({
   skiResort: high1,
   durationHours: 2,
   capacity: 1,
+  lessonDate: "2026-12-20",
   existing: [
     {
       ski_resort: "비발디파크",
@@ -70,8 +86,19 @@ const vivaldi = computeAvailabilitySlots({
   durationHours: 4,
   existing: [],
   capacity: 6,
+  lessonDate: "2026-12-20",
 });
 assert.ok(vivaldi.every((s) => s.remaining === 6));
+
+// 무주도 슬롯이 생성된다.
+const muju = computeAvailabilitySlots({
+  skiResort: "무주덕유산리조트",
+  durationHours: 2,
+  existing: [],
+  capacity: 6,
+  lessonDate: "2026-12-20",
+});
+assert.ok(muju.length > 0);
 
 assert.equal(
   publicAvailabilityErrorMessage(new Error("로그인이 필요합니다.")),

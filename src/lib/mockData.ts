@@ -3,7 +3,7 @@ import { INSTAGRAM_URL, LESSON_PHOTOS } from "@/lib/site";
 export const PRODUCT_DATA = {
     id: "ski-lesson-premium",
     title: "라이드올다이 프리미엄 1:1 스키·보드 강습",
-    price: 150000,
+    price: 140000,
     description: "공인 강사와 함께하는 스키·스노보드 강습. 입문부터 상급까지 레벨에 맞춰 진행합니다.",
     images: {
         hero: LESSON_PHOTOS.hero,

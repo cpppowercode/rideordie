@@ -1,5 +1,10 @@
 import { slotOverlapsGrooming } from "@/lib/grooming";
-import { SKI_RESORTS } from "@/lib/site";
+import {
+  DEFAULT_RESORT_HOURS,
+  RESORTS,
+  resortByValue,
+  type ResortHoursDef,
+} from "@/lib/resorts";
 
 /**
  * Per-resort slope operating hours used to generate bookable lesson starts.
@@ -7,105 +12,27 @@ import { SKI_RESORTS } from "@/lib/site";
  * Hours are decimal (16.5 = 16:30). Close may be 24+ for after-midnight
  * (26 = 02:00). A lesson that ends exactly at close is allowed.
  *
- * 26/27-season pages were not posted as of 2026-10-23, so times come from the
- * latest official 25/26 pages still live on each resort site (or a flagged
- * default when the official page could not be confirmed).
- *
- * Edit this file only — availability, POST /api/bookings, and the booking
- * form all read from RESORT_HOURS. Grooming windows stay in src/lib/grooming.ts.
+ * Source of truth: src/lib/resorts.ts (RESORTS[].hours).
  */
 
-type ResortValue = (typeof SKI_RESORTS)[number]["value"];
+export type ResortHours = ResortHoursDef;
 
 export const LESSON_DURATIONS = [2, 3, 4] as const;
 export type LessonDurationHours = (typeof LESSON_DURATIONS)[number];
 
 export const LESSON_START_STEP_HOURS = 0.5;
 
-export type ResortHours = {
-  openHour: number;
-  /** Closing hour; 24+ means past midnight (26 = 02:00). */
-  closeHour: number;
-  source: string;
-  confirmed: boolean;
-  note?: string;
-};
+const DEFAULT_HOURS: ResortHours = DEFAULT_RESORT_HOURS;
 
-const DEFAULT_HOURS: ResortHours = {
-  openHour: 9,
-  closeHour: 22,
-  source: "default: typical 09:00–22:00 winter operating hours",
-  confirmed: false,
-  note: "Official operating hours were not confirmed; using 09:00–22:00.",
-};
-
-export const RESORT_HOURS: Record<ResortValue, ResortHours> = {
-  // 하이원: 주간 09:00–16:00, 정설 16:00–18:00, 야간 18:00–22:00.
-  // Source: https://www.high1.com/ski/contents.do?key=750
-  하이원리조트: {
-    openHour: 9,
-    closeHour: 22,
-    source: "https://www.high1.com/ski/contents.do?key=750",
-    confirmed: true,
-  },
-
-  // 비발디파크: 주간~심야. Booking uses 09:00–23:00 (late-night to 03:00 exists
-  // on some slopes; not offered as a lesson window until confirmed as standard).
-  // Source: https://www.sonohotelsresorts.com/skiboard/info
-  비발디파크: {
-    openHour: 9,
-    closeHour: 23,
-    source: "https://www.sonohotelsresorts.com/skiboard/info",
-    confirmed: true,
-    note: "Some slopes list late-night to 03:00; lesson booking closes at 23:00.",
-  },
-
-  // 웰리힐리파크: official Korean charge page 404'd. Secondary 25/26 writeups
-  // state 동절기 09:00~22:30; night tickets historically run later. Use 24:00
-  // so a 2h lesson can start after 16:30–18:30 정설.
-  // Fallback refs: https://www.ktriptips.com/kor/leisure/131299
-  웰리힐리파크: {
-    openHour: 9,
-    closeHour: 24,
-    source:
-      "default from day/night ticket gap; official Korean charge page 404 as of 2026-10-23",
-    confirmed: false,
-    note: "Official wellihillipark.com charge page was not reachable; 09:00–24:00 is the booking window.",
-  },
-
-  // 용평: 주간 09:00–17:00, 야간 19:00–23:00.
-  // Source: https://www.yongpyong.co.kr/mobile/kor/skiNboard/charge/lift.do
-  용평리조트: {
-    openHour: 9,
-    closeHour: 23,
-    source: "https://www.yongpyong.co.kr/mobile/kor/skiNboard/charge/lift.do",
-    confirmed: true,
-  },
-
-  // 지산: 주간 09:00–17:00, 정설 17:00–18:30, 야간 18:30–02:00.
-  // Source: https://www.jisanresort.co.kr/w/ski/slopes/info.asp
-  지산포레스트: {
-    openHour: 9,
-    closeHour: 26,
-    source: "https://www.jisanresort.co.kr/w/ski/slopes/info.asp",
-    confirmed: true,
-    note: "Night skiing listed through 02:00 (26:00 in booking hours).",
-  },
-
-  // 알펜시아: 공식 26/27 운영시간 미확인. 예약 창은 기본 09:00–22:00.
-  알펜시아리조트: {
-    openHour: 9,
-    closeHour: 22,
-    source: "default: typical 09:00–22:00; alpensia official hours not confirmed as of 2026-11-05",
-    confirmed: false,
-    note: "Official Alpensia operating hours were not confirmed; using 09:00–22:00.",
-  },
-};
+/** Derived from RESORTS SSOT — do not edit here. */
+export const RESORT_HOURS: Record<string, ResortHours> = Object.fromEntries(
+  RESORTS.map((r) => [r.value, r.hours]),
+);
 
 export function resortHoursFor(skiResort: string): ResortHours {
-  if (skiResort in RESORT_HOURS) {
-    return RESORT_HOURS[skiResort as ResortValue];
-  }
+  const found = resortByValue(skiResort);
+  if (found) return found.hours;
+  if (skiResort in RESORT_HOURS) return RESORT_HOURS[skiResort];
   return DEFAULT_HOURS;
 }
 

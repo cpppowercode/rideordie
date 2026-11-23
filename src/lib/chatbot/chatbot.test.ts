@@ -21,7 +21,7 @@ for (const b of bad) { const r = filterAnswer(b); assert.equal(r.ok, false, b); 
 for (const g of ["1:1 2시간 14만원이에요.", "자세한 건 https://pf.kakao.com/_xfWMxaG 로", "예약은 rideordie.kr/book 에서 해요.", "결제하면 예약이 접수돼요."]) assert.equal(filterAnswer(g).ok, true, g);
 
 // 프리셋 10개, 고정 답변 전부 필터 통과
-assert.deepEqual(PRESETS.map((p) => p.label), ["가격", "예약·결제", "하이원", "비발디", "웰리힐리", "용평", "지산", "알펜시아", "환불", "준비물·렌탈", "단체·가족"]);
+assert.deepEqual(PRESETS.map((p) => p.label), ["가격", "예약·결제", "하이원", "비발디", "웰리힐리", "용평", "지산", "알펜시아", "무주", "환불", "준비물·렌탈", "단체·가족"]);
 for (const p of PRESETS) for (const d of [EARLY, REG, LATE]) assert.equal(filterAnswer(presetAnswer(p.id, S, d)!).ok, true, p.id);
 
 // 가격은 세일 요금표(pricing.ts)에서 - 날짜와 무관하게 항상 동일
@@ -36,16 +36,20 @@ assert.ok(!presetAnswer("price", S, EARLY)!.includes("% 할인"));
 const y = presetAnswer("yongpyong", S, REG)!;
 assert.ok(/1:1과 2:1/.test(y)); assert.ok(!/^3:1 /m.test(y)); assert.ok(/^3:1 /m.test(presetAnswer("high1", S, REG)!));
 assert.ok(mockAnswer("용평 3:1 돼요?", S, REG).includes("3:1은 없어요"));
-// 패찰비는 비발디·지산만
-assert.ok(/패찰비는 없어요/.test(presetAnswer("high1", S, REG)!) && /패찰비는 없어요/.test(presetAnswer("welli", S, REG)!));
+// 패찰비는 비발디·지산·웰리힐리
+assert.ok(/패찰비는 없어요/.test(presetAnswer("high1", S, REG)!));
+assert.ok(/40,000/.test(presetAnswer("welli", S, REG)!));
 assert.ok(/12,500/.test(presetAnswer("vivaldi", S, REG)!) && /35,000/.test(presetAnswer("jisan", S, REG)!));
+assert.ok(/패찰비는 없어요/.test(presetAnswer("muju", S, REG)!));
 
 // 지식 파일 검증
 const kn = systemInstructions(buildKnowledge(S));
 assert.ok(!/강습 날짜 기준|예약 날짜 기준|예약일 기준/.test(kn));
 assert.ok(!/만\s*5세|박강후|010-/.test(kn));
-assert.ok(/용평은 1:1과 2:1만/.test(kn) && /패찰비는 비발디와 지산에만/.test(kn));
+assert.ok(/용평은 1:1과 2:1만/.test(kn) && /패찰비는 비발디·지산·웰리힐리에만/.test(kn));
 assert.ok(!/% 할인/.test(kn));
+assert.ok(!/정가/.test(kn));
+assert.ok(/무주/.test(kn));
 
 // 제한
 const L = new UsageLimiter({ perSession10m: 2, perSessionDay: 3, globalDay: 100, monthlyTokenCap: 1000, monthlyUsdCap: 1 });

@@ -1,3 +1,12 @@
+import {
+  RESORTS,
+  skiResortOptions,
+  teachingResortNames,
+  teachingResortsCopy,
+  teachingResortsInline,
+} from "@/lib/resorts";
+import { LESSON_PHOTOS } from "@/lib/site-photos";
+
 export const INSTAGRAM_URL = "https://www.instagram.com/ski.rideordie/";
 export const NAVER_BLOG_URL = "https://blog.naver.com/rideordieski";
 export const KAKAO_CONSULT_URL = "https://pf.kakao.com/_xfWMxaG";
@@ -21,27 +30,17 @@ export function bookingSlotCapacity(): number {
   return Number.isFinite(n) && n > 0 ? Math.floor(n) : 6;
 }
 
-export const SKI_RESORTS = [
-  { value: "하이원리조트", label: "하이원" },
-  { value: "비발디파크", label: "비발디파크" },
-  { value: "웰리힐리파크", label: "웰리힐리파크" },
-  { value: "용평리조트", label: "용평" },
-  { value: "지산포레스트", label: "지산" },
-  { value: "알펜시아리조트", label: "알펜시아" },
-] as const;
+/** Booking picker — derived from RESORTS SSOT. */
+export const SKI_RESORTS = skiResortOptions() as {
+  value: (typeof RESORTS)[number]["value"];
+  label: string;
+}[];
 
 /** Short names for marketing copy. Booking picker labels stay SKI_RESORTS. */
-export const TEACHING_RESORTS = [
-  "하이원",
-  "비발디",
-  "웰리힐리",
-  "용평",
-  "지산",
-  "알펜시아",
-] as const;
+export const TEACHING_RESORTS = teachingResortNames() as readonly string[];
 
-export const TEACHING_RESORTS_COPY = TEACHING_RESORTS.join(", ");
-export const TEACHING_RESORTS_INLINE = TEACHING_RESORTS.join(" · ");
+export const TEACHING_RESORTS_COPY = teachingResortsCopy();
+export const TEACHING_RESORTS_INLINE = teachingResortsInline();
 
 export const LESSON_TYPES = [
   { value: "ski", label: "스키" },
@@ -49,18 +48,4 @@ export const LESSON_TYPES = [
   { value: "both", label: "둘 다" },
 ] as const;
 
-/**
- * Real lesson photos owned by RideOrDie.
- * Only shots without identifiable children's faces are shipped
- * (backs, helmets+goggles covering the face, or distant riding).
- */
-export const LESSON_PHOTOS = {
-  hero: "/images/lessons/hero.webp",
-  heroMobile: "/images/lessons/hero-mobile.webp",
-  lesson: "/images/lessons/lesson.webp",
-  carve: "/images/lessons/gallery-carve.webp",
-  lift: "/images/lessons/gallery-lift.webp",
-  jump: "/images/lessons/gallery-jump.webp",
-  air: "/images/lessons/gallery-air.webp",
-  slope: "/images/lessons/gallery-slope.webp",
-} as const;
+export { LESSON_PHOTOS, RESORTS };

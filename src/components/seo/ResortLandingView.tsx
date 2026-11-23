@@ -14,6 +14,7 @@ import {
   TERMS_REFUND_HREF,
   type ResortLanding,
 } from "@/lib/resort-landings";
+import { badgeFeeNotice } from "@/lib/resorts";
 
 function Ctas({ landing }: { landing: ResortLanding }) {
   return (
@@ -139,8 +140,8 @@ export function ResortLandingView({ landing }: { landing: ResortLanding }) {
         </div>
 
         {landing.mentionBadgeFee ? (
-          <p className="mt-6 rounded-[14px] bg-ice px-5 py-4 text-[16px] leading-7 text-ink">
-            이 스키장은 패찰비가 별도입니다.
+          <p className="mt-6 rounded-[14px] bg-ice px-5 py-4 text-[16px] leading-7 text-ink" data-testid="resort-badge-fee">
+            {badgeFeeNotice(landing.bookingValue) || "이 스키장은 패찰비가 별도입니다. 온라인 결제 때 강습비와 함께 계산됩니다."}
           </p>
         ) : null}
 
