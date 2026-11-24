@@ -73,4 +73,6 @@ export const RATE_LIMITS = {
   seasonOrder: { windowMs: 60_000, max: 10 },
   webhooksKcp: { windowMs: 60_000, max: 60 },
   legacyOrders: { windowMs: 60_000, max: 5 },
+  /** 손님 피드백 로그인 — IP당 분당. */
+  feedbackLogin: { windowMs: 60_000, max: 10 },
 } as const satisfies Record<string, RateLimitConfig>;
