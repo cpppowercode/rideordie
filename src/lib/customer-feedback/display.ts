@@ -88,12 +88,27 @@ export function markSymbol(mark: FeedbackMark): string {
   return "·";
 }
 
+/** 손님 화면 확정 문구 (최종 명세 3-5). */
 export function markLabel(mark: FeedbackMark): string {
-  if (mark === "o") return "통과";
+  if (mark === "o") return "할 수 있어요";
   if (mark === "triangle") return "연습 중";
-  if (mark === "x") return "아직";
-  return "미기록";
+  if (mark === "x") return "아직 어려워요";
+  return "배우기 전";
 }
+
+export function resolveMarkLabel(
+  mark: FeedbackMark,
+  fromApi?: string | null,
+): string {
+  const raw = typeof fromApi === "string" ? fromApi.trim() : "";
+  if (raw) return raw;
+  return markLabel(mark);
+}
+
+export const REINFORCE_BADGE_LABEL = "조금 더 다듬기";
+export const NEXT_STEP_LABEL = "다음에 배울 단계";
+export const ALL_STEPS_DONE_LABEL = "모든 단계 완료";
+
 
 export function formatSessionDate(isoDate: string): string {
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(isoDate.trim());

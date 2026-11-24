@@ -1,10 +1,19 @@
-import { normalizeSport } from "./display";
+/**
+ * 손님 회차 이력 — 최종 명세 §3 (단계별 사다리 · 날짜별 · 다음 단계 · 보강).
+ * 강사 실명/ID는 항상 「담당 강사」로 덮는다.
+ */
+import {
+  markLabel as defaultMarkLabel,
+  markSymbol,
+  normalizeSport,
+  resolveMarkLabel,
+} from "./display";
 import { customerInstructorLabel } from "./instructor";
 import type {
+  FeedbackItem,
   FeedbackMark,
   FeedbackSession,
   FeedbackStudent,
-  StepGroup,
 } from "./types";
 
 export type MarkChange =
@@ -15,10 +24,11 @@ export type MarkChange =
 export type ByStepRecord = {
   sessionNo: number;
   date: string;
-  /** 손님 UI에서는 항상 '담당 강사' */
   instructor: string;
   mark: FeedbackMark;
+  markLabel: string;
   change: MarkChange;
+  stepComment: string | null;
   nextFocus?: string | null;
   instructorNote?: string | null;
   feedbackId?: string;
@@ -29,6 +39,12 @@ export type ByStepRow =
       step: string;
       kind: "step";
       records: ByStepRecord[];
+      latestMark: FeedbackMark;
+      markLabel: string;
+      neverMarked: boolean;
+      isNextStep: boolean;
+      /** 최근 회차에 표시+다음체크 = 보강 */
+      isReinforce: boolean;
     }
   | {
       step: string;
@@ -40,7 +56,11 @@ export type ByStepRow =
 export type SessionMarkRow = {
   step: string;
   mark: FeedbackMark;
+  markLabel: string;
   change: MarkChange;
+  stepComment: string | null;
+  isNextStep: boolean;
+  isReinforce: boolean;
 };
 
 export type HistorySessionCard = {
@@ -48,15 +68,44 @@ export type HistorySessionCard = {
   date: string;
   instructor: string;
   marks: SessionMarkRow[];
+  daySummary: string | null;
   nextFocus: string | null;
   instructorNote: string | null;
   feedbackId: string;
 };
 
+export type NextStepChip = {
+  label: string;
+  isReinforce: boolean;
+};
+
 export type StudentHistory = {
   byStep: ByStepRow[];
   sessions: HistorySessionCard[];
+  canDoCount: number;
+  totalSteps: number;
+  /** o | triangle_or_x | next | empty — 막대용 */
+  barSlots: Array<"o" | "tx" | "next" | "empty">;
+  nextSteps: NextStepChip[];
+  nextFocusText: string | null;
+  allStepsDone: boolean;
 };
+
+export function formatChangeLabel(change: MarkChange): string | null {
+  if (!change) return null;
+  if (change === "first") return "첫 평가";
+  const [a, b] = change.split("->") as [FeedbackMark, FeedbackMark];
+  return `${markSymbol(a)} → ${markSymbol(b)}`;
+}
+
+export function progressCompareSummary(history: StudentHistory): string | null {
+  const steps = history.byStep.filter(
+    (r): r is Extract<ByStepRow, { kind: "step" }> => r.kind === "step",
+  );
+  if (!steps.length) return null;
+  const o = steps.filter((s) => s.latestMark === "o").length;
+  return `○ ${o} / ${steps.length}`;
+}
 
 function changeOf(prev: FeedbackMark | undefined, mark: FeedbackMark): MarkChange {
   if (prev === undefined) return "first";
@@ -77,215 +126,270 @@ function orderedSessions(
     .sort((a, b) => a.session_date.localeCompare(b.session_date));
 }
 
-/** feedbacks 로부터 v3.1 8-2 형태 이력을 만든다. */
+function withNums(sessions: FeedbackSession[]): Array<FeedbackSession & { _num: number }> {
+  return sessions.map((s, i) => ({
+    ...s,
+    _num:
+      typeof s.session_number === "number" && s.session_number > 0
+        ? s.session_number
+        : i + 1,
+  }));
+}
+
+function itemComment(it: FeedbackItem): string | null {
+  if (it.mark == null) return null; // 명세: mark 없는 행 코멘트는 손님에게 없음
+  const c = typeof it.step_comment === "string" ? it.step_comment.trim() : "";
+  return c || null;
+}
+
+type LadderSlot =
+  | { kind: "step"; label: string }
+  | { kind: "milestone"; label: string };
+
+function buildLadder(sessions: FeedbackSession[]): LadderSlot[] {
+  const out: LadderSlot[] = [];
+  const seen = new Set<string>();
+  for (const s of sessions) {
+    for (const it of s.items ?? []) {
+      if (!it || typeof it.label !== "string") continue;
+      const key = `${it.kind}:${it.label}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push({
+        kind: it.kind === "milestone" ? "milestone" : "step",
+        label: it.label,
+      });
+    }
+  }
+  return out;
+}
+
+/** feedbacks 로부터 최종 명세 형태 이력을 만든다. */
 export function buildHistoryFromFeedbacks(
   feedbacks: FeedbackSession[],
   sportFilter?: "ski" | "board",
 ): StudentHistory {
-  const sessions = orderedSessions(feedbacks, sportFilter);
-  const instructor = customerInstructorLabel();
+  const sessions = withNums(orderedSessions(feedbacks, sportFilter));
+  const ladder = buildLadder(sessions);
+  const newest = sessions[sessions.length - 1] ?? null;
 
-  const sessionCards: HistorySessionCard[] = sessions.map((fb, i) => {
-    const sessionNo = i + 1;
-    const marks: SessionMarkRow[] = [];
-    for (const item of fb.items ?? []) {
-      if (item.kind !== "step") continue;
-      if (item.mark == null) continue; // 평가 안 한 단계는 줄 없음
-      // prev mark from earlier sessions
-      let prev: FeedbackMark | undefined;
-      for (let j = i - 1; j >= 0; j--) {
-        const earlier = sessions[j]!;
-        const hit = (earlier.items ?? []).find(
-          (it) => it.kind === "step" && it.label === item.label && it.mark != null,
-        );
-        if (hit) {
-          prev = hit.mark;
-          break;
-        }
-      }
-      marks.push({
-        step: item.label,
-        mark: item.mark,
-        change: changeOf(prev, item.mark),
+  const byStep: ByStepRow[] = [];
+  for (const slot of ladder) {
+    if (slot.kind === "milestone") {
+      byStep.push({ step: slot.label, kind: "milestone" });
+      continue;
+    }
+
+    const records: ByStepRecord[] = [];
+    let prev: FeedbackMark | undefined;
+    let latestMark: FeedbackMark = null;
+    let latestLabel = "배우기 전";
+    let neverMarked = true;
+
+    for (const s of sessions) {
+      const it = (s.items ?? []).find(
+        (x) => x.kind === "step" && x.label === slot.label,
+      );
+      if (!it || it.mark == null) continue;
+      neverMarked = false;
+      const mark = it.mark;
+      const change = changeOf(prev, mark);
+      records.push({
+        sessionNo: s._num,
+        date: s.session_date,
+        instructor: customerInstructorLabel(s.instructor_display_name),
+        mark,
+        markLabel: resolveMarkLabel(mark, it.mark_label),
+        change,
+        stepComment: itemComment(it),
+        nextFocus: s.next_focus,
+        instructorNote: s.instructor_note,
+        feedbackId: s.id,
       });
+      prev = mark;
+      latestMark = mark;
+      latestLabel = resolveMarkLabel(mark, it.mark_label);
     }
-    return {
-      sessionNo,
-      date: fb.session_date,
-      instructor,
-      marks,
-      nextFocus: fb.next_focus,
-      instructorNote: fb.instructor_note,
-      feedbackId: fb.id,
-    };
-  });
 
-  // byStep order from first appearance across sessions
-  const order: Array<{ step: string; kind: "step" | "milestone" }> = [];
-  const seen = new Set<string>();
-  for (const fb of sessions) {
-    for (const item of fb.items ?? []) {
-      const kind = item.kind === "milestone" ? "milestone" : "step";
-      const key = `${kind}::${item.label}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      order.push({ step: item.label, kind });
+    const newestItem = newest
+      ? (newest.items ?? []).find(
+          (x) => x.kind === "step" && x.label === slot.label,
+        )
+      : undefined;
+    const isNextStep = Boolean(newestItem?.is_next_step);
+    const isReinforce = Boolean(
+      isNextStep && newestItem && newestItem.mark != null,
+    );
+
+    if (isNextStep && neverMarked) {
+      latestLabel = "다음에 배울 단계";
+      latestMark = null;
+    } else if (neverMarked) {
+      latestLabel = "배우기 전";
+      latestMark = null;
     }
+
+    byStep.push({
+      step: slot.label,
+      kind: "step",
+      records: records.slice().reverse(), // 최신 위
+      latestMark,
+      markLabel: latestLabel,
+      neverMarked,
+      isNextStep,
+      isReinforce,
+    });
   }
 
-  const byStep: ByStepRow[] = order.map((o) => {
-    if (o.kind === "milestone") {
-      return { step: o.step, kind: "milestone", remaining: null };
-    }
-    const records: ByStepRecord[] = [];
-    let prevMark: FeedbackMark | undefined;
-    for (const card of sessionCards) {
-      const m = card.marks.find((x) => x.step === o.step);
-      if (!m) continue;
-      records.push({
-        sessionNo: card.sessionNo,
-        date: card.date,
-        instructor,
-        mark: m.mark,
-        change: changeOf(prevMark, m.mark),
-        nextFocus: card.nextFocus,
-        instructorNote: card.instructorNote,
-        feedbackId: card.feedbackId,
+  // sessions cards — chronological then reverse for display
+  const prevMarks = new Map<string, FeedbackMark>();
+  const sessionCardsAsc: HistorySessionCard[] = [];
+  for (const s of sessions) {
+    const marks: SessionMarkRow[] = [];
+    for (const it of s.items ?? []) {
+      if (it.kind !== "step") continue;
+      const marked = it.mark != null;
+      const isNext = Boolean(it.is_next_step);
+      if (!marked && !isNext) continue;
+      const prev = prevMarks.get(it.label);
+      const mark = (it.mark ?? null) as FeedbackMark;
+      const change = marked ? changeOf(prev, mark) : null;
+      marks.push({
+        step: it.label,
+        mark,
+        markLabel:
+          isNext && !marked
+            ? "다음에 배울 단계"
+            : resolveMarkLabel(mark, it.mark_label),
+        change,
+        stepComment: itemComment(it),
+        isNextStep: isNext,
+        isReinforce: isNext && marked,
       });
-      prevMark = m.mark;
+      if (marked) prevMarks.set(it.label, mark);
     }
-    return { step: o.step, kind: "step", records };
+    sessionCardsAsc.push({
+      sessionNo: s._num,
+      date: s.session_date,
+      instructor: customerInstructorLabel(s.instructor_display_name),
+      marks,
+      daySummary:
+        typeof s.day_summary === "string" && s.day_summary.trim()
+          ? s.day_summary.trim()
+          : null,
+      nextFocus:
+        typeof s.next_focus === "string" && s.next_focus.trim()
+          ? s.next_focus.trim()
+          : null,
+      instructorNote:
+        typeof s.instructor_note === "string" && s.instructor_note.trim()
+          ? s.instructor_note.trim()
+          : null,
+      feedbackId: s.id,
+    });
+  }
+  const sessionCards = sessionCardsAsc.slice().reverse();
+
+  const stepRows = byStep.filter(
+    (r): r is Extract<ByStepRow, { kind: "step" }> => r.kind === "step",
+  );
+  const canDoCount = stepRows.filter((r) => r.latestMark === "o").length;
+  const totalSteps = stepRows.length;
+
+  const nextSteps: NextStepChip[] = stepRows
+    .filter((r) => r.isNextStep)
+    .map((r) => ({ label: r.step, isReinforce: r.isReinforce }));
+
+  const nextFocusText =
+    newest && typeof newest.next_focus === "string" && newest.next_focus.trim()
+      ? newest.next_focus.trim()
+      : null;
+
+  // 모든 단계 완료: 다음 체크가 없고, 모든 step에 표시 기록이 있음
+  const allMarked = totalSteps > 0 && stepRows.every((r) => !r.neverMarked);
+  const allStepsDone = allMarked && nextSteps.length === 0;
+
+  const barSlots: StudentHistory["barSlots"] = stepRows.map((r) => {
+    if (r.isNextStep && r.neverMarked) return "next";
+    if (r.isNextStep && r.isReinforce) {
+      // 보강: 표시 색 + 다음으로도 볼 수 있게 표시 우선
+      if (r.latestMark === "o") return "o";
+      if (r.latestMark === "triangle" || r.latestMark === "x") return "tx";
+      return "next";
+    }
+    if (r.latestMark === "o") return "o";
+    if (r.latestMark === "triangle" || r.latestMark === "x") return "tx";
+    return "empty";
   });
 
-  return { byStep, sessions: sessionCards };
+  return {
+    byStep,
+    sessions: sessionCards,
+    canDoCount,
+    totalSteps,
+    barSlots,
+    nextSteps,
+    nextFocusText,
+    allStepsDone,
+  };
 }
 
-/** step_groups API 가 있으면 변환, 없으면 feedbacks 파생. 강사명은 항상 마스킹. */
+function maskApiHistory(history: {
+  byStep?: ByStepRow[];
+  sessions?: HistorySessionCard[];
+}): Pick<StudentHistory, "byStep" | "sessions"> | null {
+  if (!history.byStep?.length && !history.sessions?.length) return null;
+  return {
+    byStep: (history.byStep ?? []).map((r) => {
+      if (r.kind === "milestone") return r;
+      return {
+        ...r,
+        records: (r.records ?? []).map((rec) => ({
+          ...rec,
+          instructor: customerInstructorLabel(rec.instructor),
+          markLabel: rec.markLabel || defaultMarkLabel(rec.mark),
+          stepComment: rec.stepComment ?? null,
+        })),
+        latestMark: r.latestMark ?? r.records?.[0]?.mark ?? null,
+        markLabel:
+          r.markLabel ||
+          defaultMarkLabel(r.latestMark ?? r.records?.[0]?.mark ?? null),
+        neverMarked: r.neverMarked ?? !(r.records && r.records.length),
+        isNextStep: Boolean(r.isNextStep),
+        isReinforce: Boolean(r.isReinforce),
+      };
+    }),
+    sessions: (history.sessions ?? []).map((s) => ({
+      ...s,
+      instructor: customerInstructorLabel(s.instructor),
+      daySummary: s.daySummary ?? null,
+      marks: (s.marks ?? []).map((m) => ({
+        ...m,
+        markLabel: m.markLabel || defaultMarkLabel(m.mark),
+        stepComment: m.stepComment ?? null,
+        isNextStep: Boolean(m.isNextStep),
+        isReinforce: Boolean(m.isReinforce),
+      })),
+    })),
+  };
+}
+
+/**
+ * history.byStep / sessions 가 있으면 강사만 마스킹해 쓰고,
+ * 없으면 feedbacks 에서 파생. 요약 필드는 항상 feedbacks 기준으로 보강.
+ */
 export function resolveStudentHistory(
   student: FeedbackStudent,
   sportFilter?: "ski" | "board",
 ): StudentHistory {
-  if (student.history?.byStep || student.history?.sessions) {
-    return maskHistory(student.history, sportFilter);
-  }
-  if (Array.isArray(student.step_groups) && student.step_groups.length > 0) {
-    return historyFromStepGroups(student.step_groups, sportFilter);
-  }
-  return buildHistoryFromFeedbacks(student.feedbacks ?? [], sportFilter);
-}
+  const fromFb = buildHistoryFromFeedbacks(student.feedbacks ?? [], sportFilter);
+  const masked = student.history ? maskApiHistory(student.history) : null;
+  if (!masked) return fromFb;
 
-function maskHistory(
-  history: Partial<StudentHistory>,
-  sportFilter?: "ski" | "board",
-): StudentHistory {
-  void sportFilter;
-  const instructor = customerInstructorLabel();
-  const byStep = (history.byStep ?? []).map((row) => {
-    if (row.kind === "milestone") return row;
-    return {
-      ...row,
-      records: (row.records ?? []).map((r) => ({
-        ...r,
-        instructor,
-      })),
-    };
-  });
-  const sessions = (history.sessions ?? []).map((s) => ({
-    ...s,
-    instructor,
-  }));
-  return { byStep, sessions };
-}
-
-function historyFromStepGroups(
-  groups: StepGroup[],
-  sportFilter?: "ski" | "board",
-): StudentHistory {
-  const filtered = groups.filter((g) => {
-    if (!sportFilter) return true;
-    return normalizeSport(g.sport) === sportFilter || !g.sport;
-  });
-  // synthesize feedbacks-like sessions from rounds
-  const byId = new Map<
-    string,
-    { date: string; nextFocus: string | null; note: string | null; items: Array<{ label: string; kind: "step"; mark: FeedbackMark }> }
-  >();
-  for (const g of filtered) {
-    if (g.kind !== "step") continue;
-    for (const r of g.rounds ?? []) {
-      if (r.mark == null) continue;
-      const cur = byId.get(r.feedback_id) ?? {
-        date: r.session_date,
-        nextFocus: r.next_focus,
-        note: r.instructor_note,
-        items: [],
-      };
-      cur.items.push({ label: g.label, kind: "step", mark: r.mark });
-      byId.set(r.feedback_id, cur);
-    }
-  }
-  const feedbacks: FeedbackSession[] = Array.from(byId.entries())
-    .map(([id, v]) => ({
-      id,
-      session_date: v.date,
-      sport: sportFilter || "ski",
-      instructor_display_name: customerInstructorLabel(),
-      items: [
-        ...filtered
-          .filter((g) => g.kind === "milestone")
-          .map((g) => ({ label: g.label, kind: "milestone" as const, mark: null })),
-        ...v.items,
-      ],
-      next_focus: v.nextFocus,
-      instructor_note: v.note,
-    }))
-    .sort((a, b) => a.session_date.localeCompare(b.session_date));
-
-  // Prefer byStep order from groups, rebuild via feedbacks for change calc
-  const built = buildHistoryFromFeedbacks(feedbacks, sportFilter);
-  // Reorder byStep to match group order (milestones included)
-  const byLabel = new Map(built.byStep.map((r) => [r.step, r]));
-  const ordered: ByStepRow[] = [];
-  for (const g of filtered) {
-    if (g.kind === "milestone") {
-      ordered.push({ step: g.label, kind: "milestone", remaining: null });
-      continue;
-    }
-    const row = byLabel.get(g.label);
-    if (row && row.kind === "step" && row.records.length > 0) ordered.push(row);
-  }
-  return { byStep: ordered, sessions: built.sessions };
-}
-
-/** "지난 회차보다 ○ 2개 늘었어요" */
-export function progressCompareSummary(history: StudentHistory): string | null {
-  const sessions = history.sessions;
-  if (sessions.length < 2) {
-    if (sessions.length === 1) {
-      const o = sessions[0]!.marks.filter((m) => m.mark === "o").length;
-      return o > 0 ? `이번 회차에서 ○ ${o}개를 기록했어요` : "첫 피드백이 도착했어요";
-    }
-    return null;
-  }
-  const latest = sessions[sessions.length - 1]!;
-  const prev = sessions[sessions.length - 2]!;
-  const delta =
-    latest.marks.filter((m) => m.mark === "o").length -
-    prev.marks.filter((m) => m.mark === "o").length;
-  if (delta > 0) return `지난 회차보다 ○ ${delta}개 늘었어요`;
-  if (delta < 0) return `지난 회차보다 ○ ${Math.abs(delta)}개 줄었어요`;
-  const improved = latest.marks.filter(
-    (m) => m.change && m.change !== "first" && m.change.endsWith("->o"),
-  ).length;
-  if (improved > 0) return `지난 회차보다 ○로 오른 단계가 ${improved}개 있어요`;
-  return "지난 회차와 ○ 개수가 같아요";
-}
-
-export function formatChangeLabel(change: MarkChange): string | null {
-  if (!change) return null;
-  if (change === "first") return "첫 평가";
-  const [a, b] = change.split("->");
-  const sym = (m: string) =>
-    m === "o" ? "○" : m === "triangle" ? "△" : m === "x" ? "✕" : m;
-  return `${sym(a!)} → ${sym(b!)}`;
+  // API history 가 옛 형태여도 요약은 feedbacks 파생값을 쓴다
+  return {
+    ...fromFb,
+    byStep: masked.byStep.length ? masked.byStep : fromFb.byStep,
+    sessions: masked.sessions.length ? masked.sessions : fromFb.sessions,
+  };
 }

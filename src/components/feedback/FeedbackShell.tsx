@@ -9,9 +9,7 @@ type FeedbackShellProps = {
 export function FeedbackShell({ children, className = "" }: FeedbackShellProps) {
   return (
     <div className={`fb-root min-h-[70vh] overflow-x-clip ${className}`.trim()}>
-      <div className="mx-auto w-full max-w-lg px-4 py-6 sm:py-8 md:py-10">
-        {children}
-      </div>
+      <div className="container page customer">{children}</div>
     </div>
   );
 }
