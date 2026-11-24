@@ -1,0 +1,71 @@
+:root {
+  --space-3xs: 2px; --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px; --space-4xl: 144px;
+  --text-xs: 0.75rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.2rem; --text-xl: 1.44rem; --text-2xl: 1.728rem; --text-3xl: 2.074rem;
+  --text-display-s: 1.44rem; --text-display: 1.728rem; --text-section: 1.2rem; --text-title: 1rem; --text-lead: 1rem;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); --ease-in: cubic-bezier(0.7, 0, 0.84, 0); --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-micro: 120ms; --dur-short: 220ms; --dur-long: 420ms;
+  --container: 1120px; --gutter: 40px; --gap-columns: 32px; --section-gap-s: 120px; --section-gap: 144px; --section-gap-l: 176px;
+  --z-base: 1; --z-raised: 10; --z-dropdown: 100; --z-sticky: 200; --z-sticky-nav: 300; --z-modal: 400; --z-toast: 500; --z-tooltip: 600;
+
+  /* Ride or Die Figma "color system" library, collection Primitive (values read from the 컬러 guide, INSTAGRAM file node 49:47) */
+  --rod-blue-900: #0A1833; --rod-blue-800: #143166; --rod-blue-700: #1E4999; --rod-blue-600: #1254CF; --rod-blue-500: #327AFF;
+  --rod-blue-100: #D6E4FF; --rod-blue-50: #EBF2FF;
+  --rod-neutral-800: #464A4D; --rod-neutral-700: #5E6366; --rod-neutral-500: #8C9499;
+  --rod-neutral-300: #BBC5CC; --rod-neutral-200: #E8EEF2; --rod-neutral-100: #F2F8FC; --rod-neutral-0: #FFFFFF;
+
+  /* admin panel brand, cpppowercode/admin src/app/globals.css --color-brand-* (read only) */
+  --adm-brand-50: #eef1ff; --adm-brand-100: #e0e6ff; --adm-brand-500: #465fff; --adm-brand-600: #3646f0; --adm-brand-700: #2b36d0; --adm-brand-800: #252ea8;
+
+  /* roles */
+  --color-paper: var(--rod-neutral-0);
+  --color-paper-2: var(--rod-neutral-100);
+  --color-paper-3: var(--rod-neutral-200);
+  --color-panel: var(--rod-neutral-0);
+  --color-ink: var(--rod-blue-900);
+  --color-ink-2: var(--rod-neutral-800);
+  --color-muted: var(--rod-neutral-700);
+  --color-rule: var(--rod-neutral-200);
+  --color-rule-strong: var(--rod-neutral-300);
+  --color-field-edge: var(--rod-neutral-500);
+  --color-track: var(--rod-neutral-200);
+
+  --color-brand: var(--adm-brand-500);
+  --color-accent: var(--rod-blue-600);
+  --color-accent-deep: var(--adm-brand-700);
+  --color-accent-deeper: var(--adm-brand-800);
+  --color-accent-ink: var(--rod-neutral-0);
+  --color-accent-soft: var(--adm-brand-50);
+  --color-accent-soft-2: var(--adm-brand-100);
+  --color-accent-text: var(--adm-brand-600);
+  --color-focus: var(--adm-brand-500);
+
+  /* states, Hallmark names (error, success from the scaffold; warning and its soft as the sangtti install adds) */
+  --color-error: oklch(52% 0.19 27);
+  --color-error-soft: oklch(95.5% 0.025 27);
+  --color-success: oklch(50% 0.12 150);
+  --color-success-soft: oklch(95.5% 0.03 150);
+  --color-warning: oklch(64% 0.18 48);
+  --color-warning-text: oklch(52% 0.16 42);
+  --color-warning-soft: oklch(96.5% 0.03 60);
+  --color-warning-edge: oklch(84% 0.08 55);
+  --color-warning-soft-2: oklch(93% 0.05 58);
+
+  --font-display: "Pretendard Variable", Pretendard, ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Pretendard Variable", Pretendard, ui-sans-serif, system-ui, sans-serif;
+  --font-outlier: var(--font-body);
+  --radius-card: 16px; --radius-part: 12px; --radius-pill: 999px; --radius-control: 999px; --rule-hair: 1px;
+  --shadow-card: 0 1px 2px oklch(20% 0.03 262 / 0.08);
+  --shadow-thumb: 0 1px 2px oklch(20% 0.03 262 / 0.14);
+  --tracking-display: -0.02em;
+}
+/* theme block for the v4 to v5 comparison sheet only: the v4 blues */
+.theme-v4 {
+  --color-brand: var(--rod-blue-500);
+  --color-accent: var(--rod-blue-600);
+  --color-accent-deep: var(--rod-blue-700);
+  --color-accent-deeper: var(--rod-blue-800);
+  --color-accent-soft: var(--rod-blue-50);
+  --color-accent-soft-2: var(--rod-blue-100);
+  --color-accent-text: var(--rod-blue-600);
+  --color-focus: var(--rod-blue-500);
+}
