@@ -1,0 +1,219 @@
+/**
+ * 손님 피드백·주니어 페이지 전용 토큰.
+ * 출처: cpppowercode/admin — src/app/globals.css brand/gray + src/styles/hallmark-tokens.css
+ * .fb-root 스코프만 적용해 기존 홈페이지는 건드리지 않는다.
+ */
+
+.fb-root {
+  /* Admin brand (not pink theme) */
+  --fb-brand: #465fff;
+  --fb-brand-hover: #3646f0;
+  --fb-brand-subtle: #eef1ff;
+  --fb-brand-25: #f5f7ff;
+
+  --fb-bg: #f7f7f9;
+  --fb-surface: #ffffff;
+  --fb-border: #e4e4e9;
+  --fb-border-subtle: #f0f0f3;
+
+  --fb-text: #18181d;
+  --fb-text-secondary: #6e6e7a;
+  --fb-text-tertiary: #9d9da8;
+
+  --fb-success: #12b76a;
+  --fb-success-bg: #ecfdf3;
+  --fb-warning: #f79009;
+  --fb-warning-bg: #fffaeb;
+  --fb-error: #f04438;
+  --fb-error-bg: #fef3f2;
+
+  --fb-shadow-sm: 0 1px 2px 0 rgba(16, 16, 20, 0.05),
+    0 1px 3px 0 rgba(16, 16, 20, 0.04);
+  --fb-shadow-md: 0 4px 12px -2px rgba(16, 16, 20, 0.08),
+    0 2px 4px -2px rgba(16, 16, 20, 0.04);
+
+  --fb-radius: 12px;
+  --fb-radius-sm: 8px;
+
+  color: var(--fb-text);
+  background: var(--fb-bg);
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+    system-ui, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+}
+
+.fb-root .fb-card {
+  background: var(--fb-surface);
+  border: 1px solid var(--fb-border);
+  border-radius: var(--fb-radius);
+  box-shadow: var(--fb-shadow-sm);
+}
+
+.fb-root .fb-card-elevated {
+  background: var(--fb-surface);
+  border: 1px solid var(--fb-border);
+  border-radius: var(--fb-radius);
+  box-shadow: var(--fb-shadow-md);
+}
+
+.fb-root .fb-btn-primary {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 10px;
+  padding: 0 1.25rem;
+  font-size: 16px;
+  font-weight: 600;
+  background: var(--fb-brand);
+  color: #fff;
+  border: none;
+  transition: background-color 150ms ease, transform 150ms ease;
+}
+
+.fb-root .fb-btn-primary:hover {
+  background: var(--fb-brand-hover);
+}
+
+.fb-root .fb-btn-primary:active {
+  transform: scale(0.98);
+}
+
+.fb-root .fb-btn-primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.fb-root .fb-btn-ghost {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 10px;
+  padding: 0 1rem;
+  font-size: 15px;
+  font-weight: 500;
+  background: var(--fb-surface);
+  color: var(--fb-text);
+  border: 1px solid var(--fb-border);
+}
+
+.fb-root .fb-input {
+  width: 100%;
+  min-height: 48px;
+  border-radius: var(--fb-radius-sm);
+  border: 1px solid var(--fb-border);
+  background: #fff;
+  padding: 0.75rem 0.875rem;
+  font-size: 16px;
+  color: var(--fb-text);
+}
+
+.fb-root .fb-input:focus {
+  outline: 2px solid var(--fb-brand);
+  outline-offset: 1px;
+  border-color: var(--fb-brand);
+}
+
+.fb-root .fb-mark-o {
+  color: var(--fb-success);
+}
+
+.fb-root .fb-mark-triangle {
+  color: var(--fb-warning);
+}
+
+.fb-root .fb-mark-x {
+  color: var(--fb-error);
+}
+
+.fb-root .fb-mark-null {
+  color: var(--fb-text-tertiary);
+}
+
+.fb-root .fb-milestone {
+  display: flex;
+  align-items: stretch;
+  gap: 0.75rem;
+  margin: 0.75rem 0;
+}
+
+.fb-root .fb-milestone-bar {
+  width: 4px;
+  border-radius: 2px 0 0 2px;
+  background: var(--fb-brand);
+  flex-shrink: 0;
+}
+
+.fb-root .fb-milestone-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fb-brand);
+  padding: 0.35rem 0;
+}
+
+.fb-root .fb-progress-track {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.fb-root .fb-progress-step {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  background: var(--fb-border-subtle);
+  border: 1px solid var(--fb-border);
+}
+
+.fb-root .fb-progress-step.is-o {
+  background: var(--fb-success);
+  border-color: var(--fb-success);
+}
+
+.fb-root .fb-progress-step.is-triangle {
+  background: var(--fb-warning);
+  border-color: var(--fb-warning);
+}
+
+.fb-root .fb-progress-step.is-x {
+  background: var(--fb-error-bg);
+  border-color: var(--fb-error);
+}
+
+.fb-root .fb-sport-toggle {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--fb-border-subtle);
+  border: 1px solid var(--fb-border);
+  gap: 2px;
+}
+
+.fb-root .fb-sport-toggle button {
+  min-height: 36px;
+  padding: 0 0.9rem;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fb-text-secondary);
+  background: transparent;
+  border: none;
+}
+
+.fb-root .fb-sport-toggle button[aria-pressed="true"] {
+  background: #fff;
+  color: var(--fb-brand);
+  box-shadow: var(--fb-shadow-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fb-root .fb-btn-primary,
+  .fb-root .fb-btn-ghost {
+    transition: none;
+  }
+}
