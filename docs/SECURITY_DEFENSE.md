@@ -8,7 +8,7 @@
 | 보호 | 대상 | 방식 |
 |---|---|---|
 | 레이트리밋 | `/api/bookings`, availability, 결제 prepare/confirm/return, 현금영수증, 문의, 챗, 웹훅 | 인스턴스 메모리 (추가 비용 없음, 유료 Redis 미사용) |
-| 웹훅 서명 | `/api/webhooks/kcp`, `/api/webhooks/kakao` | 시크릿 없으면 **fail-closed(503)** |
+| 웹훅 서명 | `/api/webhooks/kcp` | 시크릿 없으면 **fail-closed(503)** |
 | 본문 크기 | JSON API 32KiB, 웹훅/폼 64KiB | `Content-Length` + 실제 바이트 |
 | 입력 검증 | 예약·결제·문의·현금영수증·챗 | 길이·형식 제한 |
 | 업로드 | (현재 공개 업로드 없음) | MIME·2MiB 헬퍼 준비 |
@@ -19,7 +19,6 @@
 | 환경변수 | 운영 존재 여부 (이름만) | 배포 시 영향 |
 |---|---|---|
 | `KCP_NOTI_SECRET` | **없음** | 기존 결제(confirm / Ret_URL)는 **그대로 동작**. 새 `/api/webhooks/kcp` 만 시크릿 없으면 거부. KCP에 통보 URL을 등록하기 **전에** 시크릿을 넣어야 함. |
-| `KAKAO_WEBHOOK_SECRET` | **없음** | 기존 알림(Solapi 발신)·채널톡은 **그대로**. 새 `/api/webhooks/kakao` 만 시크릿 없으면 거부. |
 
 **KCP 키·모드(`NEXT_PUBLIC_KCP_*`, `KCP_ENV`, `KCP_CERT_INFO`)는 변경하지 않았습니다.**
 
@@ -37,8 +36,9 @@ TURNSTILE_SECRET_KEY=
 
 ```env
 KCP_NOTI_SECRET=긴랜덤문자열
-KAKAO_WEBHOOK_SECRET=긴랜덤문자열
 ```
+
+채널톡은 공개 플러그인 키만 쓰며 인바운드 웹훅 시크릿/서명 검사는 없습니다.
 
 호출 측은 `Authorization: Bearer <시크릿>` 또는 `X-Webhook-Secret: <시크릿>`  
 또는 `X-Webhook-Signature: sha256=<HMAC-SHA256(body)>` 를 보냅니다.
@@ -90,7 +90,6 @@ Vercel 프로젝트 `rideordie` 환경변수 조사 결과 (값 미열람):
 | `TOSS_SECRET_KEY` | ✅ | ✅ **동일 항목** | 레거시, 공유 |
 | `KCP_ENV` / `NEXT_PUBLIC_KCP_*` | ✅ | ✅ | 테스트 설정 공유 |
 | `KCP_NOTI_SECRET` | ❌ | ❌ | 미설정 |
-| `KAKAO_WEBHOOK_SECRET` | ❌ | ❌ | 미설정 |
 | `TURNSTILE_*` | ❌ | ❌ | 미설정(봇 검증 OFF) |
 
 ### Preview 분리 제안 (문서만 — 지금 바꾸지 않음)

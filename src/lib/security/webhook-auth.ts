@@ -5,7 +5,6 @@ import crypto from "crypto";
  *
  * 환경변수:
  * - KCP_NOTI_SECRET: KCP 결과 통보 (/api/webhooks/kcp)
- * - KAKAO_WEBHOOK_SECRET: 카카오/알림톡 관련 인바운드 웹훅 (/api/webhooks/kakao)
  */
 
 export type WebhookAuthResult =
@@ -78,10 +77,6 @@ export function verifyWebhookSignature(options: {
 
 export function kcpNotiSecret(env: NodeJS.ProcessEnv = process.env): string | undefined {
   return env.KCP_NOTI_SECRET?.trim() || undefined;
-}
-
-export function kakaoWebhookSecret(env: NodeJS.ProcessEnv = process.env): string | undefined {
-  return env.KAKAO_WEBHOOK_SECRET?.trim() || undefined;
 }
 
 export type WebhookAuthFailReason = "missing_secret" | "missing_signature" | "invalid_signature";

@@ -72,6 +72,5 @@ export const RATE_LIMITS = {
   chat: { windowMs: 60_000, max: 30 },
   seasonOrder: { windowMs: 60_000, max: 10 },
   webhooksKcp: { windowMs: 60_000, max: 60 },
-  webhooksKakao: { windowMs: 60_000, max: 60 },
   legacyOrders: { windowMs: 60_000, max: 5 },
 } as const satisfies Record<string, RateLimitConfig>;
