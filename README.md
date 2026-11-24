@@ -79,7 +79,14 @@ KCP_CERT_INFO=
 
 # 채널톡 웹 메신저 (선택 — 없으면 코드 기본 공개 키 사용)
 NEXT_PUBLIC_CHANNELTALK_PLUGIN_KEY=
+
+# 트래픽·봇 방어 (선택 — 없으면 꺼짐, 예약은 그대로 동작)
+# NEXT_PUBLIC_TURNSTILE_SITE_KEY=
+# TURNSTILE_SECRET_KEY=
+# KCP_NOTI_SECRET=          # /api/webhooks/kcp (없으면 fail-closed)
 ```
+
+트래픽 공격 방어·Vercel 무료 Firewall 안내: [`docs/SECURITY_DEFENSE.md`](docs/SECURITY_DEFENSE.md).
 
 인스타그램 URL은 코드 상수입니다: `src/lib/site.ts`의 `INSTAGRAM_URL` (`https://www.instagram.com/ski.rideordie/`).
 

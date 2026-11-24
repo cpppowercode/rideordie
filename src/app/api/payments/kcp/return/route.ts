@@ -3,6 +3,8 @@ import iconv from "iconv-lite";
 import { INTENT_COOKIE, readBookingIntent } from "@/lib/booking-intent";
 import { approveAndFinalizeBooking } from "@/lib/booking-finalize";
 import { requestOrigin } from "@/lib/request-origin";
+import { RATE_LIMITS } from "@/lib/security/rate-limit";
+import { DEFAULT_WEBHOOK_BODY_LIMIT, enforceRateLimit, readRawBody } from "@/lib/security/request";
 
 function failRedirect(request: NextRequest, code: string, order?: string) {
   const url = new URL("/checkout/fail", requestOrigin(request.headers));
@@ -12,7 +14,13 @@ function failRedirect(request: NextRequest, code: string, order?: string) {
 }
 
 async function handleReturn(request: NextRequest) {
-  const buf = Buffer.from(await request.arrayBuffer());
+  const limited = enforceRateLimit(request, "paymentsReturn", RATE_LIMITS.paymentsReturn);
+  if (limited) return limited;
+
+  const raw = await readRawBody(request, DEFAULT_WEBHOOK_BODY_LIMIT);
+  if (!raw.ok) return failRedirect(request, "PAYLOAD");
+
+  const buf = raw.buf;
   let text = iconv.decode(buf, "euc-kr");
   if (!text.includes("enc_data") && !text.includes("res_cd")) {
     text = buf.toString("utf8");
@@ -32,6 +40,9 @@ async function handleReturn(request: NextRequest) {
   const payMethod = params.get("pay_method") || params.get("use_pay_method") || "CARD";
 
   if (!enc_data || !enc_info || !tran_cd || !orderId) {
+    return failRedirect(request, "INVALID");
+  }
+  if (enc_data.length > 16_000 || enc_info.length > 8_000 || orderId.length > 64) {
     return failRedirect(request, "INVALID");
   }
 

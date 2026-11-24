@@ -4,6 +4,9 @@ import { checkBookingAvailability, parseBookingBody } from "@/lib/booking-checks
 import { createBookingIntent, INTENT_COOKIE } from "@/lib/booking-intent";
 import { BadgeFeeError, payBreakdown } from "@/lib/badge-fee";
 import { getSeasonSettings } from "@/lib/season-settings";
+import { checkBotGuard, HONEYPOT_FIELD } from "@/lib/security/bot-guard";
+import { RATE_LIMITS } from "@/lib/security/rate-limit";
+import { clientIp, enforceRateLimit, readJsonBody } from "@/lib/security/request";
 
 /**
  * 결제 전 단계: 예약 정보를 확인만 하고 저장·알림은 하지 않는다.
@@ -11,7 +14,24 @@ import { getSeasonSettings } from "@/lib/season-settings";
  */
 export async function POST(request: NextRequest) {
   try {
-    const body = (await request.json()) as Partial<BookingInput>;
+    const limited = enforceRateLimit(request, "bookings", RATE_LIMITS.bookings);
+    if (limited) return limited;
+
+    const parsed = await readJsonBody<Partial<BookingInput> & Record<string, unknown>>(request);
+    if (!parsed.ok) return parsed.response;
+    const body = parsed.data;
+
+    const bot = await checkBotGuard(
+      {
+        honeypot: body[HONEYPOT_FIELD] ?? body.honeypot,
+        turnstileToken: body.turnstileToken ?? body["cf-turnstile-response"],
+      },
+      { ip: clientIp(request) },
+    );
+    if (!bot.ok) {
+      return NextResponse.json({ error: bot.error }, { status: bot.status });
+    }
+
     const checked = await checkBookingAvailability(parseBookingBody(body));
     if (!checked.ok) {
       return NextResponse.json({ error: checked.error }, { status: checked.status });

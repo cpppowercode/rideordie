@@ -15,6 +15,8 @@ import {
   LESSON_DURATIONS,
   type LessonDurationHours,
 } from '@/lib/hours';
+import { HONEYPOT_FIELD, shouldShowTurnstile } from '@/lib/security/bot-guard';
+import { TurnstileWidget } from '@/components/security/TurnstileWidget';
 
 type Step = 1 | 2 | 3;
 
@@ -113,6 +115,10 @@ export function BookingForm({ initialResort, seasonSettings = UNSET_SETTINGS }: 
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  /** 봇 허니팟 — 사람은 비워 둔다. */
+  const [honeypot, setHoneypot] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const turnstileOn = shouldShowTurnstile();
 
   const weeks = useMemo(() => monthMatrix(viewYear, viewMonth), [viewYear, viewMonth]);
   const monthLabel = `${viewYear}년 ${viewMonth + 1}월`;
@@ -269,6 +275,8 @@ export function BookingForm({ initialResort, seasonSettings = UNSET_SETTINGS }: 
           durationHours,
           startHour,
           notes,
+          [HONEYPOT_FIELD]: honeypot,
+          turnstileToken: turnstileToken || undefined,
         }),
       });
       const data = await res.json();
@@ -622,6 +630,25 @@ export function BookingForm({ initialResort, seasonSettings = UNSET_SETTINGS }: 
                 </div>
               ))}
             </dl>
+            {/* 허니팟: 스크린리더·자동완성에서 숨김. 봇만 채운다. */}
+            <div
+              aria-hidden="true"
+              style={{ position: 'absolute', left: '-10000px', top: 'auto', width: 1, height: 1, overflow: 'hidden' }}
+            >
+              <label>
+                회사 홈페이지
+                <input
+                  type="text"
+                  name={HONEYPOT_FIELD}
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={honeypot}
+                  onChange={(e) => setHoneypot(e.target.value)}
+                  data-testid="booking-honeypot"
+                />
+              </label>
+            </div>
+            {turnstileOn ? <TurnstileWidget onToken={setTurnstileToken} /> : null}
           </motion.div>
         )}
       </AnimatePresence>
