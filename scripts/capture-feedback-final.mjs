@@ -49,12 +49,18 @@ async function main() {
   const n = await folds.count();
   console.log("folds", n);
   if (n > 0) {
-    const sum = folds.nth(0).locator("summary");
-    await sum.scrollIntoViewIfNeeded();
-    await sum.click({ force: true });
-    await page.waitForTimeout(250);
-    await shot(page, "pc_03_코멘트_펼침", 1280, 800);
-    await shot(page, "phone_03_코멘트_펼침", 390, 844);
+    try {
+      const openable = folds.filter({ has: page.locator("summary") }).first();
+      await openable.evaluate((el) => {
+        el.scrollIntoView({ block: "center" });
+        el.open = true;
+      });
+      await page.waitForTimeout(250);
+      await shot(page, "pc_03_코멘트_펼침", 1280, 800);
+      await shot(page, "phone_03_코멘트_펼침", 390, 844);
+    } catch (e) {
+      console.warn("fold open skipped", String(e).slice(0, 120));
+    }
   }
 
   for (const [key, label] of [
