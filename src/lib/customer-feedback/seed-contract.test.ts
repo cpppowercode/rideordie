@@ -1,5 +1,5 @@
 /**
- * feedback-grades-seed.json 계약 — 사장님 확정(스키 15단계·after_step) 고정.
+ * feedback-grades-seed.json 계약 — 사장님 확정(스키 13단계·스템턴 통합·after_step) 고정.
  * 옛 note/position_owner_default 보다 after_step 이 우선.
  */
 import assert from "node:assert/strict";
@@ -26,13 +26,20 @@ const skiSteps = seed.steps
   .filter((s) => s.sport === "ski" && s.kind === "step")
   .sort((a, b) => a.sort_order - b.sort_order);
 
-assert.equal(skiSteps.length, 15, "스키 단계는 15개");
-assert.equal(skiSteps[5]!.code, "SKI_PARALLEL");
-assert.equal(skiSteps[6]!.code, "SKI_BASIC_SHORT");
-assert.equal(skiSteps[7]!.code, "SKI_DYNAMIC");
-assert.equal(skiSteps[8]!.code, "SKI_DYNAMIC_SHORT");
+assert.equal(skiSteps.length, 13, "스키 단계는 13개(스템턴 통합)");
+assert.equal(skiSteps[0]!.code, "SKI_SNOWPLOW");
+assert.equal(skiSteps[1]!.code, "SKI_SNOWPLOW_TURN");
+assert.equal(skiSteps[2]!.code, "SKI_STEM_TURN");
+assert.equal(skiSteps[3]!.code, "SKI_PARALLEL");
+assert.equal(skiSteps[4]!.code, "SKI_BASIC_SHORT");
+assert.equal(skiSteps[5]!.code, "SKI_DYNAMIC");
+assert.equal(skiSteps[6]!.code, "SKI_DYNAMIC_SHORT");
+assert.ok(skiSteps.some((s) => s.code === "SKI_STEM_TURN"));
 assert.ok(skiSteps.some((s) => s.code === "SKI_BASIC_SHORT"));
 assert.ok(skiSteps.some((s) => s.code === "SKI_DYNAMIC_SHORT"));
+assert.ok(!skiSteps.some((s) => s.code === "SKI_STEM_EARLY"));
+assert.ok(!skiSteps.some((s) => s.code === "SKI_STEM_MID"));
+assert.ok(!skiSteps.some((s) => s.code === "SKI_STEM_LATE"));
 
 const boardSteps = seed.steps.filter((s) => s.sport === "board" && s.kind === "step");
 assert.equal(boardSteps.length, 14, "보드는 기존 14단계 유지");
@@ -46,9 +53,10 @@ assert.equal(skiMs.SKI_KSIA_L2, "SKI_GATE");
 
 const jr = Object.fromEntries(
   seed.junior_grades
-    .filter((g) => g.sport === "ski" && [4, 5, 6, 7].includes(g.grade))
+    .filter((g) => g.sport === "ski" && [3, 4, 5, 6, 7].includes(g.grade))
     .map((g) => [g.grade, g.required_steps[0]]),
 );
+assert.equal(jr[3], "SKI_STEM_TURN");
 assert.equal(jr[4], "SKI_PARALLEL");
 assert.equal(jr[5], "SKI_BASIC_SHORT");
 assert.equal(jr[6], "SKI_DYNAMIC");
@@ -80,6 +88,9 @@ function buildItems(sport: string) {
 
 const skiItems = buildItems("ski");
 const idx = (code: string) => skiItems.findIndex((i) => i.code === code);
+assert.ok(idx("SKI_STEM_TURN") >= 0);
+assert.equal(skiItems[idx("SKI_SNOWPLOW_TURN") + 1]!.code, "SKI_STEM_TURN");
+assert.equal(skiItems[idx("SKI_STEM_TURN") + 1]!.code, "SKI_PARALLEL");
 assert.ok(idx("SKI_BASIC_SHORT") >= 0);
 assert.equal(skiItems[idx("SKI_BASIC_SHORT") + 1]!.code, "SKI_KSIA_L1");
 assert.equal(skiItems[idx("SKI_BASIC_SHORT") + 2]!.code, "SKI_SBAK_T1");
@@ -89,4 +100,4 @@ assert.equal(skiItems[idx("SKI_GATE") + 2]!.code, "SKI_FREE_RUN");
 assert.equal(skiItems[idx("SKI_PARALLEL") + 1]!.code, "SKI_BASIC_SHORT");
 assert.equal(skiItems[idx("SKI_DYNAMIC") + 1]!.code, "SKI_DYNAMIC_SHORT");
 
-console.log("seed-contract.test.ts: ok (ski 15 steps, after_step)");
+console.log("seed-contract.test.ts: ok (ski 13 steps, SKI_STEM_TURN, after_step)");

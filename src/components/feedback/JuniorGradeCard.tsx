@@ -44,7 +44,7 @@ export function JuniorGradeCard({ progress }: JuniorGradeCardProps) {
           href="/junior"
           className="mt-3 inline-flex text-[14px] font-semibold text-[var(--fb-brand)] hover:text-[var(--fb-brand-hover)]"
         >
-          주니어 등급 알아보기 →
+          주니어 등급 알아보기
         </Link>
       </div>
     </aside>

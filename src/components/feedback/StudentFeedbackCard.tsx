@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import {
   availableSports,
   filterFeedbacksBySport,
+  formatSessionDate,
   givenNameOnly,
   latestFeedback,
   sportLabel,
@@ -14,7 +15,6 @@ import type { FeedbackStudent } from "@/lib/customer-feedback/types";
 import { BadgeRack } from "./BadgeRack";
 import { HistoryViews } from "./HistoryViews";
 import { JuniorGradeCard } from "./JuniorGradeCard";
-import { ProgressSummary } from "./ProgressSummary";
 
 type StudentFeedbackCardProps = {
   student: FeedbackStudent;
@@ -49,22 +49,29 @@ export function StudentFeedbackCard({ student }: StudentFeedbackCardProps) {
   const badges = visibleBadges(student);
 
   return (
-    <section className="space-y-3" data-student-key={student.student_key}>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-[20px] font-semibold tracking-tight text-[var(--fb-text)]">
-            {name}
-          </h2>
-          <p className="text-[13px] text-[var(--fb-text-secondary)]">
-            {sportLabel(student.sport)}
-            {latest ? ` · 최근 ${latest.session_date}` : null}
-          </p>
-        </div>
+    <div className="customer" data-student-key={student.student_key}>
+      <div className="head">
+        <h1>
+          {name} {sportLabel(activeSport)} 기록
+        </h1>
+        <dl className="meta">
+          {latest ? (
+            <div>
+              <dt>최근 강습</dt>
+              <dd>{formatSessionDate(latest.session_date).replace(/\s/g, "")}</dd>
+            </div>
+          ) : null}
+          <div>
+            <dt>기록</dt>
+            <dd>{sessions.length}회</dd>
+          </div>
+        </dl>
         {showToggle ? (
           <div
-            className="fb-sport-toggle w-full max-w-[220px] shrink-0"
+            className="toggle"
             role="group"
             aria-label="종목 선택"
+            style={{ marginTop: "var(--space-sm)" }}
           >
             {sports.map((s) => (
               <button
@@ -82,15 +89,11 @@ export function StudentFeedbackCard({ student }: StudentFeedbackCardProps) {
 
       <BadgeRack badges={badges} />
 
-      {sessions.length > 1 && student.progress ? (
-        <ProgressSummary progress={student.progress} />
-      ) : null}
-
       {student.is_junior_eligible ? (
         <JuniorGradeCard progress={student.progress} />
       ) : null}
 
       <HistoryViews history={history} />
-    </section>
+    </div>
   );
 }

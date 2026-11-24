@@ -1,247 +1,365 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import {
+  ALL_STEPS_DONE_LABEL,
   formatSessionDate,
-  markLabel,
-  markSymbol,
+  REINFORCE_BADGE_LABEL,
 } from "@/lib/customer-feedback/display";
 import {
   formatChangeLabel,
-  progressCompareSummary,
   type ByStepRecord,
   type ByStepRow,
   type HistorySessionCard,
   type StudentHistory,
 } from "@/lib/customer-feedback/history";
 import { INSTRUCTOR_PUBLIC_LABEL } from "@/lib/customer-feedback/instructor";
-import type { FeedbackMark } from "@/lib/customer-feedback/types";
+import { CommentFold } from "./CommentFold";
+import { MarkGlyph } from "./MarkGlyph";
 
-function markClass(mark: FeedbackMark): string {
-  if (mark === "o") return "fb-mark-o";
-  if (mark === "triangle") return "fb-mark-triangle";
-  if (mark === "x") return "fb-mark-x";
-  return "fb-mark-null";
+function shortDate(iso: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso.trim());
+  if (!m) return iso;
+  return `${m[2]}.${m[3]}`;
 }
 
-function ChangeBadge({ change }: { change: ByStepRecord["change"] }) {
+function weekdayKo(iso: string): string {
+  const d = new Date(`${iso.trim()}T12:00:00`);
+  if (Number.isNaN(d.getTime())) return "";
+  return ["일", "월", "화", "수", "목", "금", "토"][d.getDay()] ?? "";
+}
+
+function ChangeTag({ change }: { change: ByStepRecord["change"] }) {
   const label = formatChangeLabel(change);
   if (!label) return null;
-  const first = change === "first";
-  return (
-    <span
-      className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[12px] font-semibold ${
-        first
-          ? "bg-[var(--fb-brand-subtle)] text-[var(--fb-brand)]"
-          : "bg-[var(--fb-warning-bg)] text-[var(--fb-warning)]"
-      }`}
-      data-testid={first ? "first-eval" : "mark-change"}
-    >
-      {label}
-    </span>
-  );
+  return <span className="chg-tag">{label}</span>;
 }
 
-function ByStepRecordRow({ record }: { record: ByStepRecord }) {
-  return (
-    <li className="flex flex-wrap items-center gap-x-2 gap-y-1.5 border-t border-[var(--fb-border-subtle)] py-2.5 first:border-t-0">
-      <span className="text-[13px] font-semibold text-[var(--fb-text)]">
-        {record.sessionNo}회차
-      </span>
-      <span className="text-[12px] text-[var(--fb-text-secondary)]">
-        {formatSessionDate(record.date)}
-      </span>
-      <span className="text-[12px] text-[var(--fb-text-tertiary)]">
-        {INSTRUCTOR_PUBLIC_LABEL}
-      </span>
-      <span
-        className={`text-[15px] font-semibold ${markClass(record.mark)}`}
-        title={markLabel(record.mark)}
-      >
-        {markSymbol(record.mark)} {markLabel(record.mark)}
-      </span>
-      <ChangeBadge change={record.change} />
-    </li>
-  );
-}
+function SummaryBlock({ history }: { history: StudentHistory }) {
+  const cols = Math.max(history.totalSteps, 1);
+  const showNextWell = history.nextSteps.length > 0;
 
-function ByStepBlock({ row }: { row: ByStepRow }) {
-  if (row.kind === "milestone") {
-    return (
-      <div className="fb-milestone" role="separator" aria-label={row.step}>
-        <div className="fb-milestone-bar" aria-hidden />
-        <div className="fb-milestone-label">] {row.step}</div>
+  return (
+    <section className="sum" aria-labelledby="fb-sum-h">
+      <h2 id="fb-sum-h" className="visually-hidden">
+        요약
+      </h2>
+      <div className="sum__fig">
+        <span className="big">{history.canDoCount}</span>
+        <span className="note">
+          {history.totalSteps}단계 중 할 수 있는 단계
+        </span>
       </div>
-    );
-  }
-  if (!row.records.length) return null;
-  return (
-    <section className="fb-card p-4" data-step-label={row.step}>
-      <h3 className="fb-step-label text-[16px] font-semibold text-[var(--fb-text)]">
-        {row.step}
-      </h3>
-      <ul className="mt-1">
-        {row.records.map((r) => (
-          <ByStepRecordRow key={`${r.feedbackId}-${r.sessionNo}`} record={r} />
+      <div
+        className="bars"
+        style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
+        aria-hidden="true"
+      >
+        {history.barSlots.map((slot, i) => (
+          <span
+            key={i}
+            className={
+              slot === "o"
+                ? "b-o"
+                : slot === "tx"
+                  ? "b-t"
+                  : slot === "next"
+                    ? "b-next"
+                    : undefined
+            }
+          />
         ))}
-      </ul>
+      </div>
+
+      {history.allStepsDone ? (
+        <div className="nextwell" data-testid="all-steps-done">
+          <span className="done">{ALL_STEPS_DONE_LABEL}</span>
+          <p>자율활강까지 표시가 있어서 미리 체크할 다음 단계가 없어요.</p>
+        </div>
+      ) : null}
+
+      {showNextWell ? (
+        <div className="nextwell" data-testid="next-well">
+          <span className="nexttag">다음에 배울 단계</span>
+          {history.nextSteps.map((n) => (
+            <strong key={n.label}>
+              {n.label}
+              {n.isReinforce ? (
+                <>
+                  {" "}
+                  <span className="again">{REINFORCE_BADGE_LABEL}</span>
+                </>
+              ) : null}
+            </strong>
+          ))}
+          {history.nextFocusText ? (
+            <p className="fb-say-long">{history.nextFocusText}</p>
+          ) : null}
+        </div>
+      ) : null}
+
+      <dl className="legend">
+        <div>
+          <dt>
+            <MarkGlyph mark="o" />
+          </dt>
+        </div>
+        <div>
+          <dt>
+            <MarkGlyph mark="triangle" />
+          </dt>
+        </div>
+        <div>
+          <dt>
+            <MarkGlyph mark="x" />
+          </dt>
+        </div>
+        <div>
+          <dt>
+            <span className="sw sw--next" />
+          </dt>
+          <dd>다음에 배울 단계</dd>
+        </div>
+        <div>
+          <dt>
+            <span className="sw sw--gray" />
+          </dt>
+          <dd>아직 배우지 않은 단계</dd>
+        </div>
+      </dl>
     </section>
   );
 }
 
-function SessionCard({
-  session,
-  isLatest,
-  defaultOpen,
+function ByStepBlock({
+  row,
+  nextFocusText,
 }: {
-  session: HistorySessionCard;
-  isLatest: boolean;
-  defaultOpen: boolean;
+  row: Extract<ByStepRow, { kind: "step" }>;
+  nextFocusText: string | null;
 }) {
-  const [open, setOpen] = useState(defaultOpen);
-  return (
-    <article
-      className={`fb-card overflow-hidden ${
-        isLatest ? "border-[var(--fb-brand)] shadow-[var(--fb-shadow-sm)]" : ""
-      }`}
-      data-session-no={session.sessionNo}
-      data-latest={isLatest ? "true" : "false"}
-    >
-      <button
-        type="button"
-        className="flex w-full items-start gap-3 px-4 py-3 text-left"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-      >
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[15px] font-semibold text-[var(--fb-text)]">
-              {session.sessionNo}회차
-            </span>
-            {isLatest ? (
-              <span className="rounded-md bg-[var(--fb-brand)] px-1.5 py-0.5 text-[11px] font-semibold text-white">
-                최신
-              </span>
-            ) : null}
-            <span className="text-[12px] text-[var(--fb-text-secondary)]">
-              {formatSessionDate(session.date)}
-            </span>
-            <span className="text-[12px] text-[var(--fb-text-tertiary)]">
-              {INSTRUCTOR_PUBLIC_LABEL}
-            </span>
-          </div>
+  if (row.neverMarked && row.isNextStep) {
+    return (
+      <li className="step step--next" data-step-label={row.step}>
+        <div className="step__top">
+          <span className="step__name">{row.step}</span>
+          <MarkGlyph mark={null} variant="next" />
         </div>
-        <span className="text-[12px] text-[var(--fb-text-tertiary)]">
-          {open ? "접기" : "펼치기"}
+        {nextFocusText ? <p className="say fb-say-long">{nextFocusText}</p> : null}
+      </li>
+    );
+  }
+
+  if (row.neverMarked) {
+    return (
+      <li className="step step--gray" data-step-label={row.step}>
+        <div className="step__top">
+          <span className="step__name">{row.step}</span>
+          <MarkGlyph mark={null} variant="none" />
+        </div>
+      </li>
+    );
+  }
+
+  const again = row.isReinforce;
+  return (
+    <li
+      className={`step${again ? " step--again" : ""}`}
+      data-step-label={row.step}
+    >
+      <div className="step__top">
+        <span className="step__name">{row.step}</span>
+        <span style={{ display: "inline-flex", gap: "var(--space-xs)", alignItems: "center" }}>
+          {again ? <span className="again">{REINFORCE_BADGE_LABEL}</span> : null}
+          <MarkGlyph mark={row.latestMark} label={row.markLabel} />
         </span>
-      </button>
-      {open ? (
-        <div className="space-y-3 border-t border-[var(--fb-border-subtle)] px-4 py-3">
-          <ul className="space-y-1.5">
-            {session.marks.map((m) => (
-              <li
-                key={m.step}
-                className="flex flex-wrap items-center gap-2 text-[14px]"
-              >
-                <span className={`shrink-0 font-semibold ${markClass(m.mark)}`}>
-                  {markSymbol(m.mark)}
-                </span>
-                <span className="fb-step-label text-[var(--fb-text)]">{m.step}</span>
-                <ChangeBadge change={m.change} />
-              </li>
-            ))}
-          </ul>
-          {session.nextFocus?.trim() ? (
-            <div>
-              <p className="text-[12px] font-semibold text-[var(--fb-brand)]">
-                다음에 배울 것
-              </p>
-              <p className="mt-0.5 text-[14px] text-[var(--fb-text)]">{session.nextFocus}</p>
+      </div>
+      <ul className="hist">
+        {row.records.map((r) => (
+          <li key={`${r.feedbackId ?? r.date}-${r.sessionNo}`}>
+            <div className="hist__line">
+              <time dateTime={r.date}>{shortDate(r.date)}</time>
+              <span>{r.sessionNo}회차</span>
+              <MarkGlyph mark={r.mark} label={r.markLabel} />
+              <ChangeTag change={r.change} />
             </div>
-          ) : null}
-          {session.instructorNote?.trim() ? (
-            <div>
-              <p className="text-[12px] font-semibold text-[var(--fb-text-secondary)]">
-                강사 의견
-              </p>
-              <p className="mt-0.5 text-[14px] text-[var(--fb-text)]">
-                {session.instructorNote}
-              </p>
-            </div>
-          ) : null}
+            <CommentFold text={r.stepComment} />
+          </li>
+        ))}
+      </ul>
+    </li>
+  );
+}
+
+function SessionArticle({ session }: { session: HistorySessionCard }) {
+  const wd = weekdayKo(session.date);
+  const dateLabel = wd
+    ? `${formatSessionDate(session.date).replace(/\s/g, "")} (${wd})`
+    : formatSessionDate(session.date);
+
+  return (
+    <article className="sess" data-session={session.feedbackId}>
+      <div className="sess__head">
+        <h2>{session.sessionNo}회차</h2>
+        <time className="when" dateTime={session.date}>
+          {dateLabel}
+        </time>
+        <span className="who">{INSTRUCTOR_PUBLIC_LABEL}</span>
+      </div>
+
+      {session.daySummary ? (
+        <div className="overall" data-testid="day-summary">
+          <h3>그날 종합 피드백</h3>
+          <p className="fb-say-long">{session.daySummary}</p>
         </div>
       ) : null}
+
+      {session.nextFocus ? (
+        <div className="sub sub--next">
+          <h3>다음에 배울 것</h3>
+          <p className="say fb-say-long">{session.nextFocus}</p>
+        </div>
+      ) : null}
+
+      {session.instructorNote ? (
+        <div className="sub">
+          <h3>강사 의견</h3>
+          <p className="say fb-say-long">{session.instructorNote}</p>
+        </div>
+      ) : null}
+
+      <div className="sub">
+        <h3>이날 배운 단계</h3>
+        <ul className="daylist">
+          {session.marks.map((m) => (
+            <li key={m.step}>
+              <div className="row">
+                <span className="nm">{m.step}</span>
+                <span
+                  style={{
+                    display: "inline-flex",
+                    gap: "var(--space-xs)",
+                    alignItems: "center",
+                  }}
+                >
+                  {m.isReinforce ? (
+                    <span className="again">{REINFORCE_BADGE_LABEL}</span>
+                  ) : null}
+                  <ChangeTag change={m.change} />
+                  {m.mark == null && m.isNextStep ? (
+                    <MarkGlyph mark={null} variant="next" />
+                  ) : (
+                    <MarkGlyph mark={m.mark} label={m.markLabel} />
+                  )}
+                </span>
+              </div>
+              <CommentFold text={m.stepComment} />
+            </li>
+          ))}
+        </ul>
+      </div>
     </article>
   );
 }
 
-export function HistoryViews({ history }: { history: StudentHistory }) {
-  const [tab, setTab] = useState<"byStep" | "sessions">("byStep");
-  const summary = progressCompareSummary(history);
-  const sessionsNewestFirst = [...history.sessions].reverse();
+type HistoryViewsProps = {
+  history: StudentHistory;
+};
+
+export function HistoryViews({ history }: HistoryViewsProps) {
+  const baseId = useId();
+  const [tab, setTab] = useState<"step" | "date">("step");
+  const t1 = `${baseId}-t1`;
+  const t2 = `${baseId}-t2`;
+  const p1 = `${baseId}-p1`;
+  const p2 = `${baseId}-p2`;
+
+  const pick = (next: "step" | "date") => setTab(next);
 
   return (
-    <div className="space-y-3" data-testid="history-views">
-      {summary ? (
-        <p
-          className="rounded-[var(--fb-radius-sm)] bg-[var(--fb-brand-25)] px-3 py-2.5 text-[14px] font-medium text-[var(--fb-brand)]"
-          data-testid="history-summary"
-        >
-          {summary}
-        </p>
-      ) : null}
+    <div data-testid="history-views">
+      <SummaryBlock history={history} />
 
-      <div className="fb-sport-toggle w-full" role="tablist" aria-label="이력 보기">
-        <button
-          type="button"
-          role="tab"
-          className="flex-1"
-          aria-selected={tab === "byStep"}
-          onClick={() => setTab("byStep")}
-        >
-          단계별
-        </button>
-        <button
-          type="button"
-          role="tab"
-          className="flex-1"
-          aria-selected={tab === "sessions"}
-          onClick={() => setTab("sessions")}
-        >
-          회차별
-        </button>
+      <div className="tabs" data-switch>
+        <div className="toggle toggle--wide" role="tablist" aria-label="보기">
+          <button
+            role="tab"
+            type="button"
+            id={t1}
+            aria-controls={p1}
+            aria-selected={tab === "step"}
+            tabIndex={tab === "step" ? 0 : -1}
+            onClick={() => pick("step")}
+            onKeyDown={(ev) => {
+              if (ev.key === "ArrowRight" || ev.key === "ArrowLeft") {
+                ev.preventDefault();
+                pick("date");
+              }
+            }}
+          >
+            단계별
+          </button>
+          <button
+            role="tab"
+            type="button"
+            id={t2}
+            aria-controls={p2}
+            aria-selected={tab === "date"}
+            tabIndex={tab === "date" ? 0 : -1}
+            onClick={() => pick("date")}
+            onKeyDown={(ev) => {
+              if (ev.key === "ArrowRight" || ev.key === "ArrowLeft") {
+                ev.preventDefault();
+                pick("step");
+              }
+            }}
+          >
+            날짜별
+          </button>
+        </div>
       </div>
 
-      {tab === "byStep" ? (
-        <div className="space-y-3" data-testid="view-by-step">
-          {history.byStep.length === 0 ? (
-            <p className="fb-card p-4 text-[14px] text-[var(--fb-text-secondary)]">
-              이 종목의 피드백이 아직 없습니다.
-            </p>
-          ) : (
-            history.byStep.map((row, i) => (
-              <ByStepBlock key={`${row.kind}-${row.step}-${i}`} row={row} />
-            ))
-          )}
-        </div>
-      ) : (
-        <div className="space-y-3" data-testid="view-by-session">
-          {sessionsNewestFirst.length === 0 ? (
-            <p className="fb-card p-4 text-[14px] text-[var(--fb-text-secondary)]">
-              이 종목의 피드백이 아직 없습니다.
-            </p>
-          ) : (
-            sessionsNewestFirst.map((s, i) => (
-              <SessionCard
-                key={s.feedbackId}
-                session={s}
-                isLatest={i === 0}
-                defaultOpen={i === 0}
-              />
-            ))
-          )}
-        </div>
-      )}
+      <section
+        role="tabpanel"
+        id={p1}
+        aria-labelledby={t1}
+        hidden={tab !== "step"}
+      >
+        {history.byStep.length === 0 ? (
+          <p className="empty">이 종목의 피드백이 아직 없습니다.</p>
+        ) : (
+          <ol className="ladder">
+            {history.byStep.map((row) =>
+              row.kind === "milestone" ? (
+                <li key={`ms-${row.step}`} className="gate">
+                  {row.step}
+                </li>
+              ) : (
+                <ByStepBlock
+                  key={`st-${row.step}`}
+                  row={row}
+                  nextFocusText={history.nextFocusText}
+                />
+              ),
+            )}
+          </ol>
+        )}
+      </section>
+
+      <section
+        role="tabpanel"
+        id={p2}
+        aria-labelledby={t2}
+        hidden={tab !== "date"}
+      >
+        {history.sessions.length === 0 ? (
+          <p className="empty">이 종목의 피드백이 아직 없습니다.</p>
+        ) : (
+          history.sessions.map((s) => (
+            <SessionArticle key={s.feedbackId} session={s} />
+          ))
+        )}
+      </section>
     </div>
   );
 }

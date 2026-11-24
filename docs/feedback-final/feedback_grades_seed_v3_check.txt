@@ -1,0 +1,7 @@
+검사 시각: 2026-11-25 (KST), 대상 feedback_grades_seed_v3.json (원본 feedback_grades_seed.json은 그대로)
+steps: 27 {'ski': 13, 'board': 14} | milestones: 6 | junior_grades: 20 | badges: 26
+ski 순서: 스노우플라우 > 스노우플라우턴 > 스템턴 > 패러렐 > 베이직 숏턴 > 다이나믹턴 > 다이나믹 숏턴 > 베이직 카빙 > 카빙 롱턴 > 카빙 숏턴 > 모글 > 게이트 > 자율활강
+SKI_KSIA_L1 after SKI_BASIC_SHORT (= 5번째 단계 뒤) required ['SKI_SNOWPLOW_TURN', 'SKI_STEM_TURN', 'SKI_PARALLEL', 'SKI_BASIC_SHORT']
+SKI_SBAK_T1 after SKI_BASIC_SHORT (= 5번째 단계 뒤) required ['SKI_SNOWPLOW_TURN', 'SKI_STEM_TURN', 'SKI_PARALLEL', 'SKI_BASIC_SHORT']
+SKI_KSIA_L2 after SKI_GATE (= 12번째 단계 뒤) required ['SKI_DYNAMIC', 'SKI_DYNAMIC_SHORT', 'SKI_BASIC_CARVING', 'SKI_MOGUL', 'SKI_GATE']
+결과: 오류 없음 (참조·주니어 역참조 모두 맞음. "스템 전·중·후" 글자는 note·스템턴 설명·출처의 통합 이력 문구에만 남김. 원본의 SKI_JR_03 역참조 오류 2건은 통합으로 사라짐)

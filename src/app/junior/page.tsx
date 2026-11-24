@@ -70,7 +70,7 @@ export default function JuniorPage() {
             피드백으로 진행도 확인
           </h2>
           <p className="mt-2 text-[14px] leading-relaxed text-[var(--fb-text-secondary)]">
-            강습이 끝나면 단계별 ○(통과) · △(연습 중) · ✕(아직)와 누적 진행도가 업데이트돼요.
+            강습이 끝나면 단계별 ○(할 수 있어요) · △(연습 중) · ✕(아직 어려워요)와 누적 진행도가 업데이트돼요.
             자격 도전 뱃지와 주니어 급수 뱃지도 같은 화면에서 볼 수 있습니다.
           </p>
           <Link

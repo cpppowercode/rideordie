@@ -1,26 +1,36 @@
-/** 손님용 강습 피드백 — 어드민 API 계약 타입. */
+/** 손님용 강습 피드백 — 어드민 API 계약 (PR #68 + 최종 명세). */
 
 export type FeedbackMark = "o" | "triangle" | "x" | null;
 
 export type FeedbackItemKind = "step" | "milestone";
 
+export type FeedbackMarkLabel =
+  | "할 수 있어요"
+  | "연습 중"
+  | "아직 어려워요"
+  | "배우기 전";
+
 export type FeedbackItem = {
   label: string;
   kind: FeedbackItemKind;
   mark: FeedbackMark;
+  mark_label?: FeedbackMarkLabel | string | null;
+  step_comment?: string | null;
+  is_next_step?: boolean;
 };
 
 export type FeedbackSession = {
   id: string;
   session_date: string;
+  session_number?: number;
   sport: string;
   instructor_display_name: string;
   items: FeedbackItem[];
+  day_summary?: string | null;
   next_focus: string | null;
   instructor_note: string | null;
 };
 
-/** 한 단계를 배운 회차(어드민이 단계별로 묶어 내려줌). */
 export type StepRound = {
   feedback_id: string;
   round: number;
@@ -29,9 +39,9 @@ export type StepRound = {
   mark: FeedbackMark;
   next_focus: string | null;
   instructor_note: string | null;
+  step_comment?: string | null;
 };
 
-/** 단계 소제목 + 회차 배열. milestone 은 rounds 가 비어 있을 수 있다. */
 export type StepGroup = {
   code?: string | null;
   label: string;
@@ -52,7 +62,6 @@ export type FeedbackBadge = {
   label: string;
   sport: "ski" | "board";
   earned_at: string;
-  /** 주니어 급수 뱃지 색 이름(흰색·노랑…). 어드민이 생략할 수 있다. */
   color_name?: string | null;
 };
 
@@ -62,18 +71,12 @@ export type FeedbackStudent = {
   sport: string;
   is_junior_eligible: boolean;
   feedbacks: FeedbackSession[];
-  /** 단계별 회차 묶음. 어드민이 생략하면 feedbacks 에서 파생한다. */
   step_groups?: StepGroup[];
-  /**
-   * v3.1 8-2 회차 이력({ byStep, sessions }).
-   * 있으면 우선 사용하고, 강사 표시는 손님 UI에서 항상 '담당 강사'로 덮는다.
-   */
   history?: {
     byStep?: import("./history").ByStepRow[];
     sessions?: import("./history").HistorySessionCard[];
   };
   progress: StudentProgress | null;
-  /** 어드민이 생략해도 된다. */
   badges?: FeedbackBadge[];
 };
 
@@ -107,3 +110,5 @@ export type FeedbackByTokenResult =
 export type FeedbackSessionCheck =
   | { ok: true; expires_at: string }
   | { ok: false; unavailable?: boolean };
+
+export const FEEDBACK_TEXT_LIMIT = 3000;
