@@ -102,7 +102,7 @@ async function main() {
   assert.equal(givenNameOnly("남궁민수"), "민수");
   assert.equal(givenNameOnly("Hong Gildong"), "Gildong");
 
-  // --- 주니어 뱃지 필터 ---
+  // --- 주니어 급수 뱃지 필터 (자격 도전 뱃지는 비대상에게도 가능) ---
   {
     const student: FeedbackStudent = {
       student_key: "a",
@@ -113,23 +113,25 @@ async function main() {
       progress: null,
       badges: [
         {
-          code: "junior_level1",
-          label: "레벨1",
+          code: "BADGE_SB_JR_01",
+          label: "주니어 1급 준비 완료",
           sport: "board",
           earned_at: "2026-01-01T00:00:00.000Z",
+          color_name: "흰색",
         },
         {
-          code: "board_carve",
-          label: "카빙 입문",
+          code: "BADGE_SB_KSIA_L1",
+          label: "레벨1 도전 준비 완료",
           sport: "board",
           earned_at: "2026-02-01T00:00:00.000Z",
         },
       ],
     };
     assert.equal(isJuniorBadge(student.badges![0]!), true);
+    assert.equal(isJuniorBadge(student.badges![1]!), false);
     const visible = visibleBadges(student);
     assert.equal(visible.length, 1);
-    assert.equal(visible[0]!.code, "board_carve");
+    assert.equal(visible[0]!.code, "BADGE_SB_KSIA_L1");
 
     const juniorOn: FeedbackStudent = { ...student, is_junior_eligible: true };
     assert.equal(visibleBadges(juniorOn).length, 2);

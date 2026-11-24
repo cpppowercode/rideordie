@@ -9,11 +9,12 @@ import {
   sportLabel,
   visibleBadges,
 } from "@/lib/customer-feedback/display";
+import { resolveStepGroups } from "@/lib/customer-feedback/step-groups";
 import type { FeedbackStudent } from "@/lib/customer-feedback/types";
 import { BadgeRack } from "./BadgeRack";
-import { FeedbackSessionView } from "./FeedbackSessionView";
 import { JuniorGradeCard } from "./JuniorGradeCard";
 import { ProgressSummary } from "./ProgressSummary";
+import { StepGroupedView } from "./StepGroupedView";
 
 type StudentFeedbackCardProps = {
   student: FeedbackStudent;
@@ -32,6 +33,11 @@ export function StudentFeedbackCard({ student }: StudentFeedbackCardProps) {
       : student.feedbacks
           .slice()
           .sort((a, b) => a.session_date.localeCompare(b.session_date));
+
+  const groups = useMemo(
+    () => resolveStepGroups(student, sports.length > 0 ? activeSport : undefined),
+    [student, sports.length, activeSport],
+  );
 
   const latest = latestFeedback(sessions);
   const name = givenNameOnly(student.display_name);
@@ -76,17 +82,7 @@ export function StudentFeedbackCard({ student }: StudentFeedbackCardProps) {
         <JuniorGradeCard progress={student.progress} />
       ) : null}
 
-      <div className="space-y-3">
-        {sessions.length === 0 ? (
-          <p className="fb-card p-4 text-[14px] text-[var(--fb-text-secondary)]">
-            이 종목의 피드백이 아직 없습니다.
-          </p>
-        ) : (
-          [...sessions].reverse().map((session) => (
-            <FeedbackSessionView key={session.id} session={session} />
-          ))
-        )}
-      </div>
+      <StepGroupedView groups={groups} />
     </section>
   );
 }

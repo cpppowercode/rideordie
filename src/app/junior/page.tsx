@@ -8,23 +8,23 @@ export const metadata: Metadata = {
   ...pageMetadata({
     title: "주니어 등급 안내",
     description:
-      "라이드올다이 주니어 등급 체계 — 레벨1·레벨2·티칭1 도전 구간과 피드백으로 보는 성장.",
+      "라이드올다이 주니어 등급 — 스키·보드 1~10급과 레벨1·레벨2·티칭1 도전 구간, 피드백으로 보는 성장.",
     path: "/junior",
   }),
 };
 
 const TRACKS = [
   {
-    title: "레벨1 도전",
-    body: "처음 설원에서 균형과 기본 자세를 다지는 구간이에요. 작은 통과가 쌓이면 다음 문이 열립니다.",
+    title: "주니어 1~10급",
+    body: "스키와 보드 모두 급수 구간이 이어져요. 피드백의 ○△✕와 뱃지로 지금 위치를 확인할 수 있습니다.",
+  },
+  {
+    title: "레벨1 · 티칭1 도전",
+    body: "기본 턴이 자리 잡으면 자격 도전 구간이 열려요. 필수 단계를 통과하면 도전 준비 뱃지가 쌓입니다.",
   },
   {
     title: "레벨2 도전",
-    body: "회전과 속도 조절이 자연스러워지는 단계. 피드백의 ○△✕로 지금 위치를 바로 확인할 수 있어요.",
-  },
-  {
-    title: "티칭1 도전",
-    body: "배운 것을 또렷하게 표현하는 도전 구간. 다음 목표까지의 남은 단계가 피드백에 표시됩니다.",
+    body: "더 역동적인 턴과 종합 활강으로 이어지는 구간. 다음 도전까지 남은 단계가 피드백에 표시됩니다.",
   },
 ] as const;
 
@@ -41,9 +41,9 @@ export default function JuniorPage() {
             <br />
             주니어 등급
           </h1>
-          <p className="text-[15px] leading-relaxed text-[var(--fb-text-secondary)]">
-            레벨1 · 레벨2 · 티칭1 — 도전 구간이 이어지며 실력이 쌓여요. 강습 피드백에서
-            진행도를 바로 볼 수 있습니다.
+          <p className="mt-1 text-[15px] leading-relaxed text-[var(--fb-text-secondary)]">
+            스키·보드 주니어 급수와 레벨1 · 레벨2 · 티칭1 도전 구간. 강습 피드백에서
+            진행도와 뱃지를 바로 볼 수 있어요.
           </p>
         </header>
 
@@ -71,7 +71,7 @@ export default function JuniorPage() {
           </h2>
           <p className="mt-2 text-[14px] leading-relaxed text-[var(--fb-text-secondary)]">
             강습이 끝나면 단계별 ○(통과) · △(연습 중) · ✕(아직)와 누적 진행도가 업데이트돼요.
-            취득한 뱃지도 같은 화면에서 볼 수 있습니다.
+            자격 도전 뱃지와 주니어 급수 뱃지도 같은 화면에서 볼 수 있습니다.
           </p>
           <Link
             href="/feedback"

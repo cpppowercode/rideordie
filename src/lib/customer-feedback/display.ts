@@ -108,21 +108,20 @@ export function latestFeedback(feedbacks: FeedbackSession[]): FeedbackSession | 
     .sort((a, b) => b.session_date.localeCompare(a.session_date))[0]!;
 }
 
-/** 주니어 등급·레벨 계열 뱃지 코드/라벨 판별. */
+/** 주니어 급수 뱃지(종목당 10개). 자격 도전 뱃지(L1/L2/T1)와 구분한다. */
 export function isJuniorBadge(badge: Pick<FeedbackBadge, "code" | "label">): boolean {
-  const hay = `${badge.code} ${badge.label}`.toLowerCase();
-  return /junior|주니어|level\s*[12]|레벨\s*[12]|티칭\s*1|teaching\s*1|레벨1|레벨2/.test(
-    hay,
-  );
+  const hay = `${badge.code} ${badge.label}`;
+  return /_JR_|\bJR\d|주니어\s*\d*급/i.test(hay);
 }
 
 /**
  * 취득 뱃지 목록. badges 생략·빈 배열이면 [].
- * 주니어 비대상이면 주니어 뱃지는 숨긴다.
+ * 주니어 비대상이면 주니어 급수 뱃지만 숨기고, 자격 도전 뱃지는 남긴다.
+ * 손님 UI에는 needs_confirmation 을 쓰지 않는다.
  */
 export function visibleBadges(student: FeedbackStudent): FeedbackBadge[] {
   const raw = Array.isArray(student.badges) ? student.badges : [];
-  const normalized = raw
+  const normalized: FeedbackBadge[] = raw
     .filter(
       (b) =>
         b &&
@@ -136,6 +135,10 @@ export function visibleBadges(student: FeedbackStudent): FeedbackBadge[] {
       label: b.label,
       sport: b.sport as "ski" | "board",
       earned_at: b.earned_at,
+      color_name:
+        typeof b.color_name === "string" && b.color_name.trim()
+          ? b.color_name.trim()
+          : null,
     }));
 
   const filtered = student.is_junior_eligible
