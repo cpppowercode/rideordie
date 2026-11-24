@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { Instagram, Menu, MessageCircle, X } from "lucide-react";
 import { PRODUCT_DATA } from "@/lib/mockData";
 import { INSTAGRAM_URL, KAKAO_CONSULT_URL } from "@/lib/site";
@@ -14,11 +15,27 @@ const NAV = [
   { href: "/service-policy", label: "이용약관" },
 ];
 
+/** 피드백·주니어는 스티키 헤더가 본문을 가리지 않도록 문서 흐름에 둔다. 다른 페이지는 기존 sticky 유지. */
+function isFeedbackSurface(pathname: string | null): boolean {
+  if (!pathname) return false;
+  return (
+    pathname === "/junior" ||
+    pathname.startsWith("/junior/") ||
+    pathname === "/feedback" ||
+    pathname.startsWith("/feedback/")
+  );
+}
+
 export function Header() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+  const feedbackSurface = isFeedbackSurface(pathname);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-line bg-white">
+    <header
+      className={`${feedbackSurface ? "relative" : "sticky top-0"} z-50 w-full border-b border-line bg-white`}
+      data-feedback-surface={feedbackSurface ? "true" : undefined}
+    >
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-8 px-5">
         <Link href="/" aria-label="RideOrDie 홈" className="shrink-0">
           <Image src="/logo.svg" alt="RideOrDie" width={88} height={40} className="h-9 w-auto" priority />

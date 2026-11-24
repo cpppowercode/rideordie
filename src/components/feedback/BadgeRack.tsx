@@ -88,17 +88,17 @@ export function BadgeRack({ badges }: BadgeRackProps) {
   return (
     <section className="fb-card mt-4 p-4" data-testid="badge-rack">
       <h3 className="text-[14px] font-semibold text-[var(--fb-text)]">취득 뱃지</h3>
-      <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+      <ul className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3">
         {badges.map((badge) => (
           <li
             key={`${badge.code}-${badge.sport}-${badge.earned_at}`}
-            className="flex flex-col items-center rounded-[var(--fb-radius-sm)] border border-[var(--fb-border-subtle)] bg-[var(--fb-brand-25)] px-2 py-3 text-center"
+            className="flex min-w-0 flex-col items-center rounded-[var(--fb-radius-sm)] border border-[var(--fb-border-subtle)] bg-[var(--fb-brand-25)] px-2 py-3 text-center"
           >
             <BadgeGlyph badge={badge} />
-            <p className="mt-2 text-[13px] font-semibold leading-snug text-[var(--fb-text)]">
+            <p className="fb-badge-label mt-2 text-[12px] font-semibold text-[var(--fb-text)] sm:text-[13px]">
               {badge.label}
             </p>
-            <p className="mt-0.5 text-[11px] text-[var(--fb-text-tertiary)]">
+            <p className="fb-badge-label mt-0.5 text-[11px] text-[var(--fb-text-tertiary)]">
               {sportLabel(badge.sport)}
               {badge.color_name ? ` · ${badge.color_name}` : null}
             </p>

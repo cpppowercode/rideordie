@@ -44,7 +44,7 @@ function ChangeBadge({ change }: { change: ByStepRecord["change"] }) {
 
 function ByStepRecordRow({ record }: { record: ByStepRecord }) {
   return (
-    <li className="flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-[var(--fb-border-subtle)] py-2.5 first:border-t-0">
+    <li className="flex flex-wrap items-center gap-x-2 gap-y-1.5 border-t border-[var(--fb-border-subtle)] py-2.5 first:border-t-0">
       <span className="text-[13px] font-semibold text-[var(--fb-text)]">
         {record.sessionNo}회차
       </span>
@@ -55,7 +55,7 @@ function ByStepRecordRow({ record }: { record: ByStepRecord }) {
         {INSTRUCTOR_PUBLIC_LABEL}
       </span>
       <span
-        className={`text-[16px] font-semibold ${markClass(record.mark)}`}
+        className={`text-[15px] font-semibold ${markClass(record.mark)}`}
         title={markLabel(record.mark)}
       >
         {markSymbol(record.mark)} {markLabel(record.mark)}
@@ -77,7 +77,9 @@ function ByStepBlock({ row }: { row: ByStepRow }) {
   if (!row.records.length) return null;
   return (
     <section className="fb-card p-4" data-step-label={row.step}>
-      <h3 className="text-[16px] font-semibold text-[var(--fb-text)]">{row.step}</h3>
+      <h3 className="fb-step-label text-[16px] font-semibold text-[var(--fb-text)]">
+        {row.step}
+      </h3>
       <ul className="mt-1">
         {row.records.map((r) => (
           <ByStepRecordRow key={`${r.feedbackId}-${r.sessionNo}`} record={r} />
@@ -141,10 +143,10 @@ function SessionCard({
                 key={m.step}
                 className="flex flex-wrap items-center gap-2 text-[14px]"
               >
-                <span className={`font-semibold ${markClass(m.mark)}`}>
+                <span className={`shrink-0 font-semibold ${markClass(m.mark)}`}>
                   {markSymbol(m.mark)}
                 </span>
-                <span className="text-[var(--fb-text)]">{m.step}</span>
+                <span className="fb-step-label text-[var(--fb-text)]">{m.step}</span>
                 <ChangeBadge change={m.change} />
               </li>
             ))}

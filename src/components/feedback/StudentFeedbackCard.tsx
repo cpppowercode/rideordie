@@ -61,7 +61,11 @@ export function StudentFeedbackCard({ student }: StudentFeedbackCardProps) {
           </p>
         </div>
         {showToggle ? (
-          <div className="fb-sport-toggle" role="group" aria-label="종목 선택">
+          <div
+            className="fb-sport-toggle w-full max-w-[220px] shrink-0"
+            role="group"
+            aria-label="종목 선택"
+          >
             {sports.map((s) => (
               <button
                 key={s}
