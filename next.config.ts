@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { guestProxyRewrites } from "./src/lib/guest-proxy";
 
 const nextConfig: NextConfig = {
   images: {
@@ -29,6 +30,24 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
+  },
+
+  // 손님 경로·API·admin 자산만 admin으로 rewrite (Multi-Zones, microfrontends 아님)
+  async rewrites() {
+    return guestProxyRewrites();
+  },
+
+  async headers() {
+    const noStore = [
+      { key: "Cache-Control", value: "private, no-store, max-age=0, must-revalidate" },
+    ];
+    return [
+      { source: "/my-lesson/:path*", headers: noStore },
+      { source: "/e-contract/:path*", headers: noStore },
+      { source: "/api/e-contract/:path*", headers: noStore },
+      { source: "/api/client-errors", headers: noStore },
+      { source: "/api/admin-profile", headers: noStore },
+    ];
   },
 };
 
