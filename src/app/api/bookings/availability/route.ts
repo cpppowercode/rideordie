@@ -8,8 +8,13 @@ import { isLessonDuration } from "@/lib/hours";
 import { bookingSlotCapacity, SKI_RESORTS } from "@/lib/site";
 import { getSeasonSettings } from "@/lib/season-settings";
 import { isLessonScheduleOpen } from "@/lib/pricing";
+import { RATE_LIMITS } from "@/lib/security/rate-limit";
+import { enforceRateLimit } from "@/lib/security/request";
 
 export async function GET(request: NextRequest) {
+  const limited = enforceRateLimit(request, "availability", RATE_LIMITS.availability);
+  if (limited) return limited;
+
   const date = request.nextUrl.searchParams.get("date") || "";
   const skiResort = request.nextUrl.searchParams.get("skiResort") || "";
   const durationHours = Number(request.nextUrl.searchParams.get("duration"));

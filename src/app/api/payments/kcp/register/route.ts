@@ -9,19 +9,35 @@ import {
   type KcpPayMethod,
 } from "@/lib/kcp";
 import { kcpReturnUrl } from "@/lib/request-origin";
+import { RATE_LIMITS } from "@/lib/security/rate-limit";
+import { enforceRateLimit, readJsonBody } from "@/lib/security/request";
 
 export async function POST(request: NextRequest) {
   try {
-    const { orderId, goodName, payMethod, intent: intentToken } = (await request.json()) as {
+    const limited = enforceRateLimit(request, "paymentsRegister", RATE_LIMITS.paymentsRegister);
+    if (limited) return limited;
+
+    const parsed = await readJsonBody<{
       intent?: string;
       orderId?: string;
       goodName?: string;
       payMethod?: KcpPayMethod;
       retUrl?: string;
-    };
+    }>(request);
+    if (!parsed.ok) return parsed.response;
+
+    const { orderId, goodName, payMethod, intent: intentToken } = parsed.data;
 
     if (!orderId || !goodName || !payMethod) {
       return NextResponse.json({ error: "필수 정보가 누락되었습니다." }, { status: 400 });
+    }
+    if (
+      typeof orderId !== "string" ||
+      typeof goodName !== "string" ||
+      orderId.length > 64 ||
+      goodName.length > 120
+    ) {
+      return NextResponse.json({ error: "결제 정보 형식이 올바르지 않습니다." }, { status: 400 });
     }
 
     const method = KCP_PAY_METHODS[payMethod];
