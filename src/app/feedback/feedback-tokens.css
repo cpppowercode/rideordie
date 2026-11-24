@@ -41,6 +41,19 @@
     system-ui, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
   letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
+  /* 한글 단어 중간 줄바꿈·가로 넘침 방지 */
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  overflow-x: clip;
+}
+
+.fb-root h1,
+.fb-root h2,
+.fb-root h3,
+.fb-root section,
+.fb-root [data-testid="history-views"],
+.fb-root [data-student-key] {
+  scroll-margin-top: 1rem;
 }
 
 .fb-root .fb-card {
@@ -187,28 +200,47 @@
 
 .fb-root .fb-sport-toggle {
   display: inline-flex;
-  padding: 3px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 4px;
   border-radius: 10px;
   background: var(--fb-border-subtle);
   border: 1px solid var(--fb-border);
-  gap: 2px;
+  gap: 4px;
 }
 
 .fb-root .fb-sport-toggle button {
-  min-height: 36px;
-  padding: 0 0.9rem;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 0.75rem;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--fb-text-secondary);
   background: transparent;
   border: none;
+  line-height: 1.2;
 }
 
-.fb-root .fb-sport-toggle button[aria-pressed="true"] {
+.fb-root .fb-sport-toggle button[aria-pressed="true"],
+.fb-root .fb-sport-toggle button[aria-selected="true"] {
   background: #fff;
   color: var(--fb-brand);
   box-shadow: var(--fb-shadow-sm);
+}
+
+.fb-root .fb-badge-label {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
+
+.fb-root .fb-step-label {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  min-width: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {

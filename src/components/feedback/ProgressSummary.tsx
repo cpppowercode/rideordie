@@ -27,7 +27,7 @@ export function ProgressSummary({ progress }: ProgressSummaryProps) {
       ) : null}
       <div className="mt-3 space-y-1 text-[13px] text-[var(--fb-text-secondary)]">
         {progress.current_milestone_label ? (
-          <p>
+          <p className="fb-step-label">
             현재 구간:{" "}
             <span className="font-medium text-[var(--fb-text)]">
               {progress.current_milestone_label}
@@ -36,7 +36,7 @@ export function ProgressSummary({ progress }: ProgressSummaryProps) {
         ) : null}
         {typeof progress.steps_to_next_milestone === "number" &&
         progress.next_milestone_label ? (
-          <p>
+          <p className="fb-step-label">
             다음 도전까지 {progress.steps_to_next_milestone}단계 ·{" "}
             {progress.next_milestone_label}
           </p>
