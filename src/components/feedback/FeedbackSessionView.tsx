@@ -4,6 +4,7 @@ import {
   markSymbol,
   sportLabel,
 } from "@/lib/customer-feedback/display";
+import { INSTRUCTOR_PUBLIC_LABEL } from "@/lib/customer-feedback/instructor";
 import type { FeedbackItem, FeedbackSession } from "@/lib/customer-feedback/types";
 
 function ItemRow({ item }: { item: FeedbackItem }) {
@@ -50,7 +51,7 @@ export function FeedbackSessionView({ session }: { session: FeedbackSession }) {
             {formatSessionDate(session.session_date)} · {sportLabel(session.sport)}
           </p>
           <p className="mt-0.5 text-[14px] font-medium text-[var(--fb-text)]">
-            강사 {session.instructor_display_name}
+            {INSTRUCTOR_PUBLIC_LABEL}
           </p>
         </div>
       </header>

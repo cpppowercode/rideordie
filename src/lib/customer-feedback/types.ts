@@ -64,6 +64,14 @@ export type FeedbackStudent = {
   feedbacks: FeedbackSession[];
   /** 단계별 회차 묶음. 어드민이 생략하면 feedbacks 에서 파생한다. */
   step_groups?: StepGroup[];
+  /**
+   * v3.1 8-2 회차 이력({ byStep, sessions }).
+   * 있으면 우선 사용하고, 강사 표시는 손님 UI에서 항상 '담당 강사'로 덮는다.
+   */
+  history?: {
+    byStep?: import("./history").ByStepRow[];
+    sessions?: import("./history").HistorySessionCard[];
+  };
   progress: StudentProgress | null;
   /** 어드민이 생략해도 된다. */
   badges?: FeedbackBadge[];

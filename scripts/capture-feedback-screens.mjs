@@ -34,27 +34,42 @@ async function main() {
   await page.goto(`${BASE}/feedback`, { waitUntil: "networkidle" });
   await shot(page, "feedback_01_login_form");
 
+  async function fillLogin(name, phone) {
+    const nameInput = page.locator('input[name="name"]');
+    const phoneInput = page.locator('input[name="phone"]');
+    await nameInput.click({ clickCount: 3 });
+    await nameInput.fill(name);
+    await phoneInput.click({ clickCount: 3 });
+    await phoneInput.fill(phone);
+    // React controlled 값 확인
+    await page.waitForFunction(
+      ([n, p]) => {
+        const nameEl = document.querySelector('input[name="name"]');
+        const phoneEl = document.querySelector('input[name="phone"]');
+        return nameEl?.value === n && phoneEl?.value === p;
+      },
+      [name, phone],
+    );
+  }
+
   // 2 wrong login
-  await page.fill('input[name="name"]', "없는사람");
-  await page.fill('input[name="phone"]', "01099998888");
+  await fillLogin("없는사람", "01099998888");
   await page.click('button[type="submit"]');
-  await page.waitForSelector('[role="alert"]');
+  await page.waitForSelector('[role="alert"]', { timeout: 15000 });
   await shot(page, "feedback_02_invalid_message");
 
   // 3 locked
-  await page.fill('input[name="name"]', "잠금");
-  await page.fill('input[name="phone"]', "01012345678");
+  await fillLogin("잠금", "01012345678");
   await page.click('button[type="submit"]');
-  await page.waitForSelector('[role="alert"]');
+  await page.waitForSelector('[role="alert"]', { timeout: 15000 });
   await shot(page, "feedback_03_locked_message");
 
   // 4 success
-  await page.fill('input[name="name"]', "테스트");
-  await page.fill('input[name="phone"]', "01012345678");
+  await fillLogin("테스트", "01012345678");
   const remember = page.locator('input[type="checkbox"]');
   if (!(await remember.isChecked())) await remember.check();
   await page.click('button[type="submit"]');
-  await page.waitForSelector("text=내 강습 피드백");
+  await page.waitForSelector("text=내 강습 피드백", { timeout: 20000 });
   await shot(page, "feedback_04_list_after_login");
 
   const cookies = await context.cookies();
@@ -73,22 +88,38 @@ async function main() {
       : null,
   );
 
-  await page.locator('[data-testid="step-grouped-view"]').first().waitFor();
-  await shot(page, "feedback_05_step_grouped");
+  // 강사 실명 비노출 · 담당 강사만
+  const listText = await page.locator('[data-student-key="stu_junior_ski"]').innerText();
+  const hasRealName = /이강사|박강사|최강사/.test(listText);
+  const hasPublicLabel = listText.includes("담당 강사");
+  console.log("instructor real name leaked?", hasRealName);
+  console.log("instructor public label present?", hasPublicLabel);
+  if (hasRealName) throw new Error("instructor real name visible on customer UI");
+  if (!hasPublicLabel) throw new Error("expected 담당 강사 on customer UI");
 
-  // expand/collapse older round if present
-  const fold = page.locator('[data-step-label="스노우플라우"] button', {
-    hasText: "펼치기",
-  }).first();
-  if (await fold.count()) {
-    await fold.click();
-    await shot(page, "feedback_05b_round_expanded");
+  await page.locator('[data-testid="history-views"]').first().waitFor();
+  await page.locator('[data-testid="view-by-step"]').first().waitFor();
+  await shot(page, "feedback_05_history_by_step");
+
+  const firstEval = page.locator('[data-testid="first-eval"]').first();
+  if (await firstEval.count()) {
+    await firstEval.scrollIntoViewIfNeeded();
+    await shot(page, "feedback_05b_first_eval");
   }
   const change = page.locator('[data-testid="mark-change"]').first();
   if (await change.count()) {
     await change.scrollIntoViewIfNeeded();
     await shot(page, "feedback_05c_mark_change");
   }
+
+  // 회차별 탭
+  await page
+    .locator('[data-testid="history-views"]')
+    .first()
+    .locator('button[role="tab"]', { hasText: "회차별" })
+    .click();
+  await page.locator('[data-testid="view-by-session"]').first().waitFor();
+  await shot(page, "feedback_05d_history_by_session");
 
   await page.locator('[data-testid="junior-grade-card"]').first().scrollIntoViewIfNeeded();
   await shot(page, "feedback_06_junior_card_and_badges");
@@ -129,11 +160,28 @@ async function main() {
   await page.goto(`${BASE}/feedback/demo-share-token`, { waitUntil: "networkidle" });
   await shot(page, "feedback_11_share_needs_login");
 
-  // login via share
-  await page.fill('input[name="name"]', "테스트");
-  await page.fill('input[name="phone"]', "01012345678");
-  await page.click('button[type="submit"]');
-  await page.waitForSelector("text=내 강습 피드백");
+  // login via share (레이트리밋이면 창 대기 후 페이지 재진입)
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (attempt > 0) {
+      console.log("share login retry after rate limit, attempt", attempt + 1);
+      await page.waitForTimeout(65000);
+      await context.clearCookies();
+      await page.goto(`${BASE}/feedback/demo-share-token`, {
+        waitUntil: "networkidle",
+      });
+    }
+    await page.waitForSelector('input[name="name"]', { timeout: 15000 });
+    await fillLogin("테스트", "01012345678");
+    await page.click('button[type="submit"]');
+    const landed = await page
+      .waitForSelector("text=내 강습 피드백", { timeout: 10000 })
+      .then(() => true)
+      .catch(() => false);
+    if (landed) break;
+    const alertText =
+      (await page.locator('[role="alert"]').textContent().catch(() => "")) || "";
+    if (attempt === 2) throw new Error(`share login failed: ${alertText}`);
+  }
   await shot(page, "feedback_12_share_after_login");
 
   // junior page — age wording only in .fb-root (layout 헤더 제외)

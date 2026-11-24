@@ -137,6 +137,92 @@ const boardMarks3 = {
   SB_BEGINNER_TURN: null,
 };
 
+/** 손님 화면 공개 스위치 기본 off — 실제 강사명 비노출. */
+const INSTRUCTOR_PUBLIC_LABEL = "담당 강사";
+
+function changeOf(prev, mark) {
+  if (prev === undefined) return "first";
+  if (prev === mark || mark == null || prev == null) return null;
+  return `${prev}->${mark}`;
+}
+
+/** v3.1 8-2: byStep + sessions. 강사 필드는 항상 일반 문구. */
+function buildHistory(feedbacks) {
+  const sessions = feedbacks
+    .slice()
+    .sort((a, b) => a.session_date.localeCompare(b.session_date));
+  const instructor = INSTRUCTOR_PUBLIC_LABEL;
+
+  const sessionCards = sessions.map((fb, i) => {
+    const marks = [];
+    for (const item of fb.items || []) {
+      if (item.kind !== "step" || item.mark == null) continue;
+      let prev;
+      for (let j = i - 1; j >= 0; j--) {
+        const hit = (sessions[j].items || []).find(
+          (it) => it.kind === "step" && it.label === item.label && it.mark != null,
+        );
+        if (hit) {
+          prev = hit.mark;
+          break;
+        }
+      }
+      marks.push({
+        step: item.label,
+        mark: item.mark,
+        change: changeOf(prev, item.mark),
+      });
+    }
+    return {
+      sessionNo: i + 1,
+      date: fb.session_date,
+      instructor,
+      marks,
+      nextFocus: fb.next_focus,
+      instructorNote: fb.instructor_note,
+      feedbackId: fb.id,
+    };
+  });
+
+  const order = [];
+  const seen = new Set();
+  for (const fb of sessions) {
+    for (const item of fb.items || []) {
+      const kind = item.kind === "milestone" ? "milestone" : "step";
+      const key = `${kind}::${item.label}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      order.push({ step: item.label, kind });
+    }
+  }
+
+  const byStep = order.map((o) => {
+    if (o.kind === "milestone") {
+      return { step: o.step, kind: "milestone", remaining: null };
+    }
+    const records = [];
+    let prevMark;
+    for (const card of sessionCards) {
+      const m = card.marks.find((x) => x.step === o.step);
+      if (!m) continue;
+      records.push({
+        sessionNo: card.sessionNo,
+        date: card.date,
+        instructor,
+        mark: m.mark,
+        change: changeOf(prevMark, m.mark),
+        nextFocus: card.nextFocus,
+        instructorNote: card.instructorNote,
+        feedbackId: card.feedbackId,
+      });
+      prevMark = m.mark;
+    }
+    return { step: o.step, kind: "step", records };
+  });
+
+  return { byStep, sessions: sessionCards };
+}
+
 /** 어드민 list 계약과 같이 feedbacks → step_groups 로 묶는다. */
 function buildStepGroups(feedbacks) {
   const sessions = feedbacks
@@ -163,7 +249,7 @@ function buildStepGroups(feedbacks) {
         feedback_id: fb.id,
         round: list.length + 1,
         session_date: fb.session_date,
-        instructor_display_name: fb.instructor_display_name,
+        instructor_display_name: INSTRUCTOR_PUBLIC_LABEL,
         mark: item.mark ?? null,
         next_focus: fb.next_focus,
         instructor_note: fb.instructor_note,
@@ -180,8 +266,18 @@ function buildStepGroups(feedbacks) {
   }));
 }
 
-function withStepGroups(student) {
-  return { ...student, step_groups: buildStepGroups(student.feedbacks) };
+/** 손님 API 응답: 강사 실명 제거 + history/step_groups 첨부. */
+function forCustomer(student) {
+  const feedbacks = (student.feedbacks || []).map((fb) => ({
+    ...fb,
+    instructor_display_name: INSTRUCTOR_PUBLIC_LABEL,
+  }));
+  return {
+    ...student,
+    feedbacks,
+    step_groups: buildStepGroups(feedbacks),
+    history: buildHistory(feedbacks),
+  };
 }
 
 const skiMarksMid = {
@@ -194,7 +290,8 @@ const skiMarksMid = {
   SKI_BASIC_SHORT: null,
 };
 
-const juniorSkiStudent = withStepGroups({
+/** 내부 원본(실명 포함). 손님 응답 전에 forCustomer 로 마스킹한다. */
+const juniorSkiStudentRaw = {
   student_key: "stu_junior_ski",
   display_name: "김민준",
   sport: "ski",
@@ -239,9 +336,9 @@ const juniorSkiStudent = withStepGroups({
       instructor_note: "패러렐까지 잘 왔어요. 숏턴을 다듬어 봐요.",
     },
   ],
-});
+};
 
-const juniorBoardStudent = withStepGroups({
+const juniorBoardStudentRaw = {
   student_key: "stu_junior_board",
   display_name: "이서아",
   sport: "board",
@@ -286,9 +383,9 @@ const juniorBoardStudent = withStepGroups({
       instructor_note: "펜듈럼이 통과예요.",
     },
   ],
-});
+};
 
-const adultStudent = withStepGroups({
+const adultStudentRaw = {
   student_key: "stu_adult",
   display_name: "박서연",
   sport: "board",
@@ -337,9 +434,13 @@ const adultStudent = withStepGroups({
       instructor_note: "리듬이 좋아요.",
     },
   ],
-});
+};
 
-const ALL_STUDENTS = [juniorSkiStudent, juniorBoardStudent, adultStudent];
+const ALL_STUDENTS = [
+  forCustomer(juniorSkiStudentRaw),
+  forCustomer(juniorBoardStudentRaw),
+  forCustomer(adultStudentRaw),
+];
 
 function readBody(req) {
   return new Promise((resolve, reject) => {
@@ -455,7 +556,9 @@ const server = http.createServer(async (req, res) => {
     }
     return send(res, 200, {
       ok: true,
-      students: [juniorSkiStudent, juniorBoardStudent],
+      students: ALL_STUDENTS.filter((s) =>
+        s.student_key === "stu_junior_ski" || s.student_key === "stu_junior_board",
+      ),
     });
   }
 

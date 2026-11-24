@@ -9,12 +9,12 @@ import {
   sportLabel,
   visibleBadges,
 } from "@/lib/customer-feedback/display";
-import { resolveStepGroups } from "@/lib/customer-feedback/step-groups";
+import { resolveStudentHistory } from "@/lib/customer-feedback/history";
 import type { FeedbackStudent } from "@/lib/customer-feedback/types";
 import { BadgeRack } from "./BadgeRack";
+import { HistoryViews } from "./HistoryViews";
 import { JuniorGradeCard } from "./JuniorGradeCard";
 import { ProgressSummary } from "./ProgressSummary";
-import { StepGroupedView } from "./StepGroupedView";
 
 type StudentFeedbackCardProps = {
   student: FeedbackStudent;
@@ -34,8 +34,12 @@ export function StudentFeedbackCard({ student }: StudentFeedbackCardProps) {
           .slice()
           .sort((a, b) => a.session_date.localeCompare(b.session_date));
 
-  const groups = useMemo(
-    () => resolveStepGroups(student, sports.length > 0 ? activeSport : undefined),
+  const history = useMemo(
+    () =>
+      resolveStudentHistory(
+        student,
+        sports.length > 0 ? activeSport : undefined,
+      ),
     [student, sports.length, activeSport],
   );
 
@@ -82,7 +86,7 @@ export function StudentFeedbackCard({ student }: StudentFeedbackCardProps) {
         <JuniorGradeCard progress={student.progress} />
       ) : null}
 
-      <StepGroupedView groups={groups} />
+      <HistoryViews history={history} />
     </section>
   );
 }

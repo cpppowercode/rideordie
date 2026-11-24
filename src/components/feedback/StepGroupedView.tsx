@@ -6,6 +6,7 @@ import {
   markLabel,
   markSymbol,
 } from "@/lib/customer-feedback/display";
+import { INSTRUCTOR_PUBLIC_LABEL } from "@/lib/customer-feedback/instructor";
 import { markChanged } from "@/lib/customer-feedback/step-groups";
 import type { FeedbackMark, StepGroup, StepRound } from "@/lib/customer-feedback/types";
 
@@ -74,8 +75,7 @@ function RoundCard({
             ) : null}
           </div>
           <p className="mt-0.5 text-[12px] text-[var(--fb-text-secondary)]">
-            {formatSessionDate(round.session_date)} · 강사{" "}
-            {round.instructor_display_name}
+            {formatSessionDate(round.session_date)} · {INSTRUCTOR_PUBLIC_LABEL}
           </p>
         </div>
         <span className="text-[12px] text-[var(--fb-text-tertiary)]">
