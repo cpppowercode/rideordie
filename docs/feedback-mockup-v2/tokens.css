@@ -1,0 +1,45 @@
+:root {
+  --space-3xs: 2px; --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px; --space-4xl: 144px;
+  --text-xs: 0.75rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.2rem; --text-xl: 1.44rem; --text-2xl: 1.728rem; --text-3xl: 2.074rem;
+  --text-display-s: 1.44rem; --text-display: 1.728rem; --text-section: 1.2rem; --text-title: 1rem; --text-lead: 1rem;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); --ease-in: cubic-bezier(0.7, 0, 0.84, 0); --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-micro: 120ms; --dur-short: 220ms; --dur-long: 420ms;
+  --container: 1120px; --gutter: 40px; --gap-columns: 32px; --section-gap-s: 120px; --section-gap: 144px; --section-gap-l: 176px;
+  --z-base: 1; --z-raised: 10; --z-dropdown: 100; --z-sticky: 200; --z-sticky-nav: 300; --z-modal: 400; --z-toast: 500; --z-tooltip: 600;
+
+  /* paper and ink, tinted toward the admin brand hue 270 */
+  --color-paper: oklch(98.4% 0.006 270);
+  --color-paper-2: oklch(96.2% 0.01 270);
+  --color-paper-3: oklch(93.6% 0.013 270);
+  --color-panel: oklch(99.6% 0.003 270);
+  --color-ink: oklch(21% 0.03 265);
+  --color-ink-2: oklch(36% 0.025 268);
+  --color-muted: oklch(52% 0.018 280);
+  --color-rule: oklch(91% 0.012 270);
+  --color-field-edge: oklch(64% 0.02 275);
+
+  /* the admin panel brand, #465fff family (brand-500 held to chroma 0.22) */
+  --color-accent: oklch(56.8% 0.22 270);
+  --color-accent-deep: oklch(50.7% 0.22 270);
+  --color-accent-ink: oklch(99% 0.004 270);
+  --color-accent-soft: oklch(96% 0.019 276);
+  --color-accent-text: oklch(48% 0.2 270);
+  --color-focus: oklch(56.8% 0.22 270);
+
+  /* states, Hallmark names (error, success from the scaffold; warning and its soft as the sangtti install adds) */
+  --color-error: oklch(52% 0.19 27);
+  --color-error-soft: oklch(95.5% 0.025 27);
+  --color-success: oklch(50% 0.12 150);
+  --color-success-soft: oklch(95.5% 0.03 150);
+  --color-warning: oklch(64% 0.18 48);
+  --color-warning-text: oklch(52% 0.16 42);
+  --color-warning-soft: oklch(96.5% 0.03 60);
+  --color-warning-edge: oklch(84% 0.08 55);
+
+  --font-display: "Pretendard Variable", Pretendard, ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Pretendard Variable", Pretendard, ui-sans-serif, system-ui, sans-serif;
+  --font-outlier: var(--font-body);
+  --radius-card: 12px; --radius-part: 8px; --radius-pill: 999px; --rule-hair: 1px;
+  --shadow-card: 0 1px 2px oklch(20% 0.01 270 / 0.05);
+  --tracking-display: -0.02em;
+}
