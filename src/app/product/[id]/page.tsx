@@ -7,6 +7,8 @@ import { KakaoConsultLink } from "@/components/seo/KakaoConsultLink";
 import { TrustBadges } from "@/components/seo/TrustBadges";
 import { TERMS_REFUND_HREF } from "@/lib/resort-landings";
 import { ProductImageGallery } from "@/components/product/ProductImageGallery";
+import { FeedbackIntroSection } from "@/components/product/FeedbackIntroSection";
+import { isFeedbackSectionEnabled } from "@/lib/feedback-section";
 
 const FACTS = [
     { icon: MountainSnow, label: "형태", value: "현장 강습 (선택한 스키장)" },
@@ -86,9 +88,11 @@ export default function ProductPage() {
                 </div>
 
                 <div>
-                    <div className="sticky top-16 z-40 mb-8 flex border-b border-line bg-white">
+                    <div id="detail-tab" className="sticky top-16 z-40 mb-8 flex border-b border-line bg-white">
                         <div className="border-b-2 border-ink py-4 font-bold">상세정보</div>
                     </div>
+
+                    {isFeedbackSectionEnabled() ? <FeedbackIntroSection /> : null}
 
                     <div className="mb-12 grid gap-3 sm:grid-cols-2">
                         {PRODUCT_DATA.images.detail.map((src, i) => (

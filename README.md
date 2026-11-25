@@ -80,6 +80,9 @@ KCP_CERT_INFO=
 # 채널톡 웹 메신저 (선택 — 없으면 코드 기본 공개 키 사용)
 NEXT_PUBLIC_CHANNELTALK_PLUGIN_KEY=
 
+# 강습 상세 피드백 소개 섹션 (기본 꺼짐. 사진 업로드 기능이 운영 배포된 뒤에만 1로 켠다. 빌드/재배포 필요)
+# NEXT_PUBLIC_FEEDBACK_SECTION=
+
 # 트래픽·봇 방어 (선택 — 없으면 꺼짐, 예약은 그대로 동작)
 # NEXT_PUBLIC_TURNSTILE_SITE_KEY=
 # TURNSTILE_SECRET_KEY=
