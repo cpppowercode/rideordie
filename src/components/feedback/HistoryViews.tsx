@@ -16,6 +16,7 @@ import {
 import { INSTRUCTOR_PUBLIC_LABEL } from "@/lib/customer-feedback/instructor";
 import { CommentFold } from "./CommentFold";
 import { MarkGlyph } from "./MarkGlyph";
+import { SessionPhotos } from "./SessionPhotos";
 
 function shortDate(iso: string): string {
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso.trim());
@@ -226,6 +227,10 @@ function SessionArticle({ session }: { session: HistorySessionCard }) {
           <h3>강사 의견</h3>
           <p className="say fb-say-long">{session.instructorNote}</p>
         </div>
+      ) : null}
+
+      {session.photos?.length ? (
+        <SessionPhotos photos={session.photos} label={`${session.sessionNo}회차`} />
       ) : null}
 
       <div className="sub">

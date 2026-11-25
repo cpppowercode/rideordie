@@ -19,6 +19,15 @@ export type FeedbackItem = {
   is_next_step?: boolean;
 };
 
+/** 회차 사진(긴 변 2048px 압축본). 서명 URL 1시간. 그 회차 강습생 모두에게 공용. */
+export type FeedbackPhoto = {
+  id: string;
+  url: string;
+  download_url: string;
+  width?: number | null;
+  height?: number | null;
+};
+
 export type FeedbackSession = {
   id: string;
   session_date: string;
@@ -29,6 +38,7 @@ export type FeedbackSession = {
   day_summary?: string | null;
   next_focus: string | null;
   instructor_note: string | null;
+  photos?: FeedbackPhoto[];
 };
 
 export type StepRound = {

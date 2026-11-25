@@ -12,6 +12,7 @@ import { customerInstructorLabel } from "./instructor";
 import type {
   FeedbackItem,
   FeedbackMark,
+  FeedbackPhoto,
   FeedbackSession,
   FeedbackStudent,
 } from "./types";
@@ -63,6 +64,24 @@ export type SessionMarkRow = {
   isReinforce: boolean;
 };
 
+/** 어드민이 준 사진 중 Supabase 서명 주소만 통과(다른 주소·스크립트 차단). 최대 20장. */
+export function safeFeedbackPhotos(input: unknown): FeedbackPhoto[] {
+  if (!Array.isArray(input)) return [];
+  const ok = (u: unknown) => {
+    if (typeof u !== "string") return false;
+    try {
+      const x = new URL(u);
+      return (x.protocol === "https:" || x.protocol === "http:") && x.pathname.includes("/storage/v1/object/sign/");
+    } catch {
+      return false;
+    }
+  };
+  return input
+    .filter((p): p is FeedbackPhoto => !!p && typeof p === "object" && typeof (p as FeedbackPhoto).id === "string" && ok((p as FeedbackPhoto).url) && ok((p as FeedbackPhoto).download_url))
+    .slice(0, 20)
+    .map((p) => ({ id: p.id, url: p.url, download_url: p.download_url, width: p.width ?? null, height: p.height ?? null }));
+}
+
 export type HistorySessionCard = {
   sessionNo: number;
   date: string;
@@ -72,6 +91,8 @@ export type HistorySessionCard = {
   nextFocus: string | null;
   instructorNote: string | null;
   feedbackId: string;
+  /** 회차 공용 사진 (없으면 빈 배열) */
+  photos: FeedbackPhoto[];
 };
 
 export type NextStepChip = {
@@ -286,6 +307,7 @@ export function buildHistoryFromFeedbacks(
           ? s.instructor_note.trim()
           : null,
       feedbackId: s.id,
+      photos: safeFeedbackPhotos(s.photos),
     });
   }
   const sessionCards = sessionCardsAsc.slice().reverse();
@@ -363,6 +385,7 @@ function maskApiHistory(history: {
       ...s,
       instructor: customerInstructorLabel(s.instructor),
       daySummary: s.daySummary ?? null,
+      photos: safeFeedbackPhotos(s.photos),
       marks: (s.marks ?? []).map((m) => ({
         ...m,
         markLabel: m.markLabel || defaultMarkLabel(m.mark),
@@ -387,9 +410,17 @@ export function resolveStudentHistory(
   if (!masked) return fromFb;
 
   // API history 가 옛 형태여도 요약은 feedbacks 파생값을 쓴다
+  // 사진은 항상 feedbacks(회차) 기준으로 붙인다
+  const photosById = new Map(
+    (student.feedbacks ?? []).map((f) => [f.id, safeFeedbackPhotos(f.photos)]),
+  );
+  const sessions = masked.sessions.length ? masked.sessions : fromFb.sessions;
   return {
     ...fromFb,
     byStep: masked.byStep.length ? masked.byStep : fromFb.byStep,
-    sessions: masked.sessions.length ? masked.sessions : fromFb.sessions,
+    sessions: sessions.map((s) => ({
+      ...s,
+      photos: s.photos?.length ? s.photos : (photosById.get(s.feedbackId) ?? []),
+    })),
   };
 }

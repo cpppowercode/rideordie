@@ -7,6 +7,7 @@ import {
   formatChangeLabel,
   progressCompareSummary,
   resolveStudentHistory,
+  safeFeedbackPhotos,
 } from "./history";
 import { customerInstructorLabel, INSTRUCTOR_PUBLIC_LABEL } from "./instructor";
 import { markLabel } from "./display";
@@ -142,6 +143,7 @@ async function main() {
           nextFocus: null,
           instructorNote: null,
           feedbackId: "a",
+          photos: [],
         },
       ],
     },
@@ -174,6 +176,26 @@ async function main() {
   assert.ok(gray && gray.kind === "step");
   assert.equal(gray.neverMarked, true);
   assert.equal(gray.records.length, 0);
+
+  // 회차 사진: 서명 주소만 통과, 회차 카드에 붙음
+  {
+  const good = {
+    id: "p1",
+    url: "https://x.supabase.co/storage/v1/object/sign/feedback-photos/p-a/2026-01-05/p1.jpg?token=t",
+    download_url: "https://x.supabase.co/storage/v1/object/sign/feedback-photos/p-a/2026-01-05/p1.jpg?token=t&download=a.jpg",
+  };
+  const bad = [
+    { id: "p2", url: "javascript:alert(1)", download_url: "javascript:alert(1)" },
+    { id: "p3", url: "https://evil.example/x.jpg", download_url: "https://evil.example/x.jpg" },
+    { id: "p4", url: "https://x.supabase.co/storage/v1/object/public/feedback-photos/x.jpg", download_url: "https://x.supabase.co/storage/v1/object/public/feedback-photos/x.jpg" },
+  ];
+  assert.deepEqual(safeFeedbackPhotos([good, ...bad]).map((p) => p.id), ["p1"]);
+  assert.equal(safeFeedbackPhotos(Array.from({ length: 25 }, (_, i) => ({ ...good, id: `g${i}` }))).length, 20);
+  const h = buildHistoryFromFeedbacks([{ ...session("a", "2026-01-05", "이강사", []), photos: [good] } as FeedbackSession]);
+  assert.equal(h.sessions[0]!.photos.length, 1);
+  const h2 = buildHistoryFromFeedbacks([session("b", "2026-01-06", "이강사", [])]);
+  assert.deepEqual(h2.sessions[0]!.photos, []);
+  }
 
   console.log("history.test.ts OK");
 }

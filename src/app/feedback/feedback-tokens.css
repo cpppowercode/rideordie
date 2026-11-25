@@ -438,3 +438,21 @@ html, body { overflow-x: clip; }
   outline: 2px solid var(--color-focus);
   outline-offset: 2px;
 }
+
+/* 회차 사진 (그 회차 강습생 모두에게 공용). 기존 토큰·반경만 사용 */
+.fb-root .photos { gap: var(--space-xs); }
+.fb-root .photos .note { font-size: var(--text-sm); color: var(--color-muted); }
+.fb-root .photos__warn { padding: var(--space-xs) var(--space-sm); border-radius: var(--radius-part); background: var(--color-warning-soft); color: var(--color-warning-text); font-size: var(--text-sm); }
+.fb-root .pgallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: var(--space-xs); list-style: none; margin: 0; padding: 0; }
+.fb-root .pgallery button { display: block; width: 100%; aspect-ratio: 1; padding: 0; border: 0; border-radius: var(--radius-part); overflow: hidden; background: var(--color-paper-3); cursor: zoom-in; }
+.fb-root .pgallery button:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.fb-root .pgallery img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.fb-root .photos__act { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-xs); }
+.fb-root .pviewer { position: fixed; inset: 0; z-index: var(--z-modal); display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: var(--space-sm); padding: var(--space-md) var(--space-md) max(var(--space-md), env(safe-area-inset-bottom)); background: var(--color-ink); color: var(--color-accent-ink); }
+.fb-root .pviewer__top { display: flex; justify-content: space-between; align-items: center; gap: var(--space-sm); font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.fb-root .pviewer__close { color: var(--color-accent-ink); }
+.fb-root .pviewer__frame { display: grid; place-items: center; min-height: 0; }
+.fb-root .pviewer__frame img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: var(--radius-part); }
+.fb-root .pviewer__nav { display: flex; justify-content: space-between; gap: var(--space-xs); max-width: 640px; width: 100%; margin-inline: auto; }
+.fb-root .pviewer__btn { color: var(--color-accent-ink); border-color: var(--color-rule-strong); }
+@media (hover: hover) { .fb-root .pviewer__btn:hover { background: var(--color-ink-2); } }
