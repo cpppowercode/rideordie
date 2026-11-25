@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "npx tsx src/lib/booking.test.ts && npx tsx src/lib/booking-intent.test.ts && npx tsx src/lib/request-origin.test.ts && npx tsx src/lib/availability.test.ts && npx tsx src/lib/resort-landings.test.ts && npx tsx src/lib/badge-fee.test.ts && npx tsx src/lib/pricing.test.ts && npx tsx src/lib/season.test.ts && npx tsx src/lib/resorts.test.ts && npx tsx src/lib/kcp.test.ts && npx tsx src/lib/booking-finalize.test.ts && npx tsx src/lib/chatbot/chatbot.test.ts && npx tsx src/lib/channeltalk.test.ts && npx tsx src/lib/security/security.test.ts",
+    "test": "npx tsx src/lib/booking.test.ts && npx tsx src/lib/booking-intent.test.ts && npx tsx src/lib/request-origin.test.ts && npx tsx src/lib/availability.test.ts && npx tsx src/lib/resort-landings.test.ts && npx tsx src/lib/badge-fee.test.ts && npx tsx src/lib/pricing.test.ts && npx tsx src/lib/season.test.ts && npx tsx src/lib/resorts.test.ts && npx tsx src/lib/kcp.test.ts && npx tsx src/lib/booking-finalize.test.ts && npx tsx src/lib/chatbot/chatbot.test.ts && npx tsx src/lib/channeltalk.test.ts && npx tsx src/lib/feedback-section.test.ts && npx tsx src/lib/security/security.test.ts",
     "test:booking": "npx tsx src/lib/booking.test.ts",
     "test:e2e": "playwright test"
   },
